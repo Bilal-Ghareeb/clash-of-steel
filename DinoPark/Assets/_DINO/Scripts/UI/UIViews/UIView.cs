@@ -1,0 +1,61 @@
+using System;
+using UnityEngine.UIElements;
+
+public class UIView : IDisposable
+{
+    protected bool m_HideOnAwake = true;
+    protected bool m_IsOverlay;
+    protected VisualElement m_TopElement;
+
+    // Properties
+    public VisualElement Root => m_TopElement;
+    public bool IsTransparent => m_IsOverlay;
+    public bool IsHidden => m_TopElement.style.display == DisplayStyle.None;
+
+    public UIView(VisualElement topElement)
+    {
+        m_TopElement = topElement ?? throw new ArgumentNullException(nameof(topElement));
+        Initialize();
+    }
+
+    public virtual void Initialize()
+    {
+        if (m_HideOnAwake)
+        {
+            Hide();
+        }
+        SetVisualElements();
+        RegisterButtonCallbacks();
+    }
+
+    // Sets up the VisualElements for the UI. Override to customize.
+    protected virtual void SetVisualElements()
+    {
+
+    }
+
+    // Registers callbacks for buttons in the UI. Override to customize.
+    protected virtual void RegisterButtonCallbacks()
+    {
+
+    }
+
+    // Displays the UI.
+    public virtual void Show()
+    {
+        m_TopElement.style.display = DisplayStyle.Flex;
+    }
+
+    // Hides the UI.
+    public virtual void Hide()
+    {
+        m_TopElement.style.display = DisplayStyle.None;
+    }
+
+    // Unregisters any callbacks or event handlers. Override to customize.
+    public virtual void Dispose()
+    {
+
+    }
+
+}

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="BackgroundImage" style="position: absolute; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/_DINO/Images/JPGs/MainMenuImage.jpg?fileID=2800000&amp;guid=197f310f64f0bb742b09f23a0451aa92&amp;type=3#MainMenuImage&quot;); -unity-background-scale-mode: stretch-to-fill;" />
+    <ui:VisualElement name="Title-Container" style="flex-grow: 1; position: absolute; width: 100%; height: 47%; left: auto; top: 8%; flex-direction: column; justify-content: center;">
+        <ui:VisualElement name="Logo" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_DINO/Images/PNGs/Icons/logo.png?fileID=2800000&amp;guid=ff41e69070163dd4bbafcb8a034c3110&amp;type=3#logo&quot;); align-self: center; width: 31%; -unity-background-scale-mode: scale-to-fit;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="Buttons-Container" style="flex-grow: 1; position: absolute; width: 100%; height: 22%; top: 70%; flex-direction: row; align-items: center; justify-content: center;">
+        <ui:Button text="LOGIN" selectable="false" focusable="false" name="LoginWithGoogle_btn" style="width: 17%; height: 47%; font-size: 85px; -unity-font-style: bold; -unity-text-outline-color: rgba(0, 0, 0, 0); color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+</ui:UXML>

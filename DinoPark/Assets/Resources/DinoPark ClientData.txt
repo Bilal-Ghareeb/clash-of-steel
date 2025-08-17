@@ -1,3 +1,0 @@
-DinoPark Client ID : 856244024436-bog73d98lad6k4k1qnthsll0ateo1pb2.apps.googleusercontent.com
-DinoPark Client Secret : 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
-Creation Date : August 16, 2025 at 7:41:34 PM GMT+3
