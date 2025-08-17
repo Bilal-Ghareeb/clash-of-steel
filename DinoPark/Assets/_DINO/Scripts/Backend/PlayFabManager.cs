@@ -34,30 +34,45 @@ public class PlayFabManager : MonoBehaviour
 
     private void OnLoginSuccess(LoginResult result)
     {
-        Debug.Log("Successfully logged in with Custom ID: " + result.PlayFabId);
+        Debug.Log("Successfully logged in: " + result.PlayFabId);
 
-        var updateNameRequest = new UpdateUserTitleDisplayNameRequest
+        PlayFabClientAPI.GetPlayerProfile(new GetPlayerProfileRequest
         {
-            DisplayName = "Temp"
-        };
-
-        PlayFabClientAPI.UpdateUserTitleDisplayName(updateNameRequest, OnDisplayNameUpdateSuccess, OnDisplayNameUpdateFailure);
-
-        SceneManager.LoadScene(1);
+            PlayFabId = result.PlayFabId
+        },
+        profileResult =>
+        {
+            if (profileResult.PlayerProfile != null &&
+                !string.IsNullOrEmpty(profileResult.PlayerProfile.DisplayName))
+            {
+                Debug.Log("Existing DisplayName: " + profileResult.PlayerProfile.DisplayName);
+                SceneManager.LoadScene(1);
+            }
+            else
+            {
+                var nameGenerator = gameObject.AddComponent<UniqueDisplayNameGenerator>();
+                nameGenerator.GenerateAndSetDisplayName(
+                    uniqueName =>
+                    {
+                        Debug.Log("New DisplayName assigned: " + uniqueName);
+                        SceneManager.LoadScene(1);
+                    },
+                    error =>
+                    {
+                        Debug.LogError("Could not set unique name: " + error);
+                        SceneManager.LoadScene(1);
+                    });
+            }
+        },
+        error =>
+        {
+            Debug.LogError("Failed to get player profile: " + error.GenerateErrorReport());
+        });
     }
+
 
     private void OnLoginFailure(PlayFabError error)
     {
         Debug.LogError("Login failed: " + error.GenerateErrorReport());
-    }
-
-    private void OnDisplayNameUpdateSuccess(UpdateUserTitleDisplayNameResult result)
-    {
-        Debug.Log("Successfully updated display name to: " + result.DisplayName);
-    }
-
-    private void OnDisplayNameUpdateFailure(PlayFabError error)
-    {
-        Debug.LogError("Failed to update display name: " + error.GenerateErrorReport());
     }
 }
