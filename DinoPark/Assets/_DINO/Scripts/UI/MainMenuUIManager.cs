@@ -7,8 +7,6 @@ public class MainMenuUIManager : MonoBehaviour
     private UIDocument m_MainMenuDocument;
     private VisualElement m_LoginWithGoogleButton;
 
-    public string customPlayerID = "myUniquePlayerID_123";
-
     private void OnEnable()
     {
         m_MainMenuDocument = GetComponent<UIDocument>();
@@ -30,7 +28,7 @@ public class MainMenuUIManager : MonoBehaviour
 
     private void ClickLoginWithGoogleButton(ClickEvent evt)
     {
-       //PlayFabManager.Instance.LoginWithCustomID(customPlayerID);
+        PlayFabManager.Instance.LoginWithCustomID();
     }
 
     public void OnDisable()
