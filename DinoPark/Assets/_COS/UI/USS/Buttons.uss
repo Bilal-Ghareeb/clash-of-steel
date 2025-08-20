@@ -1,10 +1,15 @@
 :root {
 }
 
+.rectangleButton:active {
+    scale: 1.2 1.2;
+    -unity-background-image-tint-color: rgb(63, 63, 63);
+}
+
 .rectangleButton {
     -unity-font-style: bold;
     font-size: 85px;
-    -unity-font-definition: url("project://database/Assets/_DINO/Fonts/LilitaOne-Regular.ttf?fileID=12800000&guid=67875264478804542a3bc72a6b9a4785&type=3#LilitaOne-Regular");
+    -unity-font-definition: url("project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&guid=67875264478804542a3bc72a6b9a4785&type=3#LilitaOne-Regular");
     -unity-text-align: middle-center;
     width: 697px;
     height: 207px;
@@ -23,7 +28,7 @@
     transition-duration: 0.25s;
 }
 
-.rectangleButton:active {
-    scale: 1.2 1.2;
-    -unity-background-image-tint-color: rgb(63, 63, 63);
+.lable {
+    text-shadow: 7px -38px 1.3px rgb(0, 0, 0);
+    -unity-text-outline-color: rgb(0, 0, 0);
 }

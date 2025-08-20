@@ -1,0 +1,9 @@
+:root {
+}
+
+.selected-tab {
+    -unity-background-image-tint-color: rgb(132, 129, 129);
+}
+
+.unselected-tab {
+}

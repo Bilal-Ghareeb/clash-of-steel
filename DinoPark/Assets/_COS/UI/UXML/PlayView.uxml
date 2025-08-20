@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
+    <ui:VisualElement name="Play_View" style="width: 100%; height: 100%;">
+        <ui:VisualElement name="Play__Stage__Card" picking-mode="Ignore" style="width: 45%; height: 30%; position: relative; top: 32%; right: 0%; align-self: center;">
+            <ui:VisualElement name="Play_Stage_Card_Background" style="flex-grow: 1; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/CardFrame03_Single_Orange.png?fileID=21300000&amp;guid=284f99482071f47839549747513b612b&amp;type=3#CardFrame03_Single_Orange&quot;); justify-content: flex-end;">
+                <ui:VisualElement name="Play_Stage_Card_Photo_Emission" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Particles/Texture/fx_glow_small.png?fileID=21300000&amp;guid=247271a91ae7f45a9aec012e9229dd6f&amp;type=3#fx_glow_small&quot;); -unity-background-scale-mode: scale-to-fit; width: 50%; height: 50%; align-self: center; position: absolute; top: 10%;" />
+                <ui:VisualElement name="Play_Stage_Card_Photo" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/IconMisc/Icon_ImageIcon_Knife_Battle.png?fileID=2800000&amp;guid=455d317bd36c5444483f77940660f34b&amp;type=3#Icon_ImageIcon_Knife_Battle&quot;); -unity-background-scale-mode: scale-to-fit; width: 50%; height: 50%; align-self: center;" />
+                <ui:VisualElement name="Card__Footer" style="flex-grow: 0; width: 100%; height: 30%; background-color: rgba(255, 255, 255, 0);">
+                    <ui:Button name="Battle_btn" text="BATTLE" class="rectangleButton lable" style="width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/CardFrame06_Bg_Yellow.png?fileID=21300000&amp;guid=28554fc966eb749e587c11db562e7eeb&amp;type=3#CardFrame06_Bg_Yellow&quot;); -unity-text-align: middle-center; -unity-text-outline-width: 0; color: rgb(255, 255, 255); font-size: 158px; -unity-text-outline-color: rgb(19, 19, 19); text-shadow: 7.1px -38.1px 1.3px rgb(0, 0, 0); letter-spacing: 3px; background-color: rgba(0, 0, 0, 0); -unity-background-image-tint-color: rgb(255, 255, 255);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
