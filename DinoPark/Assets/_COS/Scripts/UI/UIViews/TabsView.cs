@@ -46,8 +46,8 @@ public class TabsView : UIView
         base.RegisterButtonCallbacks();
 
         m_PlayViewMenuButton.RegisterCallback<ClickEvent>(ClickPlayViewMenuButton);
-        m_ArsenalViewMenuButton.RegisterCallback<ClickEvent>(ClickCharButton);
-        m_ShopViewMenuButton.RegisterCallback<ClickEvent>(ClickInfoButton);
+        m_ArsenalViewMenuButton.RegisterCallback<ClickEvent>(ClickArsenalViewMenuButton);
+        m_ShopViewMenuButton.RegisterCallback<ClickEvent>(ClickShopViewMenuButton);
 
         m_MenuMarker.RegisterCallback<GeometryChangedEvent>(OnGeometryChangedEvent);
     }
@@ -55,8 +55,8 @@ public class TabsView : UIView
     protected void UnregisterButtonCallbacks()
     {
         m_PlayViewMenuButton.UnregisterCallback<ClickEvent>(ClickPlayViewMenuButton);
-        m_ArsenalViewMenuButton.UnregisterCallback<ClickEvent>(ClickCharButton);
-        m_ShopViewMenuButton.UnregisterCallback<ClickEvent>(ClickInfoButton);
+        m_ArsenalViewMenuButton.UnregisterCallback<ClickEvent>(ClickArsenalViewMenuButton);
+        m_ShopViewMenuButton.UnregisterCallback<ClickEvent>(ClickShopViewMenuButton);
 
         m_MenuMarker.UnregisterCallback<GeometryChangedEvent>(OnGeometryChangedEvent);
     }
@@ -64,18 +64,18 @@ public class TabsView : UIView
     private void ClickPlayViewMenuButton(ClickEvent evt)
     {
         ActivateButton(m_PlayViewMenuButton);
-
+        MainTabBarEvents.PlayScreenShown?.Invoke();
         MoveMarkerToClick(evt);
     }
 
-    private void ClickCharButton(ClickEvent evt)
+    private void ClickArsenalViewMenuButton(ClickEvent evt)
     {
         ActivateButton(m_ArsenalViewMenuButton);
-
+        MainTabBarEvents.ArsenalViewShown?.Invoke();
         MoveMarkerToClick(evt);
     }
 
-    private void ClickInfoButton(ClickEvent evt)
+    private void ClickShopViewMenuButton(ClickEvent evt)
     {
         ActivateButton(m_ShopViewMenuButton);
 
