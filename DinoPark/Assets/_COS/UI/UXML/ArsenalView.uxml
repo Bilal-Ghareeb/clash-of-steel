@@ -1,5 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="ArsenalView" style="width: 100%; height: 100%;">
-        <ui:Label text="ARSENAL" style="width: 100%; height: 100%; align-self: center; -unity-font-style: bold; -unity-text-align: middle-center; font-size: 203px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); color: rgb(255, 255, 255);" />
+    <ui:VisualElement name="ArsenalView" style="width: 100%; height: 100%; justify-content: center;">
+        <ui:VisualElement name="ArsenalView-Container" style="height: 40%; width: 100%;">
+            <ui:VisualElement name="background-graphic" style="width: 100%; height: 100%;" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
