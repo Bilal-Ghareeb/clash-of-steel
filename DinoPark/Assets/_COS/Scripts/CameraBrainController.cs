@@ -19,12 +19,13 @@ public class CameraBrainController : MonoBehaviour
 
     private void RotateCameraTowardsArsenal()
     {
-        transform.rotation = Quaternion.Euler(m_arsenalRotationAngles);
+        LeanTween.rotate(gameObject, m_arsenalRotationAngles, 0.5f)
+            .setEaseOutQuad();
     }
 
     private void RotateCameraTowardsEntrance()
     {
-        transform.rotation = Quaternion.Euler(m_entranceRotationAngles);
+        LeanTween.rotate(gameObject, m_entranceRotationAngles, 0.5f)
+            .setEaseOutQuad();
     }
-
 }
