@@ -6,3 +6,28 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+
+.weapon-scroll-item {
+    width: 350px;
+    height: 345px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+
+.weapon-scroll-text-lvl {
+    position: absolute;
+    width: 240px;
+    height: 100px;
+    top: 254px;
+    right: auto;
+    left: 177px;
+    bottom: auto;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&guid=67875264478804542a3bc72a6b9a4785&type=3#LilitaOne-Regular");
+    -unity-text-align: middle-center;
+    font-size: 95px;
+}
