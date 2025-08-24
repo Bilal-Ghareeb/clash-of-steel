@@ -14,12 +14,14 @@ public class PlayFabManager : MonoBehaviour
     private static PlayFabManager m_instance;
     public static PlayFabManager Instance => m_instance;
 
-    // Economy constants
     private const string StarterWeaponId = "sword_common_01";
     private const string ContentTypeWeapon = "Weapon";
 
     private PlayFab.EconomyModels.EntityKey m_entity;
     private List<CatalogItem> m_weaponCatalog = new List<CatalogItem>();
+
+    private List<InventoryItem> m_playerWeapons = new List<InventoryItem>();
+    public IReadOnlyList<InventoryItem> PlayerWeapons => m_playerWeapons;
 
     private void Awake()
     {
@@ -125,7 +127,7 @@ public class PlayFabManager : MonoBehaviour
             {
                 m_weaponCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
                 Debug.Log($"Found {m_weaponCatalog.Count} weapon(s) in catalog.");
-                CheckPlayerInventoryAndGrantStartingWeapon();
+                FetchAndCachePlayerWeapons();
             },
             error =>
             {
@@ -134,7 +136,7 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
-    private void CheckPlayerInventoryAndGrantStartingWeapon()
+    private void FetchAndCachePlayerWeapons()
     {
         var request = new GetInventoryItemsRequest
         {
@@ -144,15 +146,19 @@ public class PlayFabManager : MonoBehaviour
         PlayFabEconomyAPI.GetInventoryItems(request,
             result =>
             {
-                var items = result.Items ?? new List<InventoryItem>();
+                m_playerWeapons = result.Items
+                    ?.Where(i => m_weaponCatalog.Any(c => c.Id == i.Id))
+                    .ToList()
+                    ?? new List<InventoryItem>();
+
+                Debug.Log($"Cached {m_playerWeapons.Count} player weapon(s).");
 
                 var ownedFriendlyIds = new HashSet<string>();
-                foreach (var inv in items)
+                foreach (var inv in m_playerWeapons)
                 {
                     var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == inv.Id);
                     if (catalogItem != null && catalogItem.AlternateIds != null)
                     {
-                        // Add all FriendlyIds (AlternateIds of type "FriendlyId") to the set
                         foreach (var alt in catalogItem.AlternateIds)
                         {
                             if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
@@ -163,14 +169,13 @@ public class PlayFabManager : MonoBehaviour
                     }
                 }
 
-
                 if (!ownedFriendlyIds.Contains(StarterWeaponId))
                 {
                     GrantWeapon(StarterWeaponId);
                 }
                 else
                 {
-                    Debug.Log("Player already has starter sword.");
+                    DebugPlayerWeapons();
                     LoadNextScene();
                 }
             },
@@ -186,10 +191,7 @@ public class PlayFabManager : MonoBehaviour
         var request = new ExecuteFunctionRequest
         {
             FunctionName = "GrantWeaponToPlayer",
-            FunctionParameter = new
-            {
-                weaponId = weaponFriendlyId
-            },
+            FunctionParameter = new { weaponId = weaponFriendlyId },
             GeneratePlayStreamEvent = true
         };
 
@@ -201,6 +203,7 @@ public class PlayFabManager : MonoBehaviour
                 {
                     Debug.Log("Function result: " + result.FunctionResult.ToString());
                 }
+
                 LoadNextScene();
             },
             error =>
@@ -210,6 +213,14 @@ public class PlayFabManager : MonoBehaviour
             });
     }
     #endregion
+
+    private void DebugPlayerWeapons()
+    {
+        foreach(var weapon in PlayerWeapons)
+        {
+            Debug.Log(weapon.DisplayProperties.ToString());
+        }
+    }
 
     #region Scene Flow
     private void LoadNextScene()
