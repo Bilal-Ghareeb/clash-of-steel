@@ -151,8 +151,6 @@ public class PlayFabManager : MonoBehaviour
                     .ToList()
                     ?? new List<InventoryItem>();
 
-                Debug.Log($"Cached {m_playerWeapons.Count} player weapon(s).");
-
                 var ownedFriendlyIds = new HashSet<string>();
                 foreach (var inv in m_playerWeapons)
                 {
