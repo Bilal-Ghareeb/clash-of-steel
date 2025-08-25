@@ -33,5 +33,6 @@
 }
 
 .weapon-scroll-item:active {
-    scale: 1.2 1.2 1.2;
+    scale: 1.5 1.5 1.2;
+    rotate: 0;
 }

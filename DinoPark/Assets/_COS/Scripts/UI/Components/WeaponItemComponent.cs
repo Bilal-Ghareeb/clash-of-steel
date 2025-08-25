@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 public class WeaponItemComponent
 {
     private VisualElement m_weaponItemButton;
+    private WeaponInstance m_WeaponInstance;
 
     private Label m_Lvl;
     public Label Lvl => m_Lvl;
@@ -23,16 +24,20 @@ public class WeaponItemComponent
     {
         if (weaponInstance == null) return;
 
-        m_Lvl.text = $"Lv {weaponInstance.Data.level}";
+        m_WeaponInstance = weaponInstance;
+
+        m_Lvl.text = $"Lv {m_WeaponInstance.Data.level}";
     }
 
     public void RegisterButtonCallbacks()
     {
-        m_weaponItemButton?.RegisterCallback<ClickEvent>(ClickGearItem);
+        m_weaponItemButton?.RegisterCallback<ClickEvent>(OnButtonClicked);
     }
 
-    private void ClickGearItem(ClickEvent evt)
+    private void OnButtonClicked(ClickEvent evt)
     {
         ArsenalEvents.WeaponItemClicked?.Invoke(this);
     }
+
+    public WeaponInstance GetWeaponInstance() => m_WeaponInstance;
 }
