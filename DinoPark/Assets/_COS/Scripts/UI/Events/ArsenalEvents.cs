@@ -12,6 +12,6 @@ public static class ArsenalEvents
 
     public static Action<Rarity, WeaponType> GearFiltered;
 
-    public static Action<List<InventoryItem>> ArsenalUpdated;
+    public static Action<IReadOnlyList<WeaponInstance>> ArsenalUpdated;
 
 }

@@ -31,3 +31,7 @@
     -unity-text-align: middle-center;
     font-size: 95px;
 }
+
+.weapon-scroll-item:active {
+    scale: 1.2 1.2 1.2;
+}

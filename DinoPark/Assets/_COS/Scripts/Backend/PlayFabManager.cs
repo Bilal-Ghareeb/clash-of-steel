@@ -20,8 +20,8 @@ public class PlayFabManager : MonoBehaviour
     private PlayFab.EconomyModels.EntityKey m_entity;
     private List<CatalogItem> m_weaponCatalog = new List<CatalogItem>();
 
-    private List<InventoryItem> m_playerWeapons = new List<InventoryItem>();
-    public IReadOnlyList<InventoryItem> PlayerWeapons => m_playerWeapons;
+    private List<WeaponInstance> m_playerWeapons = new List<WeaponInstance>();
+    public IReadOnlyList<WeaponInstance> PlayerWeapons => m_playerWeapons;
 
     private void Awake()
     {
@@ -146,16 +146,17 @@ public class PlayFabManager : MonoBehaviour
         PlayFabEconomyAPI.GetInventoryItems(request,
             result =>
             {
-                m_playerWeapons = result.Items
-                    ?.Where(i => m_weaponCatalog.Any(c => c.Id == i.Id))
+                m_playerWeapons = result.Items?
+                    .Where(i => m_weaponCatalog.Any(c => c.Id == i.Id))
+                    .Select(i => new WeaponInstance(i))  
                     .ToList()
-                    ?? new List<InventoryItem>();
+                    ?? new List<WeaponInstance>();
 
                 var ownedFriendlyIds = new HashSet<string>();
-                foreach (var inv in m_playerWeapons)
+                foreach (var weapon in m_playerWeapons)
                 {
-                    var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == inv.Id);
-                    if (catalogItem != null && catalogItem.AlternateIds != null)
+                    var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == weapon.Item.Id);
+                    if (catalogItem?.AlternateIds != null)
                     {
                         foreach (var alt in catalogItem.AlternateIds)
                         {
@@ -214,9 +215,9 @@ public class PlayFabManager : MonoBehaviour
 
     private void DebugPlayerWeapons()
     {
-        foreach(var weapon in PlayerWeapons)
+        foreach (var weapon in PlayerWeapons)
         {
-            Debug.Log(weapon.DisplayProperties.ToString());
+            Debug.Log("The Fetched Weapon is : " + weapon.Data.name +" With level = " +weapon.Data.level);
         }
     }
 

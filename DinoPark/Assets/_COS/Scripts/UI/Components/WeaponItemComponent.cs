@@ -1,43 +1,38 @@
-using PlayFab.EconomyModels;
-using UnityEngine;
 using UnityEngine.UIElements;
 
-public class WeaponItemComponent : MonoBehaviour
+public class WeaponItemComponent
 {
-    private VisualElement m_weaponItemVisual;
+    private VisualElement m_weaponItemButton;
+
     private Label m_Lvl;
-    private Label m_Name;
-
     public Label Lvl => m_Lvl;
-    public Label Name => m_Name;
 
-    public WeaponItemComponent(InventoryItem m_weaponInstanceData)
+    public WeaponItemComponent()
     {
-
     }
 
-    public void SetVisualElements(TemplateContainer gearElement)
+    public void SetVisualElements(TemplateContainer weaponItemUXMLTemplate)
     {
-        if (gearElement == null)
-            return;
+        if (weaponItemUXMLTemplate == null) return;
 
-        m_weaponItemVisual = gearElement.Q("gear-item__icon");
+        m_weaponItemButton = weaponItemUXMLTemplate;
+        m_Lvl = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-lvl");
     }
 
-    public void SetGameData(TemplateContainer gearElement)
+    public void SetGameData(WeaponInstance weaponInstance)
     {
-        if (gearElement == null)
-            return;
+        if (weaponInstance == null) return;
+
+        m_Lvl.text = $"Lv {weaponInstance.Data.level}";
     }
 
     public void RegisterButtonCallbacks()
     {
-        m_weaponItemVisual.RegisterCallback<ClickEvent>(ClickGearItem);
+        m_weaponItemButton?.RegisterCallback<ClickEvent>(ClickGearItem);
     }
 
-    public void ClickGearItem(ClickEvent evt)
+    private void ClickGearItem(ClickEvent evt)
     {
         ArsenalEvents.WeaponItemClicked?.Invoke(this);
     }
-
 }

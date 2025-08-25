@@ -1,4 +1,3 @@
-using PlayFab.EconomyModels;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +9,6 @@ public class ArsenalView : UIView
     public static readonly string[] ClassTypeKeys = { "All", "Sword", "Shield", "Spear"};
 
     private ScrollView m_ScrollViewParent;
-    private VisualElement m_ArsenalPanel;
 
     private DropdownField m_InventoryRarityDropdown;
     private DropdownField m_InventoryClassTypeDropdown;
@@ -22,6 +20,8 @@ public class ArsenalView : UIView
         ArsenalEvents.WeaponItemClicked += OnWeaponItemClicked;
         ArsenalEvents.ArsenalSetup += OnArsenalSetup;
         ArsenalEvents.ArsenalUpdated += OnArsenalUpdated;
+
+        m_WeaponItemAsset = Resources.Load("WeaponItem") as VisualTreeAsset;
     }
 
     public override void Dispose()
@@ -38,12 +38,10 @@ public class ArsenalView : UIView
     {
         base.SetVisualElements();
 
-        m_ArsenalPanel = m_TopElement.Q("ArsenalView");
+        m_InventoryRarityDropdown = m_TopElement.Q<DropdownField>("Rarity-dropdown");
+        m_InventoryClassTypeDropdown = m_TopElement.Q<DropdownField>("Class-dropdown");
 
-        m_InventoryRarityDropdown = m_ArsenalPanel.Q<DropdownField>("Rarity-dropdown");
-        m_InventoryClassTypeDropdown = m_ArsenalPanel.Q<DropdownField>("Class-dropdown");
-
-        m_ScrollViewParent = m_ArsenalPanel.Q<ScrollView>("ScrollView-Container");
+        m_ScrollViewParent = m_TopElement.Q<ScrollView>("ScrollView");
     }
 
     protected override void RegisterButtonCallbacks()
@@ -95,7 +93,7 @@ public class ArsenalView : UIView
         ArsenalEvents.GearFiltered?.Invoke(rarity, gearType);
     }
 
-    private void ShowWeaponItems(List<InventoryItem> waeponsToShow)
+    private void ShowWeaponItems(IReadOnlyList<WeaponInstance> waeponsToShow)
     {
         VisualElement contentContainer = m_ScrollViewParent.Q<VisualElement>("unity-content-container");
         contentContainer.Clear();
@@ -106,7 +104,7 @@ public class ArsenalView : UIView
         }
     }
 
-    private void CreateGearItemButton(InventoryItem weaponData, VisualElement container)
+    private void CreateGearItemButton(WeaponInstance weaponData, VisualElement container)
     {
         if (container == null)
         {
@@ -115,12 +113,11 @@ public class ArsenalView : UIView
         }
 
         TemplateContainer weaponUIElement = m_WeaponItemAsset.Instantiate();
-        weaponUIElement.AddToClassList("gear-item-spacing");
 
-        WeaponItemComponent weaponItem = new WeaponItemComponent(weaponData);
+        WeaponItemComponent weaponItem = new();
 
         weaponItem.SetVisualElements(weaponUIElement);
-        weaponItem.SetGameData(weaponUIElement);
+        weaponItem.SetGameData(weaponData);
         weaponItem.RegisterButtonCallbacks();
 
         container.Add(weaponUIElement);
@@ -146,7 +143,7 @@ public class ArsenalView : UIView
         RegisterButtonCallbacks();
     }
 
-   private void OnArsenalUpdated(List<InventoryItem> weaponsToLoad)
+   private void OnArsenalUpdated(IReadOnlyList<WeaponInstance> weaponsToLoad)
     {
         ShowWeaponItems(weaponsToLoad);
     }
