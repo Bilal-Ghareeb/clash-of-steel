@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 public class ArsenalView : UIView
 {
     public static readonly string[] RarityKeys = { "All", "Common", "Rare", "Legendary" };
-    public static readonly string[] ClassTypeKeys = { "All", "Sword", "Shield", "Spear"};
+    public static readonly string[] ClassTypeKeys = { "All", "Sword", "Shield", "Hammer"};
 
     private ScrollView m_ScrollViewParent;
 

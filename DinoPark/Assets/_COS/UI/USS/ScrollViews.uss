@@ -7,7 +7,7 @@
     justify-content: center;
 }
 
-.weapon-scroll-item {
+.weapon-scroll-item-common {
     width: 350px;
     height: 345px;
     -unity-background-scale-mode: scale-to-fit;
@@ -15,6 +15,8 @@
     margin-right: 20px;
     margin-bottom: 20px;
     margin-left: 20px;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/ItemFrame01_Single_Green.png?fileID=2800000&guid=e6eea4f7cbb9f46f79c0fe06180fa5b3&type=3#ItemFrame01_Single_Green");
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .weapon-scroll-text-lvl {
@@ -32,7 +34,64 @@
     font-size: 95px;
 }
 
-.weapon-scroll-item:active {
-    scale: 1.5 1.5 1.2;
+.weapon-scroll-item-base:active {
+    scale: 1.3 1.3 1.2;
     rotate: 0;
+}
+
+.weapon-scroll-item-epic {
+    width: 350px;
+    height: 345px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/ItemFrame01_Single_Purple.png?fileID=2800000&guid=10d23572713d041c596abf5c00be11dc&type=3#ItemFrame01_Single_Purple");
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.weapon-scroll-item-legendary {
+    width: 350px;
+    height: 345px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/ItemFrame01_Single_Yellow.png?fileID=2800000&guid=84063999b9e1741d099c1d8f7bbc0f7a&type=3#ItemFrame01_Single_Yellow");
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.class-icon-sword {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/512/Icon_Sword.Png?fileID=21300000&guid=955349bdf9af94f67a275cd95eacc26e&type=3#Icon_Sword");
+    -unity-background-scale-mode: scale-to-fit;
+    top: -13px;
+    left: 321px;
+}
+
+.class-icon-shield {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/256/Icon_Shield.png?fileID=21300000&guid=af4cc505a01a64425a7e1e7e85912203&type=3#Icon_Shield");
+    -unity-background-scale-mode: scale-to-fit;
+    top: -13px;
+    left: 321px;
+}
+
+.class-icon-hammer {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/256/Icon_Hammer.png?fileID=21300000&guid=52538b7886af945f990da19b2f3c5da6&type=3#Icon_Hammer");
+    -unity-background-scale-mode: scale-to-fit;
+    top: -13px;
+    left: 321px;
+}
+
+.weapon-scroll-item-base {
 }

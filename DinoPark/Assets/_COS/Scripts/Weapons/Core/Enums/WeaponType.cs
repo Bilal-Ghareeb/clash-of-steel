@@ -2,6 +2,6 @@ public enum WeaponType
 {
     Sword,
     Shield,
-    Spear,
+    Hammer,
     All
 }

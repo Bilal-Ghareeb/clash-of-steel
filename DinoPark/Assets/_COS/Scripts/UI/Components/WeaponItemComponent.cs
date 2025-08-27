@@ -11,6 +11,9 @@ public class WeaponItemComponent
     private Label m_Lvl;
     public Label Lvl => m_Lvl;
 
+    private VisualElement m_classIcon;
+    public VisualElement ClassIcon => m_classIcon;
+
     public WeaponItemComponent()
     {
     }
@@ -19,9 +22,10 @@ public class WeaponItemComponent
     {
         if (weaponItemUXMLTemplate == null) return;
 
-        m_weaponItemButton = weaponItemUXMLTemplate;
+        m_weaponItemButton = weaponItemUXMLTemplate.Q<VisualElement>("Weapon-item-button");
         m_Lvl = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-lvl");
         m_weaponImage = weaponItemUXMLTemplate.Q<VisualElement>("weapon-scroll-item-icon");
+        m_classIcon = weaponItemUXMLTemplate.Q<VisualElement>("Class-icon");
     }
 
     public void SetGameData(WeaponInstance weaponInstance)
@@ -32,6 +36,11 @@ public class WeaponItemComponent
 
         m_Lvl.text = $"Lv {m_WeaponInstance.Data.level}";
         m_weaponImage.style.backgroundImage = weaponInstance.IconTexture;
+
+        m_weaponItemButton.AddToClassList(WeaponItemComponentStyleClasses.GetRarityClass(m_WeaponInstance.Data.rarity));
+
+        m_classIcon.ClearClassList();
+        m_classIcon.AddToClassList(WeaponItemComponentStyleClasses.GetClassTypeClass(m_WeaponInstance.Data.@class));
     }
 
     public void RegisterButtonCallbacks()
