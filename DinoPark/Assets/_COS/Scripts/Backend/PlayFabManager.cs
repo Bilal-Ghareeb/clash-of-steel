@@ -136,47 +136,30 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
-    private void FetchAndCachePlayerWeapons()
+    private async void FetchAndCachePlayerWeapons()
     {
-        var request = new GetInventoryItemsRequest
-        {
-            Entity = m_entity,
-        };
+        var request = new GetInventoryItemsRequest { Entity = m_entity };
 
         PlayFabEconomyAPI.GetInventoryItems(request,
-            result =>
+            async result =>
             {
                 m_playerWeapons = result.Items?
-                    .Where(i => m_weaponCatalog.Any(c => c.Id == i.Id))
-                    .Select(i => new WeaponInstance(i))  
+                    .Select(i =>
+                    {
+                        var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == i.Id);
+                        return new WeaponInstance(i, catalogItem);
+                    })
                     .ToList()
                     ?? new List<WeaponInstance>();
 
-                var ownedFriendlyIds = new HashSet<string>();
-                foreach (var weapon in m_playerWeapons)
-                {
-                    var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == weapon.Item.Id);
-                    if (catalogItem?.AlternateIds != null)
-                    {
-                        foreach (var alt in catalogItem.AlternateIds)
-                        {
-                            if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
-                            {
-                                ownedFriendlyIds.Add(alt.Value);
-                            }
-                        }
-                    }
-                }
+                var downloadTasks = m_playerWeapons
+                    .Select(w => w.DownloadIconAsync())
+                    .ToArray();
 
-                if (!ownedFriendlyIds.Contains(StarterWeaponId))
-                {
-                    GrantWeapon(StarterWeaponId);
-                }
-                else
-                {
-                    DebugPlayerWeapons();
-                    LoadNextScene();
-                }
+                await System.Threading.Tasks.Task.WhenAll(downloadTasks);
+
+                DebugPlayerWeapons();
+                LoadNextScene();
             },
             error =>
             {
@@ -184,6 +167,7 @@ public class PlayFabManager : MonoBehaviour
                 LoadNextScene();
             });
     }
+
 
     public void GrantWeapon(string weaponFriendlyId)
     {
