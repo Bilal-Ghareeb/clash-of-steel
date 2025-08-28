@@ -18,9 +18,8 @@ public class TabsView : UIView
 
     VisualElement m_MenuMarker;
 
-    public TabsView(VisualElement topElement) : base(topElement)
+    public TabsView(VisualElement topElement) : base(topElement,false)
     {
-        
     }
 
     public override void Dispose()
@@ -28,6 +27,34 @@ public class TabsView : UIView
         base.Dispose();
 
         UnregisterButtonCallbacks();
+    }
+
+    public override void Show()
+    {
+        m_TopElement.style.display = DisplayStyle.Flex;
+
+        m_TopElement.style.translate = new Translate(0, new Length(100, LengthUnit.Percent));
+
+        LeanTween.value(100f, 0f, 0.5f)
+        .setEaseOutQuad()
+        .setOnUpdate((float val) =>
+        {
+            m_TopElement.style.translate = new Translate(0, new Length(val, LengthUnit.Percent));
+        });
+    }
+
+    public override void Hide()
+    {
+        LeanTween.value(0f, 100f, 0.5f)
+        .setEaseInQuad()
+        .setOnUpdate((float val) =>
+        {
+            m_TopElement.style.translate = new Translate(0, new Length(val, LengthUnit.Percent));
+        })
+        .setOnComplete(() =>
+        {
+            m_TopElement.style.display = DisplayStyle.None;
+        });
     }
 
     protected override void SetVisualElements()

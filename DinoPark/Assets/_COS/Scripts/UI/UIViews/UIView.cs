@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 public class UIView : IDisposable
 {
-    protected bool m_HideOnAwake = true;
+    protected bool m_HideOnAwake;
     protected bool m_IsOverlay;
     protected VisualElement m_TopElement;
 
@@ -12,9 +12,10 @@ public class UIView : IDisposable
     public bool IsTransparent => m_IsOverlay;
     public bool IsHidden => m_TopElement.style.display == DisplayStyle.None;
 
-    public UIView(VisualElement topElement)
+    public UIView(VisualElement topElement, bool hideOnAwake = true)
     {
         m_TopElement = topElement ?? throw new ArgumentNullException(nameof(topElement));
+        m_HideOnAwake = hideOnAwake;
         Initialize();
     }
 

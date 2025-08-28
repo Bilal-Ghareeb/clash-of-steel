@@ -1,0 +1,8 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
+    <ui:VisualElement name="InspectView" style="width: 100%; height: 100%; justify-content: center; flex-direction: column-reverse;">
+        <ui:Button name="Back-btn" class="rectangleButton" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button_Square01_White.png?fileID=2800000&amp;guid=e21d782d09f1e45b789bf0dacbfddb48&amp;type=3#Button_Square01_White&quot;); background-color: rgba(0, 0, 0, 0); -unity-background-scale-mode: scale-to-fit; width: 175px; height: 210px; position: absolute; left: 110px; top: 1730px; -unity-background-image-tint-color: rgb(192, 112, 0);">
+            <ui:VisualElement name="btn-image" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_PictoIcons/512/Pictoicon_Arrow_Backward.Png?fileID=2800000&amp;guid=56a70182a4a9c4ac88610b9ee0faacf8&amp;type=3#Pictoicon_Arrow_Backward&quot;); -unity-background-scale-mode: scale-to-fit; width: 100%; height: 100%; align-self: center; justify-content: center; align-items: center; align-content: center;" />
+        </ui:Button>
+    </ui:VisualElement>
+</ui:UXML>
