@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAssetDatabase
   assets:
   - {fileID: 11400000, guid: 75006659effb8394e98f81b9ab525ae4, type: 2}
+  - {fileID: 11400000, guid: 45b6883bbc0b5b24ca64dbe9c080a181, type: 2}
