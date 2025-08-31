@@ -158,8 +158,32 @@ public class PlayFabManager : MonoBehaviour
 
                 await System.Threading.Tasks.Task.WhenAll(downloadTasks);
 
-                DebugPlayerWeapons();
-                LoadNextScene();
+                var ownedFriendlyIds = new HashSet<string>();
+                foreach (var weapon in m_playerWeapons)
+                {
+                    var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == weapon.Item.Id);
+                    if (catalogItem?.AlternateIds != null)
+                    {
+                        foreach (var alt in catalogItem.AlternateIds)
+                        {
+                            if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
+                            {
+                                ownedFriendlyIds.Add(alt.Value);
+                            }
+                        }
+                    }
+                }
+
+                if (!ownedFriendlyIds.Contains(StarterWeaponId))
+                {
+                    GrantWeapon(StarterWeaponId);
+                }
+                else
+                {
+                    DebugPlayerWeapons();
+                    LoadNextScene();
+                }
+
             },
             error =>
             {

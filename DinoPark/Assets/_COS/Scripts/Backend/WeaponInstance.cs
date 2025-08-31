@@ -7,19 +7,22 @@ using UnityEngine;
 public class WeaponInstance
 {
     public InventoryItem Item { get; }
-    public CatalogItem Catalog { get; }
+    public CatalogItem CatalogBaseItem { get; }
     public WeaponData Data { get; }
+    public WeaponAsset Asset { get; }
 
-    public string IconUrl => Catalog?.Images?.FirstOrDefault()?.Url;
+    public string IconUrl => CatalogBaseItem?.Images?.FirstOrDefault()?.Url;
     public Texture2D IconTexture { get; private set; }
 
-    public WeaponInstance(InventoryItem item, CatalogItem catalog)
+    public WeaponInstance(InventoryItem item, CatalogItem catalogItemRef)
     {
         Item = item;
-        Catalog = catalog;
+        CatalogBaseItem = catalogItemRef;
 
         string json = JsonConvert.SerializeObject(item.DisplayProperties);
         Data = JsonConvert.DeserializeObject<WeaponData>(json);
+
+        Asset = WeaponAssetProvider.Database.GetAssetFor(Data.name);
     }
 
     public async Task DownloadIconAsync()
