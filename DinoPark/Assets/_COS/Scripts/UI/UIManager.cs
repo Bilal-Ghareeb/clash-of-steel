@@ -21,6 +21,8 @@ public class UIManager : MonoBehaviour
     const string k_TabsViewName = "TabsView";
     const string k_InspectViewName = "InspectView";
 
+    [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
+
     private void OnEnable()
     {
         m_MainGameDocument = GetComponent<UIDocument>();
@@ -67,7 +69,7 @@ public class UIManager : MonoBehaviour
 
         m_PlayView = new PlayView(root.Q<VisualElement>(k_PlayViewName));
         m_ArsenalView = new ArsenalView(root.Q<VisualElement>(k_ArsenalViewName));
-        m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName));
+        m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName) , m_WeaponInspectPresenter);
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
 
         m_AllViews.Add(m_PlayView);

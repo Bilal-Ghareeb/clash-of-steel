@@ -11,8 +11,12 @@ public class InspectView : UIView
     private Label m_currentDamage;
     private Label m_weaponLvl;
 
-    public InspectView(VisualElement topElement) : base(topElement) 
+    private WeaponInspectPresenter m_presenter;
+
+
+    public InspectView(VisualElement topElement , WeaponInspectPresenter presenter) : base(topElement) 
     {
+        m_presenter = presenter;
         InspectWeaponEvents.WeaponSelectedForInspect += OnWeaponSelectedForInspect;
     }
 
@@ -57,10 +61,13 @@ public class InspectView : UIView
         m_weaponLvl.text = weapon.Data.level.ToString();
         m_currentHealth.text = (weapon.Data.level * weapon.Data.scaling.healthPerLevel).ToString();
         m_currentDamage.text = (weapon.Data.baseDamage * weapon.Data.scaling.damagePerLevel).ToString();
+
+        m_presenter.ShowWeapon(weapon);
     }
 
     private void ReturnToArsenal(ClickEvent evt)
     {
+        m_presenter.ClearCurrent();
         InspectWeaponEvents.BackToArsenalButtonPressed?.Invoke();
     }
 }
