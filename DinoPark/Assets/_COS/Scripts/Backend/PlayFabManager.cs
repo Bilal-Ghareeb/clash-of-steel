@@ -23,6 +23,10 @@ public class PlayFabManager : MonoBehaviour
     private List<WeaponInstance> m_playerWeapons = new List<WeaponInstance>();
     public IReadOnlyList<WeaponInstance> PlayerWeapons => m_playerWeapons;
 
+    public Dictionary<string, int> Currencies { get; private set; } = new();
+
+    public int Gold => Currencies.ContainsKey("GD") ? Currencies["GD"] : 0;
+
     private void Awake()
     {
         if (m_instance != null && m_instance != this) { Destroy(gameObject); }
@@ -127,7 +131,7 @@ public class PlayFabManager : MonoBehaviour
             {
                 m_weaponCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
                 Debug.Log($"Found {m_weaponCatalog.Count} weapon(s) in catalog.");
-                FetchAndCachePlayerWeapons();
+                FetchAndCachePlayerInventory();
             },
             error =>
             {
@@ -136,21 +140,37 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
-    private async void FetchAndCachePlayerWeapons()
+    private async void FetchAndCachePlayerInventory()
     {
         var request = new GetInventoryItemsRequest { Entity = m_entity };
 
         PlayFabEconomyAPI.GetInventoryItems(request,
             async result =>
             {
-                m_playerWeapons = result.Items?
-                    .Select(i =>
+                m_playerWeapons.Clear();
+                Currencies.Clear();
+
+                foreach (var item in result.Items)
+                {
+                    if (item.Type == "currency")
                     {
-                        var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == i.Id);
-                        return new WeaponInstance(i, catalogItem);
-                    })
-                    .ToList()
-                    ?? new List<WeaponInstance>();
+                        if (item.Id != null)
+                            Currencies[item.Id] = item.Amount ?? 0;
+                    }
+                    else
+                    {
+                        var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == item.Id);
+                        if (catalogItem != null)
+                        {
+                            var weaponInstance = new WeaponInstance(item, catalogItem);
+                            m_playerWeapons.Add(weaponInstance);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Inventory item {item.Id} not found in catalog!");
+                        }
+                    }
+                }
 
                 var downloadTasks = m_playerWeapons
                     .Select(w => w.DownloadIconAsync())
@@ -167,23 +187,21 @@ public class PlayFabManager : MonoBehaviour
                         foreach (var alt in catalogItem.AlternateIds)
                         {
                             if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
-                            {
                                 ownedFriendlyIds.Add(alt.Value);
-                            }
                         }
                     }
                 }
 
                 if (!ownedFriendlyIds.Contains(StarterWeaponId))
                 {
-                    GrantWeapon(StarterWeaponId);
+                    GrantStarterBundle(StarterWeaponId);
                 }
                 else
                 {
                     DebugPlayerWeapons();
+                    DebugCurrencies();
                     LoadNextScene();
                 }
-
             },
             error =>
             {
@@ -192,12 +210,11 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
-
-    public void GrantWeapon(string weaponFriendlyId)
+    public void GrantStarterBundle(string weaponFriendlyId)
     {
         var request = new ExecuteFunctionRequest
         {
-            FunctionName = "GrantWeaponToPlayer",
+            FunctionName = "GrantStarterBundle",
             FunctionParameter = new { weaponId = weaponFriendlyId },
             GeneratePlayStreamEvent = true
         };
@@ -211,7 +228,7 @@ public class PlayFabManager : MonoBehaviour
                     Debug.Log("Function result: " + result.FunctionResult.ToString());
                 }
 
-                LoadNextScene();
+                FetchAndCachePlayerInventory();
             },
             error =>
             {
@@ -225,7 +242,15 @@ public class PlayFabManager : MonoBehaviour
     {
         foreach (var weapon in PlayerWeapons)
         {
-            Debug.Log("The Fetched Weapon is : " + weapon.Data.name +" With level = " +weapon.Data.level);
+            Debug.Log("The Fetched Weapon is : " + weapon.Data.name + " With level = " + weapon.Data.level);
+        }
+    }
+
+    private void DebugCurrencies()
+    {
+        foreach (var kvp in Currencies)
+        {
+            Debug.Log($"Currency: {kvp.Key} = {kvp.Value}");
         }
     }
 

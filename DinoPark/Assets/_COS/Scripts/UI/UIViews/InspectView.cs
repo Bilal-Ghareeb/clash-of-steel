@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 public class InspectView : UIView
 {
     private VisualElement m_backButton;
+    private VisualElement m_weaponLevelUpButton;
 
     private Label m_weaponName;
     private Label m_weaponDescription;
@@ -36,6 +37,7 @@ public class InspectView : UIView
     {
         base.SetVisualElements();
         m_backButton = m_TopElement.Q<VisualElement>("Back-btn");
+        m_weaponLevelUpButton = m_TopElement.Q<VisualElement>("Lvlup-btn");
         m_weaponName = m_TopElement.Q<Label>("Weapon-name");
         m_weaponDescription = m_TopElement.Q<Label>("Weapon-description");
         m_currentHealth = m_TopElement.Q<Label>("Health-number");
@@ -46,11 +48,13 @@ public class InspectView : UIView
     protected override void RegisterButtonCallbacks()
     {
         m_backButton.RegisterCallback<ClickEvent>(ReturnToArsenal);
+        m_weaponLevelUpButton.RegisterCallback<ClickEvent>(LevelUpWeapon);
     }
 
     protected void UnregisterButtonCallbacks()
     {
         m_backButton.UnregisterCallback<ClickEvent>(ReturnToArsenal);
+        m_weaponLevelUpButton.UnregisterCallback<ClickEvent>(LevelUpWeapon);
     }
 
     private void OnWeaponSelectedForInspect(WeaponInstance weapon)
@@ -69,5 +73,10 @@ public class InspectView : UIView
     {
         m_presenter.ClearCurrent();
         InspectWeaponEvents.BackToArsenalButtonPressed?.Invoke();
+    }
+
+    private void LevelUpWeapon(ClickEvent evt)
+    {
+        // i want playfab to execute the level up weapon here 
     }
 }
