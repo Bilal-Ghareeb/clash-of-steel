@@ -15,11 +15,13 @@ public class UIManager : MonoBehaviour
     private UIView m_ArsenalView;
     private UIView m_InspectView;
     private UIView m_TabsView;
+    private UIView m_CurrenciesView;
 
     const string k_PlayViewName = "PlayView";
     const string k_ArsenalViewName = "ArsenalView";
     const string k_TabsViewName = "TabsView";
     const string k_InspectViewName = "InspectView";
+    const string k_CurrenciesViewName = "CurrenciesView";
 
     [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
 
@@ -71,11 +73,13 @@ public class UIManager : MonoBehaviour
         m_ArsenalView = new ArsenalView(root.Q<VisualElement>(k_ArsenalViewName));
         m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName) , m_WeaponInspectPresenter);
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
+        m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName) , false);
 
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_TabsView);
         m_AllViews.Add(m_ArsenalView);
         m_AllViews.Add(m_InspectView);
+        m_AllViews.Add(m_CurrenciesView);
     }
 
     private void OnArsenalViewShown()

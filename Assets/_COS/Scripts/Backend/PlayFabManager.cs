@@ -3,6 +3,7 @@ using PlayFab.AuthenticationModels;
 using PlayFab.ClientModels;
 using PlayFab.CloudScriptModels;
 using PlayFab.EconomyModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -23,9 +24,10 @@ public class PlayFabManager : MonoBehaviour
     private List<WeaponInstance> m_playerWeapons = new List<WeaponInstance>();
     public IReadOnlyList<WeaponInstance> PlayerWeapons => m_playerWeapons;
 
+    private Dictionary<string, CatalogItem> m_currencyCatalog = new Dictionary<string, CatalogItem>();
     public Dictionary<string, int> Currencies { get; private set; } = new();
+    public event Action<Dictionary<string, int>> OnCurrenciesUpdated;
 
-    public int Gold => Currencies.ContainsKey("GD") ? Currencies["GD"] : 0;
 
     private void Awake()
     {
@@ -131,12 +133,36 @@ public class PlayFabManager : MonoBehaviour
             {
                 m_weaponCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
                 Debug.Log($"Found {m_weaponCatalog.Count} weapon(s) in catalog.");
-                FetchAndCachePlayerInventory();
+                FetchCatalogCurrencies();
             },
             error =>
             {
                 Debug.LogError("SearchItems failed: " + error.GenerateErrorReport());
                 LoadNextScene();
+            });
+    }
+
+    private void FetchCatalogCurrencies()
+    {
+        var request = new SearchItemsRequest
+        {
+            Filter = $"type eq 'currency'", 
+        };
+
+        PlayFabEconomyAPI.SearchItems(request,
+            result =>
+            {
+                m_currencyCatalog = result.Items?
+                    .Where(item => item != null)
+                    .ToDictionary(item => item.Id, item => item)
+                    ?? new Dictionary<string, CatalogItem>();
+
+                Debug.Log($"Found {m_currencyCatalog.Count} currency/currencies in catalog.");
+                FetchAndCachePlayerInventory();
+            },
+            error =>
+            {
+                Debug.LogError("SearchItems failed: " + error.GenerateErrorReport());
             });
     }
 
@@ -152,10 +178,10 @@ public class PlayFabManager : MonoBehaviour
 
                 foreach (var item in result.Items)
                 {
-                    if (item.Type == "currency")
+                    if (item.Type == "currency" && item.Id != null)
                     {
-                        if (item.Id != null)
-                            Currencies[item.Id] = item.Amount ?? 0;
+                        string friendlyId = GetCurrencyFriendlyId(item.Id);
+                        Currencies[friendlyId] = item.Amount ?? 0;
                     }
                     else
                     {
@@ -237,6 +263,30 @@ public class PlayFabManager : MonoBehaviour
             });
     }
     #endregion
+
+    private void NotifyCurrenciesChanged()
+    {
+        OnCurrenciesUpdated?.Invoke(Currencies);
+    }
+
+    private string GetCurrencyFriendlyId(string currencyId)
+    {
+        if (m_currencyCatalog.TryGetValue(currencyId, out var catalogItem))
+        {
+            if (catalogItem?.AlternateIds != null)
+            {
+                foreach (var alt in catalogItem.AlternateIds)
+                {
+                    if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
+                        return alt.Value;
+                }
+            }
+
+            return currencyId;
+        }
+
+        return currencyId;
+    }
 
     private void DebugPlayerWeapons()
     {
