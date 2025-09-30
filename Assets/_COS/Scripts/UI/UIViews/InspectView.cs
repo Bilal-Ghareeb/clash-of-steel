@@ -2,6 +2,8 @@ using UnityEngine.UIElements;
 
 public class InspectView : UIView
 {
+    private WeaponInstance m_currentWeapon;
+
     private VisualElement m_backButton;
     private VisualElement m_weaponLevelUpButton;
 
@@ -61,6 +63,8 @@ public class InspectView : UIView
 
     private void OnWeaponSelectedForInspect(WeaponInstance weapon)
     {
+        m_currentWeapon = weapon;
+
         WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[weapon.CatalogData.progressionId];
 
         m_weaponName.text = weapon.CatalogData.name;
@@ -83,6 +87,10 @@ public class InspectView : UIView
 
     private void LevelUpWeapon(ClickEvent evt)
     {
-        // i want playfab to use azure functions to level up the weapon here 
+        if (m_currentWeapon == null) return;
+
+        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
+
+        PlayFabManager.Instance.LevelWeapon(m_currentWeapon.Item.Id, progression.currencyId, WeaponProgressionCalculator.GetCostForLevelUp(m_currentWeapon.InstanceData.level, progression));
     }
 }

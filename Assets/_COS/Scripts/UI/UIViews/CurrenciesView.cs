@@ -11,7 +11,7 @@ public class CurrenciesView : UIView
     {
         PlayFabManager.Instance.OnCurrenciesUpdated += UpdateCurrencies;
 
-        UpdateCurrencies(PlayFabManager.Instance.Currencies);
+        UpdateCurrencies(PlayFabManager.Instance.PlayerCurrencies);
     }
 
     public override void Show()
@@ -43,7 +43,7 @@ public class CurrenciesView : UIView
     }
 
 
-    private void UpdateCurrencies(Dictionary<string, int> currencies)
+    private void UpdateCurrencies(IReadOnlyDictionary<string, int> currencies)
     {
         if (m_playerGoldCountLabel == null) return;
 

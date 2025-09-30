@@ -31,7 +31,9 @@ public class PlayFabManager : MonoBehaviour
 
 
     private Dictionary<string, CatalogItem> m_currencyCatalog = new Dictionary<string, CatalogItem>();
-    public Dictionary<string, int> Currencies { get; private set; } = new();
+    private Dictionary<string, int> m_playerCurrencies = new();
+    public IReadOnlyDictionary<string, int> PlayerCurrencies => m_playerCurrencies;
+
     public event Action<Dictionary<string, int>> OnCurrenciesUpdated;
 
 
@@ -215,6 +217,30 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
+    private void RefreshCurrencies()
+    {
+        var request = new GetInventoryItemsRequest { Entity = m_entity };
+
+        PlayFabEconomyAPI.GetInventoryItems(request,
+            result =>
+            {
+                m_playerCurrencies.Clear();
+
+                foreach (var item in result.Items)
+                {
+                    if (item.Type == "currency" && item.Id != null)
+                    {
+                        string friendlyId = GetCurrencyFriendlyId(item.Id);
+                        m_playerCurrencies[friendlyId] = item.Amount ?? 0;
+                    }
+                }
+
+                OnCurrenciesUpdated?.Invoke(m_playerCurrencies);
+            },
+            error => Debug.LogError("Failed to refresh currencies: " + error.GenerateErrorReport()));
+    }
+
+
     private async void FetchAndCachePlayerInventory()
     {
         var request = new GetInventoryItemsRequest { Entity = m_entity };
@@ -223,14 +249,14 @@ public class PlayFabManager : MonoBehaviour
             async result =>
             {
                 m_playerWeapons.Clear();
-                Currencies.Clear();
+                m_playerCurrencies.Clear();
 
                 foreach (var item in result.Items)
                 {
                     if (item.Type == "currency" && item.Id != null)
                     {
                         string friendlyId = GetCurrencyFriendlyId(item.Id);
-                        Currencies[friendlyId] = item.Amount ?? 0;
+                        m_playerCurrencies[friendlyId] = item.Amount ?? 0;
                     }
                     else
                     {
@@ -312,12 +338,36 @@ public class PlayFabManager : MonoBehaviour
                 LoadNextScene();
             });
     }
-    #endregion
 
-    private void NotifyCurrenciesChanged()
+    public void LevelWeapon(string weaponInstanceId, string currencyFriendlyId, int cost, Action<WeaponInstance> onRefreshed = null)
     {
-        OnCurrenciesUpdated?.Invoke(Currencies);
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "LevelWeapon",
+            FunctionParameter = new
+            {
+                instanceId = weaponInstanceId,
+                currencyFriendlyId,
+                cost
+            },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            result =>
+            {
+                Debug.Log("LevelWeapon Azure Function executed successfully.");
+
+                RefreshCurrencies();
+            },
+            error =>
+            {
+                Debug.LogError("Failed to call LevelWeapon Azure Function: " + error.GenerateErrorReport());
+            });
     }
+
+
+    #endregion
 
     private string GetCurrencyFriendlyId(string currencyId)
     {
@@ -348,7 +398,7 @@ public class PlayFabManager : MonoBehaviour
 
     private void DebugCurrencies()
     {
-        foreach (var kvp in Currencies)
+        foreach (var kvp in m_playerCurrencies)
         {
             Debug.Log($"Currency: {kvp.Key} = {kvp.Value}");
         }
