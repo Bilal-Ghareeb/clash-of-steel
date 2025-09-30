@@ -151,7 +151,7 @@ public class ArsenalView : UIView
     private void OnWeaponItemClicked(WeaponItemComponent weaponComponent)
     {
         var weaponInstance = weaponComponent.GetWeaponInstance();
-        Debug.Log(weaponInstance.Data.name + " Is Clicked");
+        Debug.Log(weaponInstance.CatalogData.name + " Is Clicked");
 
         InspectWeaponEvents.WeaponSelectedForInspect?.Invoke(weaponInstance);
     }

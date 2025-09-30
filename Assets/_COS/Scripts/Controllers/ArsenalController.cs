@@ -40,12 +40,12 @@ public class ArsenalController : MonoBehaviour
 
         if (rarity != Rarity.All)
         {
-            filteredWeaponList = filteredWeaponList.Where(x => x.Data.rarity == rarity.ToString()).ToList();
+            filteredWeaponList = filteredWeaponList.Where(x => x.CatalogData.rarity == rarity.ToString()).ToList();
         }
 
         if (gearType != WeaponType.All)
         {
-            filteredWeaponList = filteredWeaponList.Where(x => x.Data.@class == gearType.ToString()).ToList();
+            filteredWeaponList = filteredWeaponList.Where(x => x.CatalogData.@class == gearType.ToString()).ToList();
         }
 
         return filteredWeaponList;

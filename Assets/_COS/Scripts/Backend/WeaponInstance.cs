@@ -8,7 +8,8 @@ public class WeaponInstance
 {
     public InventoryItem Item { get; }
     public CatalogItem CatalogBaseItem { get; }
-    public WeaponData Data { get; }
+    public WeaponData CatalogData { get; }
+    public WeaponInstanceData InstanceData { get; }
     public WeaponAsset Asset { get; }
 
     public string IconUrl => CatalogBaseItem?.Images?.FirstOrDefault()?.Url;
@@ -19,10 +20,15 @@ public class WeaponInstance
         Item = item;
         CatalogBaseItem = catalogItemRef;
 
-        string json = JsonConvert.SerializeObject(item.DisplayProperties);
-        Data = JsonConvert.DeserializeObject<WeaponData>(json);
+        // Catalog-level data
+        string catalogJson = JsonConvert.SerializeObject(catalogItemRef.DisplayProperties);
+        CatalogData = JsonConvert.DeserializeObject<WeaponData>(catalogJson);
 
-        Asset = WeaponAssetProvider.Database.GetAssetFor(Data.name);
+        // Player instance-level data
+        string instanceJson = JsonConvert.SerializeObject(item.DisplayProperties);
+        InstanceData = JsonConvert.DeserializeObject<WeaponInstanceData>(instanceJson);
+
+        Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.name);
     }
 
     public async Task DownloadIconAsync()
@@ -37,13 +43,9 @@ public class WeaponInstance
                 await Task.Yield();
 
             if (req.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-            {
                 IconTexture = UnityEngine.Networking.DownloadHandlerTexture.GetContent(req);
-            }
             else
-            {
                 Debug.LogError($"Failed to load icon: {req.error}");
-            }
         }
     }
 }

@@ -34,13 +34,13 @@ public class WeaponItemComponent
 
         m_WeaponInstance = weaponInstance;
 
-        m_Lvl.text = $"Lv {m_WeaponInstance.Data.level}";
+        m_Lvl.text = $"Lv {m_WeaponInstance.InstanceData.level}";
         m_weaponImage.style.backgroundImage = weaponInstance.IconTexture;
 
-        m_weaponItemButton.AddToClassList(WeaponItemComponentStyleClasses.GetRarityClass(m_WeaponInstance.Data.rarity));
+        m_weaponItemButton.AddToClassList(WeaponItemComponentStyleClasses.GetRarityClass(m_WeaponInstance.CatalogData.rarity));
 
         m_classIcon.ClearClassList();
-        m_classIcon.AddToClassList(WeaponItemComponentStyleClasses.GetClassTypeClass(m_WeaponInstance.Data.@class));
+        m_classIcon.AddToClassList(WeaponItemComponentStyleClasses.GetClassTypeClass(m_WeaponInstance.CatalogData.@class));
     }
 
     public void RegisterButtonCallbacks()

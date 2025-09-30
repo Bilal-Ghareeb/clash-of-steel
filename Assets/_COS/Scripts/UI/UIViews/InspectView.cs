@@ -10,6 +10,7 @@ public class InspectView : UIView
 
     private Label m_currentHealth;
     private Label m_currentDamage;
+    private Label m_nextLvlCost;
     private Label m_weaponLvl;
 
     private WeaponInspectPresenter m_presenter;
@@ -43,6 +44,7 @@ public class InspectView : UIView
         m_currentHealth = m_TopElement.Q<Label>("Health-number");
         m_currentDamage = m_TopElement.Q<Label>("Damage-number");
         m_weaponLvl = m_TopElement.Q<Label>("Lvl-text");
+        m_nextLvlCost = m_TopElement.Q<Label>("Currency-text");
     }
 
     protected override void RegisterButtonCallbacks()
@@ -59,12 +61,16 @@ public class InspectView : UIView
 
     private void OnWeaponSelectedForInspect(WeaponInstance weapon)
     {
-        m_weaponName.text = weapon.Data.name;
-        m_weaponDescription.text = weapon.Data.description;
+        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[weapon.CatalogData.progressionId];
 
-        m_weaponLvl.text = weapon.Data.level.ToString();
-        m_currentHealth.text = (weapon.Data.level * weapon.Data.scaling.healthPerLevel).ToString();
-        m_currentDamage.text = (weapon.Data.baseDamage * weapon.Data.scaling.damagePerLevel).ToString();
+        m_weaponName.text = weapon.CatalogData.name;
+        m_weaponDescription.text = weapon.CatalogData.description;
+
+        m_weaponLvl.text = weapon.InstanceData.level.ToString();
+
+        m_currentHealth.text = WeaponProgressionCalculator.GetDamage(weapon.CatalogData.baseHealth, weapon.InstanceData.level, progression).ToString();
+        m_currentDamage.text = WeaponProgressionCalculator.GetDamage(weapon.CatalogData.baseDamage, weapon.InstanceData.level, progression).ToString();
+        m_nextLvlCost.text = WeaponProgressionCalculator.GetCostForLevelUp(weapon.InstanceData.level, progression).ToString();
 
         m_presenter.ShowWeapon(weapon);
     }
@@ -77,6 +83,6 @@ public class InspectView : UIView
 
     private void LevelUpWeapon(ClickEvent evt)
     {
-        // i want playfab to execute the level up weapon here 
+        // i want playfab to use azure functions to level up the weapon here 
     }
 }

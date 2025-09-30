@@ -24,6 +24,12 @@ public class PlayFabManager : MonoBehaviour
     private List<WeaponInstance> m_playerWeapons = new List<WeaponInstance>();
     public IReadOnlyList<WeaponInstance> PlayerWeapons => m_playerWeapons;
 
+    private Dictionary<string, WeaponProgressionData> m_progressionFormulas
+    = new Dictionary<string, WeaponProgressionData>();
+
+    public IReadOnlyDictionary<string, WeaponProgressionData> ProgressionFormulas => m_progressionFormulas;
+
+
     private Dictionary<string, CatalogItem> m_currencyCatalog = new Dictionary<string, CatalogItem>();
     public Dictionary<string, int> Currencies { get; private set; } = new();
     public event Action<Dictionary<string, int>> OnCurrenciesUpdated;
@@ -119,6 +125,7 @@ public class PlayFabManager : MonoBehaviour
     private void ContinueAfterLogin()
     {
         FetchCatalogWeapons();
+        FetchCatalogFormulas();
     }
 
     private void FetchCatalogWeapons()
@@ -141,6 +148,48 @@ public class PlayFabManager : MonoBehaviour
                 LoadNextScene();
             });
     }
+
+    private void FetchCatalogFormulas()
+    {
+        var request = new SearchItemsRequest
+        {
+            Filter = $"contentType eq 'Formula'"
+        };
+
+        PlayFabEconomyAPI.SearchItems(request,
+            result =>
+            {
+                if (result.Items != null && result.Items.Count > 0)
+                {
+                    var formulasItem = result.Items.FirstOrDefault(i =>
+                        i.AlternateIds?.Any(a => a.Type == "FriendlyId" && a.Value == "ProgressionFormulas") == true
+                        || i.Id == "ProgressionFormulas");
+
+                    if (formulasItem != null && formulasItem.DisplayProperties != null)
+                    {
+                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(formulasItem.DisplayProperties);
+
+                        m_progressionFormulas = Newtonsoft.Json.JsonConvert
+                            .DeserializeObject<Dictionary<string, WeaponProgressionData>>(json);
+
+                        Debug.Log($"Loaded {m_progressionFormulas.Count} progression formulas.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No ProgressionFormulas item found in Formula catalog.");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("No Formula items found in catalog.");
+                }
+            },
+            error =>
+            {
+                Debug.LogError("SearchItems (Formulas) failed: " + error.GenerateErrorReport());
+            });
+    }
+
 
     private void FetchCatalogCurrencies()
     {
@@ -226,6 +275,7 @@ public class PlayFabManager : MonoBehaviour
                 {
                     DebugPlayerWeapons();
                     DebugCurrencies();
+                    DebugProgressionFormulas();
                     LoadNextScene();
                 }
             },
@@ -292,7 +342,7 @@ public class PlayFabManager : MonoBehaviour
     {
         foreach (var weapon in PlayerWeapons)
         {
-            Debug.Log("The Fetched Weapon is : " + weapon.Data.name + " With level = " + weapon.Data.level);
+            Debug.Log("The Fetched Weapon is : " + weapon.CatalogData.name + " With level = " + weapon.InstanceData.level);
         }
     }
 
@@ -301,6 +351,14 @@ public class PlayFabManager : MonoBehaviour
         foreach (var kvp in Currencies)
         {
             Debug.Log($"Currency: {kvp.Key} = {kvp.Value}");
+        }
+    }
+
+    private void DebugProgressionFormulas()
+    {
+        foreach (var kvp in ProgressionFormulas)
+        {
+            Debug.Log($"Formula: {kvp.Key} = {kvp.Value}");
         }
     }
 
