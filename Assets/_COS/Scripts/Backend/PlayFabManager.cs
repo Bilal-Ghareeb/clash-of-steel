@@ -352,19 +352,26 @@ public class PlayFabManager : MonoBehaviour
             },
             GeneratePlayStreamEvent = true
         };
-
         PlayFabCloudScriptAPI.ExecuteFunction(request,
             result =>
             {
                 Debug.Log("LevelWeapon Azure Function executed successfully.");
 
                 RefreshCurrencies();
+
+                var weapon = m_playerWeapons.FirstOrDefault(w => w.Item.Id == weaponInstanceId);
+                if (weapon != null)
+                {
+                    weapon.InstanceData.level++;
+                    onRefreshed?.Invoke(weapon);
+                }
             },
             error =>
             {
                 Debug.LogError("Failed to call LevelWeapon Azure Function: " + error.GenerateErrorReport());
             });
     }
+
 
 
     #endregion

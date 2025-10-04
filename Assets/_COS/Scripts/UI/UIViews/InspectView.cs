@@ -88,9 +88,12 @@ public class InspectView : UIView
     private void LevelUpWeapon(ClickEvent evt)
     {
         if (m_currentWeapon == null) return;
-
         WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
-
-        PlayFabManager.Instance.LevelWeapon(m_currentWeapon.Item.Id, progression.currencyId, WeaponProgressionCalculator.GetCostForLevelUp(m_currentWeapon.InstanceData.level, progression));
+        PlayFabManager.Instance.LevelWeapon(
+            m_currentWeapon.Item.Id,
+            progression.currencyId,
+            WeaponProgressionCalculator.GetCostForLevelUp(m_currentWeapon.InstanceData.level, progression),
+            updatedWeapon => OnWeaponSelectedForInspect(updatedWeapon)
+        );
     }
 }
