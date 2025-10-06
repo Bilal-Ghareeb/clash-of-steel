@@ -6,6 +6,7 @@ using PlayFab.EconomyModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using CatalogItem = PlayFab.EconomyModels.CatalogItem;
@@ -31,8 +32,9 @@ public class PlayFabManager : MonoBehaviour
 
 
     private Dictionary<string, CatalogItem> m_currencyCatalog = new Dictionary<string, CatalogItem>();
+
     private Dictionary<string, int> m_playerCurrencies = new();
-    public IReadOnlyDictionary<string, int> PlayerCurrencies => m_playerCurrencies;
+    public Dictionary<string, int> PlayerCurrencies => m_playerCurrencies;
 
     public event Action<Dictionary<string, int>> OnCurrenciesUpdated;
 
@@ -220,12 +222,10 @@ public class PlayFabManager : MonoBehaviour
     private void RefreshCurrencies()
     {
         var request = new GetInventoryItemsRequest { Entity = m_entity };
-
         PlayFabEconomyAPI.GetInventoryItems(request,
             result =>
             {
                 m_playerCurrencies.Clear();
-
                 foreach (var item in result.Items)
                 {
                     if (item.Type == "currency" && item.Id != null)
@@ -234,12 +234,15 @@ public class PlayFabManager : MonoBehaviour
                         m_playerCurrencies[friendlyId] = item.Amount ?? 0;
                     }
                 }
-
-                OnCurrenciesUpdated?.Invoke(m_playerCurrencies);
+                NotifyCurrenciesUpdated();
             },
             error => Debug.LogError("Failed to refresh currencies: " + error.GenerateErrorReport()));
     }
 
+    public void NotifyCurrenciesUpdated()
+    {
+        OnCurrenciesUpdated?.Invoke(m_playerCurrencies);
+    }
 
     private async void FetchAndCachePlayerInventory()
     {
@@ -339,8 +342,10 @@ public class PlayFabManager : MonoBehaviour
             });
     }
 
-    public void LevelWeapon(string weaponInstanceId, string currencyFriendlyId, int cost, Action<WeaponInstance> onRefreshed = null)
+    public async Task LevelWeaponAsync(string weaponInstanceId,string currencyFriendlyId,int cost)
     {
+        var taskCompletionSource = new TaskCompletionSource<bool>();
+
         var request = new ExecuteFunctionRequest
         {
             FunctionName = "LevelWeapon",
@@ -352,27 +357,20 @@ public class PlayFabManager : MonoBehaviour
             },
             GeneratePlayStreamEvent = true
         };
+
         PlayFabCloudScriptAPI.ExecuteFunction(request,
             result =>
             {
-                Debug.Log("LevelWeapon Azure Function executed successfully.");
-
-                RefreshCurrencies();
-
-                var weapon = m_playerWeapons.FirstOrDefault(w => w.Item.Id == weaponInstanceId);
-                if (weapon != null)
-                {
-                    weapon.InstanceData.level++;
-                    onRefreshed?.Invoke(weapon);
-                }
+                taskCompletionSource.SetResult(true);
             },
             error =>
             {
-                Debug.LogError("Failed to call LevelWeapon Azure Function: " + error.GenerateErrorReport());
-            });
+                taskCompletionSource.SetException(new Exception(error.GenerateErrorReport()));
+            }
+        );
+
+        await taskCompletionSource.Task;
     }
-
-
 
     #endregion
 
