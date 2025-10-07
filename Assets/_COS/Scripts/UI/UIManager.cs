@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,12 +17,14 @@ public class UIManager : MonoBehaviour
     private UIView m_InspectView;
     private UIView m_TabsView;
     private UIView m_CurrenciesView;
+    private UIView m_PreparingForBattleStageView;
 
     const string k_PlayViewName = "PlayView";
     const string k_ArsenalViewName = "ArsenalView";
     const string k_TabsViewName = "TabsView";
     const string k_InspectViewName = "InspectView";
     const string k_CurrenciesViewName = "CurrenciesView";
+    const string k_PreparingForBattleStageViewName = "PreparingForBattleStageView";
 
     [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
 
@@ -53,6 +56,10 @@ public class UIManager : MonoBehaviour
         InspectWeaponEvents.BackToArsenalButtonPressed += OnArsenalViewShown;
 
         ArsenalEvents.WeaponItemClicked += OnInspectViewShown;
+
+        PlayScreenEvents.PlayBattleStageButtonPressed += OnPreparingForBattleStageShown;
+        PreparingForBattleStageEvents.LeavePreparingForBattle += OnPlayViewShown;
+
     }
 
     private void UnSubscribeFromEvents()
@@ -63,6 +70,10 @@ public class UIManager : MonoBehaviour
         InspectWeaponEvents.BackToArsenalButtonPressed -= OnArsenalViewShown;
 
         ArsenalEvents.WeaponItemClicked -= OnInspectViewShown;
+
+        PlayScreenEvents.PlayBattleStageButtonPressed -= OnPreparingForBattleStageShown;
+        PreparingForBattleStageEvents.LeavePreparingForBattle -= OnPlayViewShown;
+
     }
 
     private void SetupViews()
@@ -74,12 +85,14 @@ public class UIManager : MonoBehaviour
         m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName) , m_WeaponInspectPresenter);
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
         m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName) , false);
+        m_PreparingForBattleStageView = new PreparingForBattleStageView(root.Q<VisualElement>(k_PreparingForBattleStageViewName));
 
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_TabsView);
         m_AllViews.Add(m_ArsenalView);
         m_AllViews.Add(m_InspectView);
         m_AllViews.Add(m_CurrenciesView);
+        m_AllViews.Add(m_PreparingForBattleStageView);
     }
 
     private void OnArsenalViewShown()
@@ -97,13 +110,18 @@ public class UIManager : MonoBehaviour
         ShowModalView(m_InspectView);
     }
 
+    private void OnPreparingForBattleStageShown()
+    {
+        ShowModalView(m_PreparingForBattleStageView);
+    }
+
     private void ShowModalView(UIView newView)
     {
-        if (m_CurrentView != null && m_CurrentView!=m_InspectView)
+        if (m_CurrentView != null && m_CurrentView != m_InspectView && m_CurrentView != m_PreparingForBattleStageView)
         {
             m_CurrentView.Hide();
         }
-        else if(m_CurrentView == m_InspectView)
+        else if (m_CurrentView == m_InspectView || m_CurrentView == m_PreparingForBattleStageView)
         {
             m_CurrentView.Hide();
             m_TabsView.Show();
@@ -116,9 +134,10 @@ public class UIManager : MonoBehaviour
             m_CurrentView.Show();
         }
 
-        if (m_CurrentView == m_InspectView)
+        if (m_CurrentView == m_InspectView || m_CurrentView == m_PreparingForBattleStageView)
         {
             m_TabsView.Hide();
         }
     }
+
 }

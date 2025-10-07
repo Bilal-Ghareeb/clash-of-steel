@@ -29,6 +29,6 @@ public class PlayView : UIView
 
     private void ClickPlayButton(ClickEvent evt)
     {
-        Debug.Log("Play Button Pressed");
+        PlayScreenEvents.PlayBattleStageButtonPressed?.Invoke();
     }
 }

@@ -29,6 +29,9 @@
 }
 
 .lable {
-    text-shadow: 7px -38px 1.3px rgb(0, 0, 0);
+    text-shadow: 7px 10.9px 0 rgb(0, 0, 0);
     -unity-text-outline-color: rgb(0, 0, 0);
+    -unity-text-outline-width: 5px;
+    letter-spacing: 0;
+    word-spacing: 0;
 }

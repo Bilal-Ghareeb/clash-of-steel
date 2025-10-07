@@ -3,6 +3,7 @@
     <ui:Template name="InspectView" src="project://database/Assets/_COS/UI/UXML/InspectView.uxml?fileID=9197481963319205126&amp;guid=9bfe18566f087e64fb534682f33e8e90&amp;type=3#InspectView" />
     <ui:Template name="ArsenalView" src="project://database/Assets/_COS/UI/UXML/ArsenalView.uxml?fileID=9197481963319205126&amp;guid=6d6ef9384928a244c9bf080175a35d45&amp;type=3#ArsenalView" />
     <ui:Template name="CurrenciesView" src="project://database/Assets/_COS/UI/UXML/CurrenciesView.uxml?fileID=9197481963319205126&amp;guid=4dd725d0b7168e84994b250dceaaa5e9&amp;type=3#CurrenciesView" />
+    <ui:Template name="PrepareForBattleStageView" src="project://database/Assets/_COS/UI/UXML/PrepareForBattleStageView.uxml?fileID=9197481963319205126&amp;guid=87e980b29fa713b4f973e01c5a1c8649&amp;type=3#PrepareForBattleStageView" />
     <ui:Template name="TabsView" src="project://database/Assets/_COS/UI/UXML/TabsView.uxml?fileID=9197481963319205126&amp;guid=4924dcf38d0e0ba4494179c17c0b18e2&amp;type=3#TabsView" />
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
     <Style src="project://database/Assets/_COS/UI/USS/Tabs.uss?fileID=7433441132597879392&amp;guid=7f5ae17052e34eb4db728cdec75f22f3&amp;type=3#Tabs" />
@@ -11,6 +12,7 @@
         <ui:Instance template="InspectView" name="InspectView" style="position: absolute; width: 100%; height: 100%;" />
         <ui:Instance template="ArsenalView" name="ArsenalView" style="position: absolute; width: 100%; height: 100%;" />
         <ui:Instance template="CurrenciesView" name="CurrenciesView" style="position: absolute; width: 54%; height: 15%; top: 0; right: 0;" />
-        <ui:Instance template="TabsView" name="TabsView" enabled="true" style="width: 100%; height: 15%; translate: 0 0%;" />
+        <ui:Instance template="PrepareForBattleStageView" name="PreparingForBattleStageView" style="width: 100%; height: 100%; position: absolute;" />
+        <ui:Instance template="TabsView" name="TabsView" enabled="true" style="width: 100%; height: 15%; translate: 0 0%; display: flex;" />
     </ui:VisualElement>
 </ui:UXML>
