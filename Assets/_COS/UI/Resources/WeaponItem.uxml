@@ -1,8 +1,18 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_COS/UI/USS/ScrollViews.uss?fileID=7433441132597879392&amp;guid=8d9377dbe54cf294c9d2f496a3098cac&amp;type=3#ScrollViews" />
-    <ui:Button name="Weapon-item-button" class="weapon-scroll-item weapon-scroll-item-base" style="justify-content: center; align-self: flex-start; transition-duration: 0.25s; transition-timing-function: ease-in-out-back; width: 441px; height: 433px; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);">
+    <ui:Button name="Weapon-item-button" class="weapon-scroll-item weapon-scroll-item-base" style="justify-content: center; align-self: flex-start; transition-duration: 0.25s; transition-timing-function: ease-in-out-back; width: 470px; height: 458px; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);">
         <ui:VisualElement name="weapon-scroll-item-icon" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/CardFrame01_Icon.png?fileID=2800000&amp;guid=f9f9547cfd43f48799eb35ebf9d37c19&amp;type=3#CardFrame01_Icon&quot;); -unity-background-scale-mode: scale-to-fit; width: 60%; height: 60%; align-self: center; rotate: 35deg; background-color: rgba(0, 0, 0, 0);" />
-        <ui:Label text="LVL" name="weapon-scroll-item-lvl" class="weapon-scroll-text-lvl" style="top: 333px; left: 229px;" />
-        <ui:VisualElement name="Class-icon" />
+        <ui:Label text="xx" name="weapon-scroll-item-lvl" class="weapon-scroll-text-lvl" style="top: -5px; left: -65px;" />
+        <ui:VisualElement name="Class-icon" style="top: -14px;" />
+        <ui:VisualElement name="Weapon-item-stats-container" style="width: 425px; height: 121px; position: absolute; top: 348px; left: 18px; flex-direction: row; justify-content: space-around; scale: 1.1 1.1 1.1;">
+            <ui:VisualElement name="Health-stat" style="flex-direction: row; width: 223px; height: 100%;">
+                <ui:VisualElement name="icon-heart" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/512/Icon_Heart.Png?fileID=21300000&amp;guid=c55f443156bfe423a9041e55ab7f669f&amp;type=3#Icon_Heart&quot;); -unity-background-scale-mode: scale-to-fit; width: 46%; height: 100%; flex-shrink: 0;" />
+                <ui:Label text="xxx" name="health-number" style="-unity-font-style: bold; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); font-size: 60px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="Damage-stat" style="flex-direction: row; width: 223px; height: 100%;">
+                <ui:VisualElement name="icon-damage" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_RuneIcons/512/RuneIcon4_Critical_Damage.Png?fileID=21300000&amp;guid=0c5be3c5faa7d4b9ebc49c7b77b62528&amp;type=3#RuneIcon4_Critical_Damage&quot;); width: 46%; height: 100%; -unity-background-scale-mode: scale-to-fit; flex-shrink: 0;" />
+                <ui:Label text="xxx" name="damage-number" style="-unity-font-style: bold; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); font-size: 60px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:Button>
 </ui:UXML>

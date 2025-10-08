@@ -9,6 +9,9 @@ public class WeaponItemComponent
     public VisualElement WeaponImage => m_weaponImage;
 
     private Label m_Lvl;
+    private Label m_healthNumber;
+    private Label m_damageNumber;
+
     public Label Lvl => m_Lvl;
 
     private VisualElement m_classIcon;
@@ -26,6 +29,9 @@ public class WeaponItemComponent
         m_Lvl = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-lvl");
         m_weaponImage = weaponItemUXMLTemplate.Q<VisualElement>("weapon-scroll-item-icon");
         m_classIcon = weaponItemUXMLTemplate.Q<VisualElement>("Class-icon");
+        m_healthNumber = weaponItemUXMLTemplate.Q<Label>("health-number");
+        m_damageNumber = weaponItemUXMLTemplate.Q<Label>("damage-number");
+
     }
 
     public void SetGameData(WeaponInstance weaponInstance)
@@ -34,7 +40,11 @@ public class WeaponItemComponent
 
         m_WeaponInstance = weaponInstance;
 
-        m_Lvl.text = $"Lv {m_WeaponInstance.InstanceData.level}";
+        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[weaponInstance.CatalogData.progressionId];
+
+        m_Lvl.text = $"{m_WeaponInstance.InstanceData.level}";
+        m_healthNumber.text = WeaponProgressionCalculator.GetDamage(weaponInstance.CatalogData.baseHealth, weaponInstance.InstanceData.level, progression).ToString();
+        m_damageNumber.text = WeaponProgressionCalculator.GetDamage(weaponInstance.CatalogData.baseDamage, weaponInstance.InstanceData.level, progression).ToString();
         m_weaponImage.style.backgroundImage = weaponInstance.IconTexture;
 
         m_weaponItemButton.AddToClassList(WeaponItemComponentStyleClasses.GetRarityClass(m_WeaponInstance.CatalogData.rarity));
