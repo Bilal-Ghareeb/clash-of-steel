@@ -30,7 +30,6 @@ public class PlayFabManager : MonoBehaviour
 
     public IReadOnlyDictionary<string, WeaponProgressionData> ProgressionFormulas => m_progressionFormulas;
 
-
     private Dictionary<string, CatalogItem> m_currencyCatalog = new Dictionary<string, CatalogItem>();
 
     private Dictionary<string, int> m_playerCurrencies = new();
@@ -38,6 +37,13 @@ public class PlayFabManager : MonoBehaviour
 
     public event Action<Dictionary<string, int>> OnCurrenciesUpdated;
 
+    private List<StageData> m_battleStages = new();
+    public IReadOnlyList<StageData> BattleStages => m_battleStages;
+
+    private int m_currentStageId = 1;
+    public int CurrentStageId => m_currentStageId;
+
+    public event Action OnLoginAndDataReady;
 
     private void Awake()
     {
@@ -126,14 +132,23 @@ public class PlayFabManager : MonoBehaviour
     #endregion
 
     #region Economy v2 (Catalog + Inventory)
-    private void ContinueAfterLogin()
+    private async void ContinueAfterLogin()
     {
-        FetchCatalogWeapons();
-        FetchCatalogFormulas();
+        await Task.WhenAll(
+            FetchCatalogWeaponsAsync(),
+            FetchCatalogFormulasAsync(),
+            FetchCatalogCurrenciesAsync(),
+            FetchCatalogStagesAsync(),
+            FetchAndCachePlayerInventoryAsync()
+        );
+
+        OnLoginAndDataReady?.Invoke();
     }
 
-    private void FetchCatalogWeapons()
+    private async Task FetchCatalogWeaponsAsync()
     {
+        var tcs = new TaskCompletionSource<bool>();
+
         var request = new SearchItemsRequest
         {
             Filter = $"contentType eq '{ContentTypeWeapon}'",
@@ -144,17 +159,62 @@ public class PlayFabManager : MonoBehaviour
             {
                 m_weaponCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
                 Debug.Log($"Found {m_weaponCatalog.Count} weapon(s) in catalog.");
-                FetchCatalogCurrencies();
+                tcs.SetResult(true);
             },
             error =>
             {
-                Debug.LogError("SearchItems failed: " + error.GenerateErrorReport());
-                LoadNextScene();
+                Debug.LogError("SearchItems (Weapons) failed: " + error.GenerateErrorReport());
+                tcs.SetException(new Exception(error.ErrorMessage));
             });
+
+        await tcs.Task;
     }
 
-    private void FetchCatalogFormulas()
+
+    private async Task FetchCatalogStagesAsync()
     {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new SearchItemsRequest
+        {
+            Filter = $"contentType eq 'Stage'"
+        };
+
+        PlayFabEconomyAPI.SearchItems(request,
+            result =>
+            {
+                var stageItem = result.Items?.FirstOrDefault(
+                    i => i.AlternateIds?.Any(a => a.Type == "FriendlyId" && a.Value == "StageData") == true
+                      || i.Id == "StageData");
+
+                if (stageItem != null && stageItem.DisplayProperties != null)
+                {
+                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(stageItem.DisplayProperties);
+                    var stageList = Newtonsoft.Json.JsonConvert.DeserializeObject<StageList>(json);
+                    m_battleStages = stageList.stages;
+                    Debug.Log($"Loaded {m_battleStages.Count} stages from catalog.");
+                }
+                else
+                {
+                    Debug.LogWarning("No StageData item found in catalog.");
+                }
+
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                Debug.LogError("SearchItems (StageData) failed: " + error.GenerateErrorReport());
+                tcs.SetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
+
+    private async Task FetchCatalogFormulasAsync()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
         var request = new SearchItemsRequest
         {
             Filter = $"contentType eq 'Formula'"
@@ -172,7 +232,6 @@ public class PlayFabManager : MonoBehaviour
                     if (formulasItem != null && formulasItem.DisplayProperties != null)
                     {
                         string json = Newtonsoft.Json.JsonConvert.SerializeObject(formulasItem.DisplayProperties);
-
                         m_progressionFormulas = Newtonsoft.Json.JsonConvert
                             .DeserializeObject<Dictionary<string, WeaponProgressionData>>(json);
 
@@ -187,19 +246,25 @@ public class PlayFabManager : MonoBehaviour
                 {
                     Debug.LogWarning("No Formula items found in catalog.");
                 }
+
+                tcs.SetResult(true);
             },
             error =>
             {
                 Debug.LogError("SearchItems (Formulas) failed: " + error.GenerateErrorReport());
+                tcs.SetException(new Exception(error.ErrorMessage));
             });
+
+        await tcs.Task;
     }
 
-
-    private void FetchCatalogCurrencies()
+    private async Task FetchCatalogCurrenciesAsync()
     {
+        var tcs = new TaskCompletionSource<bool>();
+
         var request = new SearchItemsRequest
         {
-            Filter = $"type eq 'currency'", 
+            Filter = $"type eq 'currency'",
         };
 
         PlayFabEconomyAPI.SearchItems(request,
@@ -211,13 +276,17 @@ public class PlayFabManager : MonoBehaviour
                     ?? new Dictionary<string, CatalogItem>();
 
                 Debug.Log($"Found {m_currencyCatalog.Count} currency/currencies in catalog.");
-                FetchAndCachePlayerInventory();
+                tcs.SetResult(true);
             },
             error =>
             {
-                Debug.LogError("SearchItems failed: " + error.GenerateErrorReport());
+                Debug.LogError("SearchItems (Currencies) failed: " + error.GenerateErrorReport());
+                tcs.SetException(new Exception(error.ErrorMessage));
             });
+
+        await tcs.Task;
     }
+
 
     private void RefreshCurrencies()
     {
@@ -244,79 +313,94 @@ public class PlayFabManager : MonoBehaviour
         OnCurrenciesUpdated?.Invoke(m_playerCurrencies);
     }
 
-    private async void FetchAndCachePlayerInventory()
+    private async Task FetchAndCachePlayerInventoryAsync()
     {
+        var tcs = new TaskCompletionSource<bool>();
+
         var request = new GetInventoryItemsRequest { Entity = m_entity };
 
         PlayFabEconomyAPI.GetInventoryItems(request,
             async result =>
             {
-                m_playerWeapons.Clear();
-                m_playerCurrencies.Clear();
-
-                foreach (var item in result.Items)
+                try
                 {
-                    if (item.Type == "currency" && item.Id != null)
+                    m_playerWeapons.Clear();
+                    m_playerCurrencies.Clear();
+
+                    foreach (var item in result.Items)
                     {
-                        string friendlyId = GetCurrencyFriendlyId(item.Id);
-                        m_playerCurrencies[friendlyId] = item.Amount ?? 0;
-                    }
-                    else
-                    {
-                        var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == item.Id);
-                        if (catalogItem != null)
+                        if (item.Type == "currency" && item.Id != null)
                         {
-                            var weaponInstance = new WeaponInstance(item, catalogItem);
-                            m_playerWeapons.Add(weaponInstance);
+                            string friendlyId = GetCurrencyFriendlyId(item.Id);
+                            m_playerCurrencies[friendlyId] = item.Amount ?? 0;
                         }
                         else
                         {
-                            Debug.LogWarning($"Inventory item {item.Id} not found in catalog!");
+                            var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == item.Id);
+                            if (catalogItem != null)
+                            {
+                                var weaponInstance = new WeaponInstance(item, catalogItem);
+                                m_playerWeapons.Add(weaponInstance);
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"Inventory item {item.Id} not found in catalog!");
+                            }
                         }
                     }
-                }
 
-                var downloadTasks = m_playerWeapons
-                    .Select(w => w.DownloadIconAsync())
-                    .ToArray();
+                    var downloadTasks = m_playerWeapons
+                        .Select(w => w.DownloadIconAsync())
+                        .ToArray();
 
-                await System.Threading.Tasks.Task.WhenAll(downloadTasks);
+                    await Task.WhenAll(downloadTasks);
 
-                var ownedFriendlyIds = new HashSet<string>();
-                foreach (var weapon in m_playerWeapons)
-                {
-                    var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == weapon.Item.Id);
-                    if (catalogItem?.AlternateIds != null)
+                    var ownedFriendlyIds = new HashSet<string>();
+                    foreach (var weapon in m_playerWeapons)
                     {
-                        foreach (var alt in catalogItem.AlternateIds)
+                        var catalogItem = m_weaponCatalog.FirstOrDefault(c => c.Id == weapon.Item.Id);
+                        if (catalogItem?.AlternateIds != null)
                         {
-                            if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
-                                ownedFriendlyIds.Add(alt.Value);
+                            foreach (var alt in catalogItem.AlternateIds)
+                            {
+                                if (alt.Type == "FriendlyId" && !string.IsNullOrEmpty(alt.Value))
+                                    ownedFriendlyIds.Add(alt.Value);
+                            }
                         }
                     }
-                }
 
-                if (!ownedFriendlyIds.Contains(StarterWeaponId))
-                {
-                    GrantStarterBundle(StarterWeaponId);
+                    if (!ownedFriendlyIds.Contains(StarterWeaponId))
+                    {
+                        await GrantStarterBundleAsync(StarterWeaponId);
+                    }
+                    else
+                    {
+                        LoadNextScene();
+                    }
+
+                    tcs.TrySetResult(true);
                 }
-                else
+                catch (Exception ex)
                 {
-                    DebugPlayerWeapons();
-                    DebugCurrencies();
-                    DebugProgressionFormulas();
-                    LoadNextScene();
+                    Debug.LogError($"Error processing inventory: {ex}");
+                    tcs.TrySetException(ex);
                 }
             },
             error =>
             {
                 Debug.LogError("GetInventoryItems failed: " + error.GenerateErrorReport());
                 LoadNextScene();
+                tcs.TrySetException(new Exception(error.ErrorMessage));
             });
+
+        await tcs.Task;
     }
 
-    public void GrantStarterBundle(string weaponFriendlyId)
+
+    public async Task GrantStarterBundleAsync(string weaponFriendlyId)
     {
+        var tcs = new TaskCompletionSource<bool>();
+
         var request = new ExecuteFunctionRequest
         {
             FunctionName = "GrantStarterBundle",
@@ -325,22 +409,36 @@ public class PlayFabManager : MonoBehaviour
         };
 
         PlayFabCloudScriptAPI.ExecuteFunction(request,
-            result =>
+            async result =>
             {
-                Debug.Log("Azure Function executed successfully.");
-                if (result.FunctionResult != null)
+                try
                 {
-                    Debug.Log("Function result: " + result.FunctionResult.ToString());
-                }
+                    Debug.Log("Azure Function executed successfully.");
+                    if (result.FunctionResult != null)
+                    {
+                        Debug.Log("Function result: " + result.FunctionResult.ToString());
+                    }
 
-                FetchAndCachePlayerInventory();
+                    await FetchAndCachePlayerInventoryAsync();
+
+                    tcs.TrySetResult(true);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Error after executing GrantStarterBundle: {ex}");
+                    tcs.TrySetException(ex);
+                }
             },
             error =>
             {
                 Debug.LogError("Failed to call Azure Function: " + error.GenerateErrorReport());
                 LoadNextScene();
+                tcs.TrySetException(new Exception(error.ErrorMessage));
             });
+
+        await tcs.Task;
     }
+
 
     public async Task LevelWeaponAsync(string weaponInstanceId,string currencyFriendlyId,int cost)
     {
@@ -374,7 +472,39 @@ public class PlayFabManager : MonoBehaviour
 
     #endregion
 
-    private string GetCurrencyFriendlyId(string currencyId)
+    public async Task FetchPlayerStageProgressAsync()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        PlayFabClientAPI.GetUserData(new GetUserDataRequest(),
+            result =>
+            {
+                if (result.Data != null && result.Data.TryGetValue("CurrentStageId", out var stageData))
+                {
+                    if (int.TryParse(stageData.Value, out int stageId))
+                        m_currentStageId = stageId;
+                    else
+                        m_currentStageId = 1;
+                }
+                else
+                {
+                    m_currentStageId = 1;
+                }
+
+                Debug.Log($"Fetched player current stage: {m_currentStageId}");
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                Debug.LogError("Failed to fetch player stage progress: " + error.GenerateErrorReport());
+                m_currentStageId = 1;
+                tcs.SetResult(false);
+            });
+
+        await tcs.Task;
+    }
+
+    public string GetCurrencyFriendlyId(string currencyId)
     {
         if (m_currencyCatalog.TryGetValue(currencyId, out var catalogItem))
         {
@@ -393,29 +523,27 @@ public class PlayFabManager : MonoBehaviour
         return currencyId;
     }
 
-    private void DebugPlayerWeapons()
+    public WeaponData GetWeaponDataByFriendlyId(string friendlyId)
     {
-        foreach (var weapon in PlayerWeapons)
-        {
-            Debug.Log("The Fetched Weapon is : " + weapon.CatalogData.name + " With level = " + weapon.InstanceData.level);
-        }
+        var catalogItem = m_weaponCatalog?.FirstOrDefault(item =>
+            item.AlternateIds != null &&
+            item.AlternateIds.Any(a => a.Type == "FriendlyId" && a.Value == friendlyId));
+
+        if (catalogItem == null || catalogItem.DisplayProperties == null)
+            return null;
+
+        string json = Newtonsoft.Json.JsonConvert.SerializeObject(catalogItem.DisplayProperties);
+        return Newtonsoft.Json.JsonConvert.DeserializeObject<WeaponData>(json);
     }
 
-    private void DebugCurrencies()
+
+    public CatalogItem GetCatalogItemByFriendlyId(string friendlyId)
     {
-        foreach (var kvp in m_playerCurrencies)
-        {
-            Debug.Log($"Currency: {kvp.Key} = {kvp.Value}");
-        }
+        return m_weaponCatalog?.FirstOrDefault(item =>
+           item.AlternateIds != null &&
+           item.AlternateIds.Any(a => a.Type == "FriendlyId" && a.Value == friendlyId));
     }
 
-    private void DebugProgressionFormulas()
-    {
-        foreach (var kvp in ProgressionFormulas)
-        {
-            Debug.Log($"Formula: {kvp.Key} = {kvp.Value}");
-        }
-    }
 
     #region Scene Flow
     private void LoadNextScene()

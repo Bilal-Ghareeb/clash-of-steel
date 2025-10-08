@@ -5,7 +5,7 @@ public class WeaponInspectPresenter : MonoBehaviour
     [SerializeField] private Transform m_inspectSpawnPoint;
     private GameObject m_currentWeaponModel;
 
-    public void ShowWeapon(WeaponInstance instance)
+    public void ShowWeapon(WeaponInstanceBase instance)
     {
         ClearCurrent();
 

@@ -6,6 +6,8 @@ public class PreparingForBattleStageView : UIView
 {
     private VisualTreeAsset m_WeaponItemAsset;
 
+    private Label m_stageNumber;
+
     private Button m_leavePreparingForBattleButton;
     private Button m_beginBattleStageButton;
 
@@ -32,8 +34,12 @@ public class PreparingForBattleStageView : UIView
         SetVisualElements();
         RegisterButtonCallbacks();
 
-        SpawnPlayerTeamHolders(m_playerTeamContainer);
+        SpawnPlayerTeamHolders();
+        SpawnEnemyTeamHolders();
+
         FetchPlayerArsenal();
+
+        UpdateStageInfo();
     }
 
     public override void Hide()
@@ -51,6 +57,9 @@ public class PreparingForBattleStageView : UIView
     protected override void SetVisualElements()
     {
         base.SetVisualElements();
+
+        m_stageNumber = m_TopElement.Q<Label>("stage-number");
+
         m_leavePreparingForBattleButton = m_TopElement.Q<Button>("Back-btn");
         m_beginBattleStageButton = m_TopElement.Q<Button>("Battle-btn");
 
@@ -82,14 +91,14 @@ public class PreparingForBattleStageView : UIView
         Debug.Log("Battle is Starting...");
     }
 
-    private void SpawnPlayerTeamHolders(VisualElement container)
+    private void SpawnPlayerTeamHolders()
     {
-        if (container == null)
+        if (m_playerTeamContainer == null)
         {
             Debug.LogError("Team container is null.");
             return;
         }
-        container.Clear();
+        m_playerTeamContainer.Clear();
 
         for (int i = 0; i < m_playerSelectedWeapons.Length; i++)
         {
@@ -102,9 +111,47 @@ public class PreparingForBattleStageView : UIView
             m_playerTeamSlotComponents[i].OnCustomClick = () => OnTeamSlotClicked(slotIndex);
             m_playerTeamSlotComponents[i].RegisterButtonCallbacks(useCustomClick: true);
 
-            container.Add(weaponUIElement);
+            m_playerTeamContainer.Add(weaponUIElement);
         }
     }
+
+    private void SpawnEnemyTeamHolders()
+    {
+        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        if (currentStage == null)
+        {
+            Debug.LogError("Cannot spawn enemies: current stage not found.");
+            return;
+        }
+
+        if (m_opponentTeamContainer == null)
+        {
+            Debug.LogError("Opponent team container is null.");
+            return;
+        }
+
+        m_opponentTeamContainer.Clear();
+
+        foreach (var enemy in currentStage.enemies)
+        {
+            var weaponData = PlayFabManager.Instance.GetWeaponDataByFriendlyId(enemy.weaponId);
+            if (weaponData == null)
+            {
+                Debug.LogWarning($"No WeaponData found for friendly ID: {enemy.weaponId}");
+                continue;
+            }
+
+            var enemyInstance = new EnemyWeaponInstance(enemy.weaponId, weaponData, enemy.level);
+
+            TemplateContainer enemyUIElement = m_WeaponItemAsset.Instantiate();
+            var enemyItemComponent = new WeaponItemComponent();
+            enemyItemComponent.SetVisualElements(enemyUIElement);
+            enemyItemComponent.SetGameData(enemyInstance);
+
+            m_opponentTeamContainer.Add(enemyUIElement);
+        }
+    }
+
 
     private void FetchPlayerArsenal()
     {
@@ -192,6 +239,18 @@ public class PreparingForBattleStageView : UIView
         {
             m_playerTeamSlotComponents[slotIndex].SetGameData(null);
         }
+    }
+
+    private void UpdateStageInfo()
+    {
+        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        if (currentStage == null)
+        {
+            m_stageNumber.text = "?";
+            return;
+        }
+
+        m_stageNumber.text = $"{currentStage.id}";
     }
 
 

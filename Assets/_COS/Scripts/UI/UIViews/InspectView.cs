@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 public class InspectView : UIView
 {
-    private WeaponInstance m_currentWeapon;
+    private WeaponInstanceBase m_currentWeapon;
     private VisualElement m_backButton;
     private VisualElement m_weaponLevelUpButton;
     private VisualElement m_currencyIcon;
@@ -22,8 +22,8 @@ public class InspectView : UIView
 
     private WeaponInspectPresenter m_inspectedWeaponModelPresenter;
 
-    private Queue<Func<Task>> m_inspectedWeaponLevelUpRequests = new Queue<Func<Task>>();
-    private SemaphoreSlim m_semaphore = new SemaphoreSlim(1, 1);
+    private readonly Queue<Func<Task>> m_inspectedWeaponLevelUpRequests = new();
+    private readonly SemaphoreSlim m_semaphore = new(1, 1);
     private bool m_isProcessingQueue = false;
 
     public InspectView(VisualElement topElement, WeaponInspectPresenter presenter) : base(topElement)
@@ -71,7 +71,7 @@ public class InspectView : UIView
         m_weaponLevelUpButton.UnregisterCallback<ClickEvent>(LevelUpWeapon);
     }
 
-    private void OnWeaponSelectedForInspect(WeaponInstance weapon)
+    private void OnWeaponSelectedForInspect(WeaponInstanceBase weapon)
     {
         m_currentWeapon = weapon;
         m_weaponName.text = weapon.CatalogData.name;
@@ -88,10 +88,11 @@ public class InspectView : UIView
 
     private async void LevelUpWeapon(ClickEvent evt)
     {
-        if (m_currentWeapon == null) return;
+        if (m_currentWeapon is not WeaponInstance playerWeapon)
+            return;
 
-        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
-        int cost = WeaponProgressionCalculator.GetCostForLevelUp(m_currentWeapon.InstanceData.level, progression);
+        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[playerWeapon.CatalogData.progressionId];
+        int cost = WeaponProgressionCalculator.GetCostForLevelUp(playerWeapon.InstanceData.level, progression);
         string currencyFriendlyId = progression.currencyId;
 
         if (!PlayFabManager.Instance.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) || playerCurrency < cost)
@@ -101,7 +102,7 @@ public class InspectView : UIView
             return;
         }
 
-        if (m_currentWeapon.InstanceData.level == progression.maxLevel)
+        if (playerWeapon.InstanceData.level == progression.maxLevel)
         {
             m_weaponLevelUpButton.SetEnabled(false);
             m_weaponLevelUpButton.style.opacity = 0.6f;
@@ -109,35 +110,36 @@ public class InspectView : UIView
             return;
         }
 
+        // Deduct locally
         PlayFabManager.Instance.PlayerCurrencies[currencyFriendlyId] = playerCurrency - cost;
         OnCurrenciesUpdated();
-        m_currentWeapon.InstanceData.level++;
+        playerWeapon.InstanceData.level++;
         UpdateWeaponDataUI();
 
+        // Queue async PlayFab request
         m_inspectedWeaponLevelUpRequests.Enqueue(async () =>
         {
             try
             {
                 await PlayFabManager.Instance.LevelWeaponAsync(
-                    m_currentWeapon.Item.Id,
+                    playerWeapon.Item.Id,
                     currencyFriendlyId,
                     cost
                 );
             }
             catch (Exception ex)
             {
+                // Roll back
                 PlayFabManager.Instance.PlayerCurrencies[currencyFriendlyId] = playerCurrency;
                 OnCurrenciesUpdated();
-                m_currentWeapon.InstanceData.level--;
+                playerWeapon.InstanceData.level--;
                 UpdateWeaponDataUI();
                 Debug.LogError("Level-up request failed: " + ex.Message);
             }
         });
 
         if (!m_isProcessingQueue)
-        {
             await ProcessQueue();
-        }
     }
 
     private async Task ProcessQueue()
@@ -161,17 +163,26 @@ public class InspectView : UIView
 
     private void UpdateWeaponDataUI()
     {
-        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
-        m_weaponLvl.text = m_currentWeapon.InstanceData.level.ToString();
-        m_currentHealth.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseHealth, m_currentWeapon.InstanceData.level, progression).ToString();
-        m_currentDamage.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseDamage, m_currentWeapon.InstanceData.level, progression).ToString();
+        if (m_currentWeapon == null)
+            return;
 
-        int cost = WeaponProgressionCalculator.GetCostForLevelUp(m_currentWeapon.InstanceData.level, progression);
+        var progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
+
+        int level = 1;
+        if (m_currentWeapon is WeaponInstance playerWeapon)
+            level = playerWeapon.InstanceData.level;
+
+        m_weaponLvl.text = level.ToString();
+        m_currentHealth.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseHealth, level, progression).ToString();
+        m_currentDamage.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseDamage, level, progression).ToString();
+
+
+        int cost = WeaponProgressionCalculator.GetCostForLevelUp(level, progression);
         m_nextLvlCost.text = cost.ToString();
 
         string currencyFriendlyId = progression.currencyId;
         bool hasEnoughCurrency = PlayFabManager.Instance.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) && playerCurrency >= cost;
-        bool isMaxLevel = m_currentWeapon.InstanceData.level >= progression.maxLevel;
+        bool isMaxLevel = level >= progression.maxLevel;
 
         m_maxLevelReached.style.display = isMaxLevel ? DisplayStyle.Flex : DisplayStyle.None;
         m_currencyIcon.style.display = isMaxLevel ? DisplayStyle.None : DisplayStyle.Flex;
