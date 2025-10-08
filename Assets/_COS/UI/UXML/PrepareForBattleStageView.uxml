@@ -1,5 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
+    <Style src="project://database/Assets/_COS/UI/USS/ScrollViews.uss?fileID=7433441132597879392&amp;guid=8d9377dbe54cf294c9d2f496a3098cac&amp;type=3#ScrollViews" />
     <ui:VisualElement name="PrepareForBattleStageView" style="width: 100%; height: 100%; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/_COS/Images/PNGs/Icons/ChatGPT%20Image%20Oct%207,%202025,%2005_42_47%20PM.png?fileID=2800000&amp;guid=1d0dc9533b77c824a9d5d213edac2ebf&amp;type=3#ChatGPT Image Oct 7, 2025, 05_42_47 PM&quot;); align-self: auto; align-content: auto;">
         <ui:VisualElement name="ViewTitles" style="width: 85%; height: 13%; justify-content: center; align-self: center; align-items: center; top: -8%;">
             <ui:VisualElement name="Title" style="width: 100%; height: 47%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Yellow.png?fileID=21300000&amp;guid=03a52e934f88f4a699b498a51573c186&amp;type=3#Title_Ribbon_Bg_Yellow&quot;); top: -10%; align-self: center; justify-content: flex-end; align-items: center;">
@@ -30,7 +31,7 @@
             <ui:Label text="YOUR ARSENAL" name="Label" class="lable" style="-unity-font-style: bold; color: rgb(255, 255, 255); -unity-text-align: middle-center; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); font-size: 76px; align-self: center; top: 0; position: relative; justify-content: center; align-items: center; align-content: center;" />
         </ui:VisualElement>
         <ui:VisualElement name="ArsenalScrollContainer" style="width: 85%; height: 16%; position: absolute; top: 76%; align-self: center; justify-content: center; align-items: center;">
-            <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" focusable="true" style="width: 100%; height: 100%;" />
+            <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" focusable="true" name="ScrollView" style="width: 100%; height: 100%;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

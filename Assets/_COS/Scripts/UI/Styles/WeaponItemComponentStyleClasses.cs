@@ -7,7 +7,8 @@ public class WeaponItemComponentStyleClasses : MonoBehaviour
     {
         { "Common", "weapon-scroll-item-common" },
         { "Rare", "weapon-scroll-item-epic" },
-        { "Legendary", "weapon-scroll-item-legendary" }
+        { "Legendary", "weapon-scroll-item-legendary" },
+        { "Unknown" , "weapon-scroll-item-unknown" },
     };
 
     private static readonly Dictionary<string, string> ClassTypeClasses = new()
@@ -22,4 +23,7 @@ public class WeaponItemComponentStyleClasses : MonoBehaviour
 
     public static string GetClassTypeClass(string className) =>
         ClassTypeClasses.TryGetValue(className, out var cls) ? cls : string.Empty;
+
+    public static string GetUnknownCardStyle() =>
+        RarityClasses.TryGetValue("Unknown", out var cls) ? cls : string.Empty;
 }

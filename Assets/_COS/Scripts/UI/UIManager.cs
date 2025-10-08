@@ -24,7 +24,7 @@ public class UIManager : MonoBehaviour
     const string k_TabsViewName = "TabsView";
     const string k_InspectViewName = "InspectView";
     const string k_CurrenciesViewName = "CurrenciesView";
-    const string k_PreparingForBattleStageViewName = "PreparingForBattleStageView";
+    const string k_PreparingForBattleStageViewName = "PrepareForBattleStageView";
 
     [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
 
