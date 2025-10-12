@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="WeaponsHudView" style="width: 100%; height: 100%; flex-direction: row;">
+        <ui:VisualElement name="PlayerWeaponsContainer" style="height: 100%; width: 100%; align-items: flex-start;" />
+        <ui:VisualElement name="EnemyWeaponsContainer" style="height: 100%; width: 100%; align-self: flex-end; align-items: flex-end;" />
+    </ui:VisualElement>
+</ui:UXML>

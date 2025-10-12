@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [RequireComponent (typeof(UIDocument))]
-public class UIManager : MonoBehaviour
+public class MainGameUIManager : MonoBehaviour
 {
     private UIDocument m_MainGameDocument;
 

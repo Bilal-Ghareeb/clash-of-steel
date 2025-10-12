@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -88,7 +89,22 @@ public class PreparingForBattleStageView : UIView
 
     private void BeginBattle(ClickEvent evt)
     {
-        Debug.Log("Battle is Starting...");
+        var playerTeam = m_playerSelectedWeapons
+            .Where(w => w != null)
+            .ToList();
+
+        if (playerTeam.Count == 0)
+        {
+            return;
+        }
+
+        var enemies = BattleStageManager.Instance?.CurrentStage?.enemies;
+        if (enemies == null)
+        {
+            return;
+        }
+
+        PreparingForBattleStageEvents.RequestBeginBattle?.Invoke(playerTeam, enemies);
     }
 
     private void SpawnPlayerTeamHolders()

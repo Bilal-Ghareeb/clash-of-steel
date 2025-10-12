@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="WeaponsHUDView" src="project://database/Assets/_COS/UI/UXML/WeaponsHUDView.uxml?fileID=9197481963319205126&amp;guid=5d0572744d79eab4f9a2a707d7ccfb4e&amp;type=3#WeaponsHUDView" />
+    <ui:Template name="BattleActionsView" src="project://database/Assets/_COS/UI/UXML/BattleActionsView.uxml?fileID=9197481963319205126&amp;guid=f74960df7930f534ba631f10967ee97f&amp;type=3#BattleActionsView" />
+    <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
+    <Style src="project://database/Assets/_COS/UI/USS/Tabs.uss?fileID=7433441132597879392&amp;guid=7f5ae17052e34eb4db728cdec75f22f3&amp;type=3#Tabs" />
+    <ui:VisualElement name="safe-area" style="width: 100%; height: 100%; position: absolute;">
+        <ui:Instance template="WeaponsHUDView" name="WeaponsHUDView" style="width: 100%; height: 50%;" />
+        <ui:Instance template="BattleActionsView" name="BattleActionsView" style="width: 100%; height: 100%;" />
+    </ui:VisualElement>
+</ui:UXML>

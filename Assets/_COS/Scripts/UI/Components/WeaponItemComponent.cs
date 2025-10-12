@@ -119,6 +119,15 @@ public class WeaponItemComponent
             m_weaponItemButton.RegisterCallback<ClickEvent>(OnButtonClicked);
     }
 
+    public void UpdateHealth(float newHealth)
+    {
+        if (m_healthNumber == null) return;
+
+        newHealth = Mathf.Max(0, newHealth);
+        m_healthNumber.text = newHealth.ToString("0");
+    }
+
+
     private void OnButtonClicked(ClickEvent evt)
     {
         ArsenalEvents.WeaponItemClicked?.Invoke(this);

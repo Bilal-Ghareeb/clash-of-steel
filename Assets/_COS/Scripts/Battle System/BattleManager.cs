@@ -1,6 +1,4 @@
-// BattleManager.cs
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,9 +25,10 @@ public class BattleManager : MonoBehaviour
     private bool isPlayerTurn = true;
 
     // events
+    public event Action OnBattleCountdownStarted;
     public event Action OnBattleStarted;
     public event Action OnBattleEnded;
-    public event Action<Combatant> OnCombatantDamaged;
+    public event Action<Combatant , float> OnCombatantDamaged;
     public event Action<Combatant> OnCombatantDeath;
     public event Action<int> OnTurnChanged; // pass turn number or indicator
 
@@ -51,6 +50,10 @@ public class BattleManager : MonoBehaviour
 
         // Build combatants from session
         BuildTeamsFromSession(session);
+
+        OnBattleCountdownStarted?.Invoke();
+
+        await Task.Delay(3500);
 
         OnBattleStarted?.Invoke();
 
@@ -166,7 +169,7 @@ public class BattleManager : MonoBehaviour
                     if (damage > 0)
                     {
                         target.CurrentHP = Mathf.Max(0, target.CurrentHP - damage);
-                        OnCombatantDamaged?.Invoke(target);
+                        OnCombatantDamaged?.Invoke(target , target.CurrentHP);
                         if (!target.IsAlive) OnCombatantDeath?.Invoke(target);
                     }
                 }
