@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,9 +20,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private int initialEnemyBasePoints = 2;
     [SerializeField] private int bankCap = 8;
 
-    public Combatant[] PlayerTeam { get; private set; }
-    public Combatant[] EnemyTeam { get; private set; }
+    public List<Combatant> PlayerTeam { get; private set; }
+    public List<Combatant> EnemyTeam { get; private set; }
 
+    private Combatant m_currentPlayerWeapon;
 
     private int playerBasePoints;
     private int playerReservedPoints;
@@ -29,29 +31,25 @@ public class BattleManager : MonoBehaviour
     private int enemyReservedPoints;
     private int activePlayerWeaponIndex = 0;
 
-    // --- Events UI should subscribe to ---
     public event Action OnBattleCountdownStarted;
     public event Action OnBattleStarted;
     public event Action OnBattleEnded;
 
-    // Allocation phase started (availablePoints for this allocation)
     public event Action<int> OnPlayerAllocationPhaseStarted;
     public event Action<int> OnEnemyAllocationPhaseStarted;
 
-    // Called after both allocations submitted and before execution.
-    // PublicAlloc = (attack, defend) only; reserve is kept private.
     public event Action<(int attack, int defend) /* playerPublic */, (int attack, int defend) /* enemyPublic */> OnAllocationsRevealed;
 
-    // Debug / UI flow events
     public event Action OnPlayerTurnStarted;
     public event Action OnEnemyTurnStarted;
 
-    // Combat events
     public event Action<Combatant, float> OnCombatantDamaged;
     public event Action<Combatant> OnCombatantDeath;
 
-    // Turn change: (turnNumber, availablePointsForThisTurn)
     public event Action<int, int> OnTurnChanged;
+
+    public event Action<Combatant, Combatant> OnPlayerWeaponSwitched;
+
 
     private int turnNumber = 0;
 
@@ -60,10 +58,10 @@ public class BattleManager : MonoBehaviour
     private (int attack, int defend, int reserve) _lastEnemyAllocation;
 
     [Header("Timing Settings (ms)")]
-    [SerializeField] private int turnStartDelayMs = 1000;   // before your turn UI appears
-    [SerializeField] private int revealDelayMs = 2000;      // between allocations and reveal
-    [SerializeField] private int resultDelayMs = 1500;      // after attack results
-    [SerializeField] private int countdownDelayMs = 3500;   // initial 3..2..1..Fight!
+    [SerializeField] private int turnStartDelayMs = 1000;
+    [SerializeField] private int revealDelayMs = 2000;    
+    [SerializeField] private int resultDelayMs = 1500; 
+    [SerializeField] private int countdownDelayMs = 3500;  
 
 
     private async void Start()
@@ -97,12 +95,11 @@ public class BattleManager : MonoBehaviour
     private void BuildTeamsFromSession(BattleSession session)
     {
         PlayerTeam = session.playerTeam
-            .Select(dto => CreateCombatantFromDTO(dto, true))
-            .ToArray();
+            .Select(dto => CreateCombatantFromDTO(dto, true)).ToList();
 
         EnemyTeam = session.enemyTeam
             .Select(dto => CreateCombatantFromDTO(dto, false))
-            .ToArray();
+            .ToList();
     }
 
     private Combatant CreateCombatantFromDTO(BattleSession.CombatantDTO dto, bool isPlayer)
@@ -148,12 +145,13 @@ public class BattleManager : MonoBehaviour
             OnPlayerTurnStarted?.Invoke();
             await Task.Delay(1200);
 
-            Combatant player = PlayerTeam[activePlayerWeaponIndex];
+            m_currentPlayerWeapon = PlayerTeam[activePlayerWeaponIndex];
             Combatant enemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
 
-            if (player != null && player.IsAlive)
+            if (m_currentPlayerWeapon != null && m_currentPlayerWeapon.IsAlive)
             {
-                player.StartTurnWithAvailablePoints(availablePlayerPoints, bankCap);
+                m_currentPlayerWeapon.ResetRoundAllocations();
+                m_currentPlayerWeapon.StartTurnWithAvailablePoints(availablePlayerPoints, bankCap);
 
                 // Allow player allocation
                 OnPlayerAllocationPhaseStarted?.Invoke(availablePlayerPoints);
@@ -161,20 +159,20 @@ public class BattleManager : MonoBehaviour
 
                 // Apply reserve logic
                 playerReservedPoints = playerAlloc.reserve;
-                player.TryAllocate(playerAlloc.attack, playerAlloc.defend, playerAlloc.reserve, out _);
+                m_currentPlayerWeapon.TryAllocate(playerAlloc.attack, playerAlloc.defend, playerAlloc.reserve, out _);
 
                 // Show only player's attack vs enemy's defend
-                var playerReveal = (player.AttackPoints, enemy?.DefendPoints ?? 0);
+                var playerReveal = (m_currentPlayerWeapon.AttackPoints, enemy?.DefendPoints ?? 0);
                 OnAllocationsRevealed?.Invoke(playerReveal, (0, 0));
                 await Task.Delay(3000);
 
                 // Execute player's attack
-                if (enemy != null && player.AttackPoints > 0)
+                if (enemy != null && m_currentPlayerWeapon.AttackPoints > 0)
                 {
                     if (TimelineController.Instance != null)
-                        await TimelineController.Instance.PlayAttackAnimationAsync(player, enemy);
+                        await TimelineController.Instance.PlayAttackAnimationAsync(m_currentPlayerWeapon, enemy);
 
-                    int damage = ActionResolver.ResolveDamage(player, enemy);
+                    int damage = ActionResolver.ResolveDamage(m_currentPlayerWeapon, enemy);
                     enemy.CurrentHP = Mathf.Max(0, enemy.CurrentHP - damage);
                     OnCombatantDamaged?.Invoke(enemy, enemy.CurrentHP);
                     if (!enemy.IsAlive) OnCombatantDeath?.Invoke(enemy);
@@ -190,7 +188,7 @@ public class BattleManager : MonoBehaviour
             await Task.Delay(1200);
 
             Combatant actingEnemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
-            Combatant defendingPlayer = PlayerTeam.FirstOrDefault(p => p.IsAlive);
+            Combatant defendingPlayer = GetActivePlayerCombatant();
 
             if (actingEnemy != null && defendingPlayer != null)
             {
@@ -225,8 +223,6 @@ public class BattleManager : MonoBehaviour
             }
 
             // --------------------------- END OF ROUND ---------------------------
-            foreach (var c in PlayerTeam.Concat(EnemyTeam))
-                c.ResetRoundAllocations();
 
             // Increment base points (like in JW)
             playerBasePoints = Mathf.Min(playerBasePoints + 1, maxPointsPerTurn);
@@ -281,11 +277,66 @@ public class BattleManager : MonoBehaviour
         return true;
     }
 
-    private bool AnyAlive(Combatant[] team) => team != null && team.Any(x => x.IsAlive);
+    /// <summary>
+    /// Switch the active player weapon to the one at newIndex (if valid).
+    /// This does not change Combatant runtime health/state — it's only swapping which one is active.
+    /// Fire OnPlayerWeaponSwitched(newActive, oldActive) when successful.
+    /// </summary>
+    public bool SwitchActivePlayerWeapon(int newIndex, int switchCost, out string error)
+    {
+        error = null;
+        if (PlayerTeam == null || newIndex < 0 || newIndex >= PlayerTeam.Count)
+        {
+            error = "Invalid index";
+            return false;
+        }
+        if (newIndex == activePlayerWeaponIndex)
+        {
+            error = "Already active";
+            return false;
+        }
 
-    // Helpers to expose values for UI
+        var oldActive = PlayerTeam[activePlayerWeaponIndex];
+        var newActive = PlayerTeam[newIndex];
+
+        if (newActive == null || !newActive.IsAlive)
+        {
+            error = "Target weapon is not available/alive.";
+            return false;
+        }
+
+        int availablePoints = GetCurrentPlayerAvailablePoints();
+        if (availablePoints < switchCost)
+        {
+            error = "Not enough points to switch.";
+            return false;
+        }
+
+        PlayerTeam.RemoveAt(newIndex);
+        PlayerTeam.Insert(0, newActive);
+
+        if(GetCurrentPlayerAvailablePoints() > 0)
+        {
+            m_currentPlayerWeapon = newActive;
+            newActive.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints() , bankCap);
+        }
+
+        OnPlayerWeaponSwitched?.Invoke(newActive, oldActive);
+        OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
+        return true;
+    }
+
+    private bool AnyAlive(List<Combatant> team) => team != null && team.Any(x => x.IsAlive);
     public int GetCurrentPlayerBasePoints() => playerBasePoints;
     public int GetCurrentPlayerAvailablePoints() => Mathf.Min(playerBasePoints + playerReservedPoints, bankCap);
+
+
+    public Combatant GetActivePlayerCombatant()
+    {
+        if (PlayerTeam == null || PlayerTeam.Count == 0) return null;
+        activePlayerWeaponIndex = Mathf.Clamp(activePlayerWeaponIndex, 0, PlayerTeam.Count - 1);
+        return PlayerTeam[activePlayerWeaponIndex];
+    }
 
     public void EndBattleAndReturnToScene(string sceneName)
     {

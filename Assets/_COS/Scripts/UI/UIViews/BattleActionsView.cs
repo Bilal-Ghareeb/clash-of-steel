@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,6 +5,7 @@ using UnityEngine.UIElements;
 public class BattleActionsView : UIView
 {
     private BattleManager m_Battle;
+    private WeaponsHUDView m_WeaponsHUD;
 
     private VisualElement m_playerButtonsContainer;
     private VisualElement m_enemyRevealContainer;
@@ -33,19 +33,24 @@ public class BattleActionsView : UIView
     private int m_AttackPoints;
     private int m_DefendPoints;
     private int m_ReservePoints;
+    private int m_SwitchPoint;
 
     public BattleActionsView(VisualElement topElement, bool hideOnAwake = true)
         : base(topElement, hideOnAwake) { }
 
-    public void InitializeBattleManager(BattleManager battle)
+    public void InitializeBattleManager(BattleManager battle, WeaponsHUDView weaponsHud)
     {
         m_Battle = battle;
+        m_WeaponsHUD = weaponsHud;
 
         m_Battle.OnBattleCountdownStarted += OnCountdownStarted;
         m_Battle.OnPlayerAllocationPhaseStarted += OnPlayerAllocationPhaseStarted;
         m_Battle.OnEnemyTurnStarted += OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed += OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted += OnPlayerTurnStarted;
+
+        if (m_WeaponsHUD != null)
+            m_WeaponsHUD.OnRequestSwitch += HandleSwitchRequest;
 
         HideAllUI();
     }
@@ -54,12 +59,14 @@ public class BattleActionsView : UIView
     {
         base.Dispose();
         if (m_Battle == null) return;
-
         m_Battle.OnBattleCountdownStarted -= OnCountdownStarted;
         m_Battle.OnPlayerAllocationPhaseStarted -= OnPlayerAllocationPhaseStarted;
         m_Battle.OnEnemyTurnStarted -= OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed -= OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+
+        if (m_WeaponsHUD != null)
+            m_WeaponsHUD.OnRequestSwitch -= HandleSwitchRequest;
     }
 
     protected override void SetVisualElements()
@@ -119,11 +126,16 @@ public class BattleActionsView : UIView
     private void OnPlayerAllocationPhaseStarted(int availablePoints)
     {
         HideAllUI();
-
         ShowActionButtonsForPlayer();
         ResetLocalPoints();
         UpdatePointsUI();
+
+        if (m_WeaponsHUD != null)
+        {
+            var actor = m_Battle.GetActivePlayerCombatant();
+        }
     }
+
 
     private async void OnPlayerTurnStarted()
     {
@@ -157,7 +169,6 @@ public class BattleActionsView : UIView
 
         m_playerReserveButton.style.display = DisplayStyle.None;
 
-        // --- Player's attack points ---
         int playerAttackPoints = playerPublic.attack;
         if (playerAttackPoints > 0)
         {
@@ -170,7 +181,6 @@ public class BattleActionsView : UIView
             m_playerPointsSpentOnAttack.text = string.Empty;
         }
 
-        // --- Enemy's defend points (vs player's attack) ---
         int enemyDefendPoints = playerPublic.defend;
         if (enemyDefendPoints > 0)
         {
@@ -183,7 +193,6 @@ public class BattleActionsView : UIView
             m_enemyPointsSpentOnDefend.text = string.Empty;
         }
 
-        // --- Enemy's attack points ---
         int enemyAttackPoints = enemyPublic.attack;
         if (enemyAttackPoints > 0)
         {
@@ -196,7 +205,6 @@ public class BattleActionsView : UIView
             m_enemyPointsSpentOnAttack.text = string.Empty;
         }
 
-        // --- Player's defend points (vs enemy's attack) ---
         int playerDefendPoints = enemyPublic.defend;
         if (playerDefendPoints > 0)
         {
@@ -229,7 +237,7 @@ public class BattleActionsView : UIView
         }
 
         UpdatePointsUI();
-        spent = m_AttackPoints + m_DefendPoints + m_ReservePoints;
+        spent = m_AttackPoints + m_DefendPoints + m_ReservePoints + m_SwitchPoint;
 
         if (spent >= totalAvailable)
         {
@@ -253,6 +261,12 @@ public class BattleActionsView : UIView
         HideAllUI();
     }
 
+    private async Task FinalizeAfterDelay(Combatant actor, int ms)
+    {
+        await Task.Delay(ms);
+        FinalizeAllocations(actor);
+    }
+
     private void UpdatePointsUI()
     {
         var actor = GetCurrentPlayerCombatant();
@@ -260,29 +274,65 @@ public class BattleActionsView : UIView
 
         int totalAvailable = m_Battle.GetCurrentPlayerAvailablePoints();
         int basePts = m_Battle.GetCurrentPlayerBasePoints();
-        int spent = m_AttackPoints + m_DefendPoints + m_ReservePoints;
+        int spent = m_AttackPoints + m_DefendPoints + m_ReservePoints + m_SwitchPoint;
         int remaining = Mathf.Max(0, totalAvailable - spent);
 
         m_playerCurrentPoints.text = remaining.ToString();
         m_playerMaxPoints.text = basePts.ToString();
-
         m_playerPointsSpentOnAttack.text = m_AttackPoints.ToString();
         m_playerPointsSpentOnDefend.text = m_DefendPoints.ToString();
         m_playerPointsSpentOnReserve.text = m_ReservePoints.ToString();
-
         m_playerCurrentPoints.style.color = totalAvailable > basePts ? Color.yellow : Color.white;
     }
+
+    private void HandleSwitchRequest(Combatant targetCombatant, int targetIndex)
+    {
+        var actor = m_Battle.GetActivePlayerCombatant();
+        if (actor == null)
+            return;
+        if (!actor.CanSwitchWeapon)
+        {
+            Debug.Log("Cannot switch again this turn.");
+            return;
+        }
+
+        int switchCost = 1;
+        string err;
+        bool ok = m_Battle.SwitchActivePlayerWeapon(targetIndex, switchCost, out err);
+        if (!ok)
+        {
+            Debug.LogError("Switch failed: " + err);
+            return;
+        }
+
+        actor.Switch();
+
+        m_SwitchPoint += switchCost;
+        UpdatePointsUI();
+        m_WeaponsHUD.UpdatePlayerWeaponsOrderAfterSwitch(targetIndex);
+
+        int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;
+        if (remaining <= 0)
+        {
+            m_playerAttackButton?.SetEnabled(false);
+            m_playerDefendButton?.SetEnabled(false);
+            m_playerReserveButton?.SetEnabled(false);
+            _ = FinalizeAfterDelay(actor, 600);
+        }
+    }
+
 
     private void ResetLocalPoints()
     {
         m_AttackPoints = 0;
         m_DefendPoints = 0;
         m_ReservePoints = 0;
+        m_SwitchPoint = 0;
     }
 
     private Combatant GetCurrentPlayerCombatant()
     {
-        return m_Battle?.PlayerTeam?.FirstOrDefault(c => c.IsAlive);
+        return m_Battle?.GetActivePlayerCombatant();
     }
 
     private void HideAllUI()

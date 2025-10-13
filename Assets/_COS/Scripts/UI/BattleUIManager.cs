@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,6 +17,8 @@ public class BattleUIManager : MonoBehaviour
     const string k_WeaponsHUDView = "WeaponsHUDView";
     const string k_BattleActionsView = "BattleActionsView";
 
+    private Action m_OnWeaponsHUDInitializedHandler;
+
     private void Awake()
     {
         m_BattleUIDocument = GetComponent<UIDocument>();
@@ -32,10 +35,14 @@ public class BattleUIManager : MonoBehaviour
     {
         UnSubscribeFromEvents();
 
-        foreach (UIView view in m_AllViews)
+        if (m_WeaponsHUDView != null && m_OnWeaponsHUDInitializedHandler != null)
         {
-            view.Dispose();
+            m_WeaponsHUDView.OnInitialized -= m_OnWeaponsHUDInitializedHandler;
+            m_OnWeaponsHUDInitializedHandler = null;
         }
+
+        foreach (UIView view in m_AllViews)
+            view.Dispose();
     }
 
     private void SubscribeToEvents()
@@ -52,14 +59,22 @@ public class BattleUIManager : MonoBehaviour
     {
         VisualElement root = m_BattleUIDocument.rootVisualElement;
 
-        m_WeaponsHUDView = new WeaponsHUDView(root.Q<VisualElement>(k_WeaponsHUDView) , false);
+        m_WeaponsHUDView = new WeaponsHUDView(root.Q<VisualElement>(k_WeaponsHUDView), false);
+
+        // store handler reference
+        m_OnWeaponsHUDInitializedHandler = () =>
+        {
+            m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
+            m_BattleActionsView.InitializeBattleManager(m_battle, m_WeaponsHUDView);
+
+            // after initialization, unsubscribe immediately to avoid leaks
+            m_WeaponsHUDView.OnInitialized -= m_OnWeaponsHUDInitializedHandler;
+        };
+
+        m_WeaponsHUDView.OnInitialized += m_OnWeaponsHUDInitializedHandler;
         m_WeaponsHUDView.InitializeBattleManager(m_battle);
 
-        m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView) , false);
-        m_BattleActionsView.InitializeBattleManager(m_battle);
-
         m_AllViews.Add(m_WeaponsHUDView);
-        m_AllViews.Add(m_BattleActionsView);
     }
 
 
@@ -67,4 +82,5 @@ public class BattleUIManager : MonoBehaviour
     {
         newView.Show();
     }
+
 }

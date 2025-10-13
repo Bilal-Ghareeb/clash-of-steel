@@ -14,6 +14,9 @@ public class Combatant
     public int DefendPoints { get; private set; } = 0;
     public int BankedPoints { get; private set; } = 0;
 
+    public bool HasSwitchedThisTurn { get; private set; } = false;
+    public bool CanSwitchWeapon => !HasSwitchedThisTurn && BankedPoints > 0;
+
     public int MaxHP => InstanceData.GetHealth();
     public int BaseAttack => InstanceData.GetDamage();
 
@@ -54,16 +57,15 @@ public class Combatant
         return true;
     }
 
-    public void AllocateUnsafe(int attack, int defend, int reserve)
+    public void Switch()
     {
-        AttackPoints = attack;
-        DefendPoints = defend;
-        BankedPoints = Mathf.Min(BankedPoints - (attack + defend) + reserve, 8);
+        HasSwitchedThisTurn = true;
     }
 
     public void ResetRoundAllocations()
     {
         AttackPoints = 0;
         DefendPoints = 0;
+        HasSwitchedThisTurn = false; // reset each new turn
     }
 }

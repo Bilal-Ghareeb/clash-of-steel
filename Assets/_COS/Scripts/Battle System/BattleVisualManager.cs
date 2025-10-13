@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 public class BattleVisualManager : MonoBehaviour
 {
@@ -7,42 +7,62 @@ public class BattleVisualManager : MonoBehaviour
     [SerializeField] private Transform playerSpawnPoint;
     [SerializeField] private Transform enemySpawnPoint;
 
+    private GameObject playerInstance;
+    private GameObject enemyInstance;
+    private BattleManager m_Battle;
+
     private void Start()
     {
-        var battle = FindAnyObjectByType<BattleManager>();
-
-        if (battle == null)
+        m_Battle = FindAnyObjectByType<BattleManager>();
+        if (m_Battle == null)
         {
             return;
         }
+        m_Battle.OnBattleStarted += () => SpawnInitialModels(m_Battle);
+        m_Battle.OnPlayerWeaponSwitched += OnPlayerWeaponSwitched;
+    }
 
-        battle.OnBattleStarted += () => SpawnInitialModels(battle);
+    private void OnDestroy()
+    {
+        if (m_Battle != null)
+            m_Battle.OnPlayerWeaponSwitched -= OnPlayerWeaponSwitched;
     }
 
     private void SpawnInitialModels(BattleManager battle)
     {
-        var player = battle.PlayerTeam?.FirstOrDefault();
+        var player = battle.GetActivePlayerCombatant();
         var enemy = battle.EnemyTeam?.FirstOrDefault();
-
         if (player != null && player.InstanceData?.Asset?.WeaponPrefab != null)
         {
-            SpawnModel(player, playerSpawnPoint);
+            SpawnModelForPlayer(player);
         }
-
         if (enemy != null && enemy.InstanceData?.Asset?.WeaponPrefab != null)
         {
-            SpawnModel(enemy, enemySpawnPoint);
+            SpawnModelForEnemy(enemy);
         }
     }
 
-    private void SpawnModel(Combatant combatant, Transform spawnPoint)
+    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive)
+    {
+        if (playerInstance != null)
+        {
+            Destroy(playerInstance);
+            playerInstance = null;
+        }
+        SpawnModelForPlayer(newActive);
+    }
+
+    private void SpawnModelForPlayer(Combatant combatant)
     {
         var prefab = combatant.InstanceData.Asset.WeaponPrefab;
-        if (prefab == null)
-        {
-            return;
-        }
+        if (prefab == null) return;
+        playerInstance = Instantiate(prefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
+    }
 
-        var obj = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
+    private void SpawnModelForEnemy(Combatant combatant)
+    {
+        var prefab = combatant.InstanceData.Asset.WeaponPrefab;
+        if (prefab == null) return;
+        enemyInstance = Instantiate(prefab, enemySpawnPoint.position, enemySpawnPoint.rotation);
     }
 }

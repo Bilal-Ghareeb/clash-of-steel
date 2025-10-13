@@ -18,15 +18,12 @@ public static class ActionResolver
     /// <returns>Total damage value to subtract from defender's HP</returns>
     public static int ResolveDamage(Combatant attacker, Combatant defender, out int hitsLanded)
     {
-        // Each defend point cancels one attack point (like Jurassic World’s block system)
         hitsLanded = Mathf.Max(attacker.AttackPoints - defender.DefendPoints, 0);
         if (hitsLanded <= 0)
             return 0;
 
-        // Base class advantage / disadvantage multiplier
         float classMult = GetClassMultiplier(attacker.ClassType, defender.ClassType);
 
-        // Total raw damage = base attack * number of hits * multiplier
         float rawDamage = attacker.BaseAttack * hitsLanded * classMult;
 
         return Mathf.RoundToInt(rawDamage);
@@ -42,7 +39,6 @@ public static class ActionResolver
 
     private static float GetClassMultiplier(string attackerClass, string defenderClass)
     {
-        // Advantage cycle: Sword > Hammer > Shield > Sword
         if (attackerClass == "Sword" && defenderClass == "Hammer") return AdvantageMultiplier;
         if (attackerClass == "Hammer" && defenderClass == "Shield") return AdvantageMultiplier;
         if (attackerClass == "Shield" && defenderClass == "Sword") return AdvantageMultiplier;
@@ -51,7 +47,6 @@ public static class ActionResolver
         if (defenderClass == "Hammer" && attackerClass == "Shield") return DisadvantageMultiplier;
         if (defenderClass == "Shield" && attackerClass == "Sword") return DisadvantageMultiplier;
 
-        // Neutral or same class
         return 1.0f;
     }
 }

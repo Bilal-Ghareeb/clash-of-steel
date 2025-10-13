@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 
 public class WeaponItemComponent
 {
+    public  VisualElement Root { get; private set; }
     private VisualElement m_weaponItemButton;
     private WeaponInstanceBase m_WeaponInstance;
     private VisualElement m_weaponImage;
@@ -41,6 +42,7 @@ public class WeaponItemComponent
     {
         if (weaponItemUXMLTemplate == null) return;
 
+        Root = weaponItemUXMLTemplate;
         m_weaponItemButton = weaponItemUXMLTemplate.Q<VisualElement>("Weapon-item-button");
         m_Lvl = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-lvl");
         m_weaponImage = weaponItemUXMLTemplate.Q<VisualElement>("weapon-scroll-item-icon");
@@ -117,6 +119,12 @@ public class WeaponItemComponent
             m_weaponItemButton.RegisterCallback<ClickEvent>(OnCustomButtonClicked);
         else
             m_weaponItemButton.RegisterCallback<ClickEvent>(OnButtonClicked);
+    }
+
+    public void UnRegisterButtonCallbacks()
+    {
+        m_weaponItemButton.UnregisterCallback<ClickEvent>(OnButtonClicked);
+        m_weaponItemButton.UnregisterCallback<ClickEvent>(OnCustomButtonClicked);
     }
 
     public void UpdateHealth(float newHealth)
