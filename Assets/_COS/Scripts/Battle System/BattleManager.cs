@@ -5,38 +5,69 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Main battle loop. This class has no UI code — only events to hook into.
-/// Place on a GameObject in your Battle scene.
+/// BattleManager (refactored)
+/// - Allocation phase (player & enemy choose attack/defend/reserve)
+/// - Reveal phase (public allocations shown: attack & defend only)
+/// - Execution phase (animations + damage resolution)
+/// This is designed for: 1 active player combatant per side, pooled points per turn,
+/// animations play once while damage counts multiple times.
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
-    // Config
     [SerializeField] private int maxPointsPerTurn = 4;
-    [SerializeField] private int initialPlayerPoints = 1;
-    [SerializeField] private int initialEnemyPoints = 2;
+    [SerializeField] private int initialPlayerBasePoints = 1;
+    [SerializeField] private int initialEnemyBasePoints = 2;
     [SerializeField] private int bankCap = 8;
 
-    // Runtime
     public Combatant[] PlayerTeam { get; private set; }
     public Combatant[] EnemyTeam { get; private set; }
 
-    private int playerBasePoints; // increases 1 each full half-round until cap = 4
-    private int enemyBasePoints;
-    private bool isPlayerTurn = true;
 
-    // events
+    private int playerBasePoints;
+    private int playerReservedPoints;
+    private int enemyBasePoints;
+    private int enemyReservedPoints;
+    private int activePlayerWeaponIndex = 0;
+
+    // --- Events UI should subscribe to ---
     public event Action OnBattleCountdownStarted;
     public event Action OnBattleStarted;
     public event Action OnBattleEnded;
-    public event Action<Combatant , float> OnCombatantDamaged;
+
+    // Allocation phase started (availablePoints for this allocation)
+    public event Action<int> OnPlayerAllocationPhaseStarted;
+    public event Action<int> OnEnemyAllocationPhaseStarted;
+
+    // Called after both allocations submitted and before execution.
+    // PublicAlloc = (attack, defend) only; reserve is kept private.
+    public event Action<(int attack, int defend) /* playerPublic */, (int attack, int defend) /* enemyPublic */> OnAllocationsRevealed;
+
+    // Debug / UI flow events
+    public event Action OnPlayerTurnStarted;
+    public event Action OnEnemyTurnStarted;
+
+    // Combat events
+    public event Action<Combatant, float> OnCombatantDamaged;
     public event Action<Combatant> OnCombatantDeath;
-    public event Action<int> OnTurnChanged; // pass turn number or indicator
+
+    // Turn change: (turnNumber, availablePointsForThisTurn)
+    public event Action<int, int> OnTurnChanged;
 
     private int turnNumber = 0;
 
+    // Internal: when waiting for player's submission
+    private TaskCompletionSource<(int attack, int defend, int reserve)> _playerAllocationTcs;
+    private (int attack, int defend, int reserve) _lastEnemyAllocation;
+
+    [Header("Timing Settings (ms)")]
+    [SerializeField] private int turnStartDelayMs = 1000;   // before your turn UI appears
+    [SerializeField] private int revealDelayMs = 2000;      // between allocations and reveal
+    [SerializeField] private int resultDelayMs = 1500;      // after attack results
+    [SerializeField] private int countdownDelayMs = 3500;   // initial 3..2..1..Fight!
+
+
     private async void Start()
     {
-        // Read session
         var session = BattleSessionHolder.CurrentSession;
         if (session == null)
         {
@@ -44,24 +75,22 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        // initialize base points
-        playerBasePoints = Mathf.Clamp(initialPlayerPoints, 1, maxPointsPerTurn);
-        enemyBasePoints = Mathf.Clamp(initialEnemyPoints, 1, maxPointsPerTurn);
+        playerBasePoints = Mathf.Clamp(initialPlayerBasePoints, 1, maxPointsPerTurn);
+        enemyBasePoints = Mathf.Clamp(initialEnemyBasePoints, 1, maxPointsPerTurn);
+        playerReservedPoints = 0;
+        enemyReservedPoints = 0;
 
-        // Build combatants from session
         BuildTeamsFromSession(session);
 
-        OnBattleCountdownStarted?.Invoke();
-
-        await Task.Delay(3500);
-
         OnBattleStarted?.Invoke();
+        await Task.Delay(500);
+
+        OnBattleCountdownStarted?.Invoke();
+        await Task.Delay(countdownDelayMs);
 
         await RunBattleLoop();
 
         OnBattleEnded?.Invoke();
-
-        // Optional: clear session
         BattleSessionHolder.CurrentSession = null;
     }
 
@@ -78,160 +107,185 @@ public class BattleManager : MonoBehaviour
 
     private Combatant CreateCombatantFromDTO(BattleSession.CombatantDTO dto, bool isPlayer)
     {
-        // Try to find a live player weapon instance if it is player-owned and exists in PlayFabManager cache.
         WeaponInstanceBase instance = null;
-
         if (isPlayer && !string.IsNullOrEmpty(dto.instanceId))
         {
-            // If you want to map to the Player inventory instance: implement PlayFabManager.Instance.FindWeaponByInstanceId
             instance = PlayFabManager.Instance?.PlayerWeapons?.FirstOrDefault(w => w.Item?.Id == dto.instanceId) as WeaponInstance;
         }
 
         if (instance != null)
-        {
-            // Use the full WeaponInstance (has icon and instance data)
             return new Combatant(instance, dto.instanceId, instance.CatalogData.name);
-        }
-        else
-        {
-            // Otherwise create an EnemyWeaponInstance (wrap catalog WeaponData for level provided).
-            // We must fetch the catalog WeaponData via PlayFabManager helper.
-            var weaponData = PlayFabManager.Instance.GetWeaponDataByFriendlyId(dto.friendlyId);
-            if (weaponData == null)
-            {
-                Debug.LogError($"No WeaponData for friendly id {dto.friendlyId}. Creating placeholder.");
-                // Fallback: create a dummy WeaponData object with safe defaults (you can change as needed)
-                weaponData = new WeaponData
-                {
-                    name = dto.friendlyId ?? "Unknown",
-                    baseDamage = 10,
-                    baseHealth = 100,
-                    rarity = "Common",
-                    @class = "Sword",
-                    progressionId = "sword_linear_common"
-                };
-            }
 
-            var enemyInstance = new EnemyWeaponInstance(dto.friendlyId ?? dto.instanceId ?? dto.friendlyId, weaponData, dto.level);
-            return new Combatant(enemyInstance, dto.friendlyId, weaponData.name);
+        var weaponData = PlayFabManager.Instance.GetWeaponDataByFriendlyId(dto.friendlyId);
+        if (weaponData == null)
+        {
+            Debug.LogError($"No WeaponData for friendly id {dto.friendlyId}. Creating placeholder.");
+            weaponData = new WeaponData
+            {
+                name = dto.friendlyId ?? "Unknown",
+                baseDamage = 10,
+                baseHealth = 100,
+                rarity = "Common",
+                @class = "Sword",
+                progressionId = "sword_linear_common"
+            };
         }
+
+        var enemyInstance = new EnemyWeaponInstance(dto.friendlyId ?? dto.instanceId ?? dto.friendlyId, weaponData, dto.level);
+        return new Combatant(enemyInstance, dto.friendlyId, weaponData.name);
     }
 
     private async Task RunBattleLoop()
     {
-        // Keep loop until one team dead
         while (AnyAlive(PlayerTeam) && AnyAlive(EnemyTeam))
         {
             turnNumber++;
-            OnTurnChanged?.Invoke(turnNumber);
 
-            Combatant[] currentSide = isPlayerTurn ? PlayerTeam : EnemyTeam;
-            Combatant[] opposingSide = isPlayerTurn ? EnemyTeam : PlayerTeam;
+            int availablePlayerPoints = Mathf.Min(playerBasePoints + playerReservedPoints, bankCap);
+            OnTurnChanged?.Invoke(turnNumber, availablePlayerPoints);
 
-            // Compute available points for this side this turn (base + banked)
-            int basePoints = isPlayerTurn ? playerBasePoints : enemyBasePoints;
+            // --------------------------- PLAYER TURN ---------------------------
+            OnPlayerTurnStarted?.Invoke();
+            await Task.Delay(1200);
 
-            // Start turn: add basePoints into each alive combatant bank
-            foreach (var c in currentSide.Where(x => x.IsAlive))
-                c.StartTurnWithAvailablePoints(basePoints, bankCap);
+            Combatant player = PlayerTeam[activePlayerWeaponIndex];
+            Combatant enemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
 
-            // For a 2-vs-2 system you might only allow one active combatant attacking per turn.
-            // Here we assume "side" acts as a group: we resolve each alive combatant in order.
-            foreach (var actor in currentSide)
+            if (player != null && player.IsAlive)
             {
-                if (!actor.IsAlive) continue;
+                player.StartTurnWithAvailablePoints(availablePlayerPoints, bankCap);
 
-                // Player decision or AI decision
-                if (isPlayerTurn)
-                {
-                    // Pause until UI gives allocations; UI must call back into BattleManager to set allocations.
-                    // We expose a simple WaitForPlayerAllocation method (you'll implement UI to call AllocateForCombatant).
-                    await WaitForPlayerAllocationAsync(actor);
-                }
-                else
-                {
-                    // Simple AI: allocate all banked points to attack
-                    int pts = actor.BankedPoints;
-                    actor.AllocateUnsafe(pts, 0, 0);
-                }
+                // Allow player allocation
+                OnPlayerAllocationPhaseStarted?.Invoke(availablePlayerPoints);
+                var playerAlloc = await WaitForPlayerAllocationAsync(availablePlayerPoints);
 
-                // Now execute attack phase for this actor on first alive opposing combatant
-                var target = opposingSide.FirstOrDefault(t => t.IsAlive);
-                if (target == null) break;
+                // Apply reserve logic
+                playerReservedPoints = playerAlloc.reserve;
+                player.TryAllocate(playerAlloc.attack, playerAlloc.defend, playerAlloc.reserve, out _);
 
-                if (actor.AttackPoints > 0)
+                // Show only player's attack vs enemy's defend
+                var playerReveal = (player.AttackPoints, enemy?.DefendPoints ?? 0);
+                OnAllocationsRevealed?.Invoke(playerReveal, (0, 0));
+                await Task.Delay(3000);
+
+                // Execute player's attack
+                if (enemy != null && player.AttackPoints > 0)
                 {
-                    // Play single animation for actor's attack using TimelineController
                     if (TimelineController.Instance != null)
-                        await TimelineController.Instance.PlayAttackAnimationAsync(actor, target);
-                    // resolve damage
-                    int damage = ActionResolver.ResolveDamage(actor, target);
-                    if (damage > 0)
-                    {
-                        target.CurrentHP = Mathf.Max(0, target.CurrentHP - damage);
-                        OnCombatantDamaged?.Invoke(target , target.CurrentHP);
-                        if (!target.IsAlive) OnCombatantDeath?.Invoke(target);
-                    }
+                        await TimelineController.Instance.PlayAttackAnimationAsync(player, enemy);
+
+                    int damage = ActionResolver.ResolveDamage(player, enemy);
+                    enemy.CurrentHP = Mathf.Max(0, enemy.CurrentHP - damage);
+                    OnCombatantDamaged?.Invoke(enemy, enemy.CurrentHP);
+                    if (!enemy.IsAlive) OnCombatantDeath?.Invoke(enemy);
                 }
-                // if actor had zero attack points we still allow defend to matter if opponent attacks later
 
-                // After resolving actor, reset allocations (we keep bank as updated already)
-                actor.ResetRoundAllocations();
-
-                // Check battle end early
-                if (!AnyAlive(opposingSide) || !AnyAlive(PlayerTeam) || !AnyAlive(EnemyTeam))
-                    break;
+                await Task.Delay(800);
             }
 
-            // After side finished acting, flip turn and increase base points (capped at maxPointsPerTurn)
-            isPlayerTurn = !isPlayerTurn;
-            if (isPlayerTurn)
-                playerBasePoints = Mathf.Min(playerBasePoints + 1, maxPointsPerTurn);
-            else
-                enemyBasePoints = Mathf.Min(enemyBasePoints + 1, maxPointsPerTurn);
+            // --------------------------- ENEMY TURN ---------------------------
+            if (!AnyAlive(EnemyTeam) || !AnyAlive(PlayerTeam)) break;
+
+            OnEnemyTurnStarted?.Invoke();
+            await Task.Delay(1200);
+
+            Combatant actingEnemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
+            Combatant defendingPlayer = PlayerTeam.FirstOrDefault(p => p.IsAlive);
+
+            if (actingEnemy != null && defendingPlayer != null)
+            {
+                int enemyAvailablePoints = Mathf.Min(enemyBasePoints + enemyReservedPoints, bankCap);
+                actingEnemy.StartTurnWithAvailablePoints(enemyAvailablePoints, bankCap);
+
+                // Enemy simple AI (example: attack everything)
+                int attack = enemyAvailablePoints;
+                int defend = 0;
+                int reserve = 0;
+                actingEnemy.TryAllocate(attack, defend, reserve, out _);
+                enemyReservedPoints = reserve;
+
+                // Reveal enemy attack vs player defend (from previous turn)
+                var enemyReveal = (actingEnemy.AttackPoints, defendingPlayer.DefendPoints);
+                OnAllocationsRevealed?.Invoke((0, 0), enemyReveal);
+                await Task.Delay(3000);
+
+                // Execute enemy attack
+                if (actingEnemy.AttackPoints > 0)
+                {
+                    if (TimelineController.Instance != null)
+                        await TimelineController.Instance.PlayAttackAnimationAsync(actingEnemy, defendingPlayer);
+
+                    int damage = ActionResolver.ResolveDamage(actingEnemy, defendingPlayer);
+                    defendingPlayer.CurrentHP = Mathf.Max(0, defendingPlayer.CurrentHP - damage);
+                    OnCombatantDamaged?.Invoke(defendingPlayer, defendingPlayer.CurrentHP);
+                    if (!defendingPlayer.IsAlive) OnCombatantDeath?.Invoke(defendingPlayer);
+                }
+
+                await Task.Delay(800);
+            }
+
+            // --------------------------- END OF ROUND ---------------------------
+            foreach (var c in PlayerTeam.Concat(EnemyTeam))
+                c.ResetRoundAllocations();
+
+            // Increment base points (like in JW)
+            playerBasePoints = Mathf.Min(playerBasePoints + 1, maxPointsPerTurn);
+            enemyBasePoints = Mathf.Min(enemyBasePoints + 1, maxPointsPerTurn);
+
+            await Task.Delay(1000);
         }
 
-        // End: determine winner
         bool playerWon = AnyAlive(PlayerTeam) && !AnyAlive(EnemyTeam);
         Debug.Log(playerWon ? "Player wins battle" : "Enemy wins battle");
     }
 
-    // You must implement how the player UI allocates points and calls AllocateForCombatant().
-    // This helper awaits a TaskCompletionSource which your UI will complete.
-    private TaskCompletionSource<bool> _waitingTcs;
-    private Combatant _waitingActor;
 
-    public Task WaitForPlayerAllocationAsync(Combatant actor)
+    // Wait for the UI to call AllocateForCombatant. This returns the submitted allocation.
+    private Task<(int attack, int defend, int reserve)> WaitForPlayerAllocationAsync(int availablePoints)
     {
-        _waitingActor = actor;
-        _waitingTcs = new TaskCompletionSource<bool>();
-        // UI should show controls for the specific actor and call BattleManager.Instance.AllocateForCombatant(...)
-        return _waitingTcs.Task;
+        _playerAllocationTcs = new TaskCompletionSource<(int attack, int defend, int reserve)>();
+        return _playerAllocationTcs.Task;
     }
 
     /// <summary>
-    /// Called by UI when player finished choosing allocations for a specific actor.
-    /// attack + defend + reserve must sum <= actor.BankedPoints.
+    /// Called by UI when player finished choosing allocations for the current active combatant.
+    /// attack + defend + reserve must be <= availablePoints provided previously.
+    /// This keeps the same signature shape as before but returns bool success and an out error message.
     /// </summary>
     public bool AllocateForCombatant(Combatant actor, int attack, int defend, int reserve, out string error)
     {
-        if (_waitingActor != actor)
+        // If no TCS active, fail (not waiting)
+        if (_playerAllocationTcs == null)
         {
-            error = "Actor not waiting for allocation.";
+            error = "Not accepting allocations right now.";
             return false;
         }
 
+        int total = attack + defend + reserve;
+        // availablePoints was passed to WaitForPlayerAllocationAsync and should be validated by UI too.
+        // Here we very defensively accept up to bankCap.
+        if (total > bankCap)
+        {
+            error = $"Requested {total} > bankCap {bankCap}";
+            return false;
+        }
+
+        // apply allocations onto the actor (so Combatant uses them for later calculation)
         if (!actor.TryAllocate(attack, defend, reserve, out error))
             return false;
 
-        // done waiting
-        _waitingTcs?.SetResult(true);
-        _waitingTcs = null;
-        _waitingActor = null;
+        // resolve the TCS so RunBattleLoop continues.
+        _playerAllocationTcs.SetResult((attack, defend, reserve));
+        _playerAllocationTcs = null;
+        error = null;
         return true;
     }
 
     private bool AnyAlive(Combatant[] team) => team != null && team.Any(x => x.IsAlive);
+
+    // Helpers to expose values for UI
+    public int GetCurrentPlayerBasePoints() => playerBasePoints;
+    public int GetCurrentPlayerAvailablePoints() => Mathf.Min(playerBasePoints + playerReservedPoints, bankCap);
 
     public void EndBattleAndReturnToScene(string sceneName)
     {

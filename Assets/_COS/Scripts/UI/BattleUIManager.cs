@@ -16,7 +16,7 @@ public class BattleUIManager : MonoBehaviour
     const string k_WeaponsHUDView = "WeaponsHUDView";
     const string k_BattleActionsView = "BattleActionsView";
 
-    private void OnEnable()
+    private void Awake()
     {
         m_BattleUIDocument = GetComponent<UIDocument>();
         m_battle = FindAnyObjectByType<BattleManager>();
