@@ -309,7 +309,6 @@ public class BattleActionsView : UIView
 
         m_SwitchPoint += switchCost;
         UpdatePointsUI();
-        m_WeaponsHUD.UpdatePlayerWeaponsOrderAfterSwitch(targetIndex);
 
         int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;
         if (remaining <= 0)

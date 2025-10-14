@@ -225,7 +225,12 @@ public class BattleManager : MonoBehaviour
                     int damage = ActionResolver.ResolveDamage(actingEnemy, defendingPlayer);
                     defendingPlayer.CurrentHP = Mathf.Max(0, defendingPlayer.CurrentHP - damage);
                     OnCombatantDamaged?.Invoke(actingEnemy, defendingPlayer, defendingPlayer.CurrentHP, damage);
-                    if (!defendingPlayer.IsAlive) OnCombatantDeath?.Invoke(defendingPlayer);
+
+                    if (!defendingPlayer.IsAlive)
+                    {
+                        OnCombatantDeath?.Invoke(defendingPlayer);
+                        ForceSwitchActivePlayerWeapon();
+                    }
                 }
 
                 await Task.Delay(1500);
@@ -334,6 +339,27 @@ public class BattleManager : MonoBehaviour
         OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
         return true;
     }
+
+    public void ForceSwitchActivePlayerWeapon()
+    {
+        var oldActive = GetActivePlayerCombatant();
+        for (int i = 0; i < PlayerTeam.Count; i++)
+        {
+            if (i != activePlayerWeaponIndex && PlayerTeam[i].IsAlive)
+            {
+                activePlayerWeaponIndex = i;
+                m_currentPlayerWeapon = PlayerTeam[i];
+                m_currentPlayerWeapon.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints(), bankCap);
+
+                OnPlayerWeaponSwitched?.Invoke(m_currentPlayerWeapon, oldActive);
+                OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
+                return;
+            }
+        }
+
+        Debug.LogWarning("No alive player combatant left to switch to!");
+    }
+
 
     private bool AnyAlive(List<Combatant> team) => team != null && team.Any(x => x.IsAlive);
     public int GetCurrentPlayerBasePoints() => playerBasePoints;

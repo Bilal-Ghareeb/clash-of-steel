@@ -33,6 +33,7 @@ public class WeaponsHUDView : UIView
         m_Battle.OnBattleStarted += OnBattleStarted;
         m_Battle.OnCombatantDamaged += OnCombatantDamaged;
         m_Battle.OnClassComparison += OnClassComparison;
+        m_Battle.OnPlayerWeaponSwitched += OnPlayerWeaponSwitched;
 
         m_Battle.OnEnemyTurnStarted += ResetAllAttackColors;
         m_Battle.OnPlayerTurnStarted += ResetAllAttackColors;
@@ -53,6 +54,7 @@ public class WeaponsHUDView : UIView
             m_Battle.OnBattleStarted -= OnBattleStarted;
             m_Battle.OnCombatantDamaged -= OnCombatantDamaged;
             m_Battle.OnClassComparison -= OnClassComparison;
+            m_Battle.OnPlayerWeaponSwitched -= OnPlayerWeaponSwitched;
 
             m_Battle.OnEnemyTurnStarted -= ResetAllAttackColors;
             m_Battle.OnPlayerTurnStarted -= ResetAllAttackColors;
@@ -124,44 +126,73 @@ public class WeaponsHUDView : UIView
         }
     }
 
+    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive)
+    {
+        if (m_PlayerCombatantsUI == null) return;
+
+        int newIndex = m_Battle.PlayerTeam.IndexOf(newActive);
+        if (newIndex >= 0)
+        {
+            UpdatePlayerWeaponsOrderAfterSwitch(newIndex);
+        }
+    }
 
     public void UpdatePlayerWeaponsOrderAfterSwitch(int newActiveIndex)
     {
         if (m_PlayerCombatantsUI == null || newActiveIndex < 0 || newActiveIndex >= m_Battle.PlayerTeam.Count)
             return;
 
-        var IncomingActiveWeapon = m_Battle.PlayerTeam[0];
-        var OutgoingToBenchWeapon = m_Battle.PlayerTeam[newActiveIndex];
+        var newActiveWeapon = m_Battle.PlayerTeam[newActiveIndex];
+        var outgoingWeapon = m_Battle.PlayerTeam[0];
 
-        if (m_PlayerCombatantsUI.TryGetValue(IncomingActiveWeapon, out var oldActiveWeaponItem))
+        if (m_PlayerCombatantsUI.TryGetValue(newActiveWeapon, out var newActiveWeaponItem))
         {
-            oldActiveWeaponItem.UnRegisterButtonCallbacks();
-            oldActiveWeaponItem.OnCustomClick = null;
+            newActiveWeaponItem.UnRegisterButtonCallbacks();
+            newActiveWeaponItem.OnCustomClick = null;
         }
 
-        if (m_PlayerCombatantsUI.TryGetValue(OutgoingToBenchWeapon, out var newActiveWeaponItem))
+        if (m_PlayerCombatantsUI.TryGetValue(outgoingWeapon, out var oldActiveWeaponItem))
         {
-            newActiveWeaponItem.OnCustomClick = () => OnWeaponItemClicked(OutgoingToBenchWeapon, 1);
-            newActiveWeaponItem.RegisterButtonCallbacks(useCustomClick: true);
+            if (outgoingWeapon.IsAlive)
+            {
+                oldActiveWeaponItem.OnCustomClick = () => OnWeaponItemClicked(outgoingWeapon, newActiveIndex);
+                oldActiveWeaponItem.RegisterButtonCallbacks(useCustomClick: true);
+            }
+            else
+            {
+                newActiveWeaponItem.UnRegisterButtonCallbacks();
+                newActiveWeaponItem.OnCustomClick = null;
+            }
         }
 
         m_PlayerContainer.Clear();
+
+        if (m_PlayerCombatantsUI.TryGetValue(newActiveWeapon, out var activeWeaponItem))
+        {
+            VisualElement root = activeWeaponItem.Root;
+            root.experimental.animation
+                .Scale(1f, 500)
+                .Ease(Easing.OutCubic);
+            m_PlayerContainer.Add(root);
+        }
+
         for (int i = 0; i < m_Battle.PlayerTeam.Count; i++)
         {
+            if (i == newActiveIndex)
+                continue;
+
             var combatant = m_Battle.PlayerTeam[i];
             if (!m_PlayerCombatantsUI.TryGetValue(combatant, out var weaponItem))
                 continue;
 
             VisualElement root = weaponItem.Root;
-            float targetScale = i == 0 ? 1f : 0.7f;
-
             root.experimental.animation
-                .Scale(targetScale, 500)
+                .Scale(0.7f, 500)
                 .Ease(Easing.OutCubic);
-
             m_PlayerContainer.Add(root);
         }
     }
+
 
     private void OnClassComparison(Combatant attacker, Combatant defender, float multiplier)
     {
