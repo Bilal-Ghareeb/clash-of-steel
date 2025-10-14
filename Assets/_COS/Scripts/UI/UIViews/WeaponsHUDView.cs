@@ -32,6 +32,10 @@ public class WeaponsHUDView : UIView
         m_Battle = battle;
         m_Battle.OnBattleStarted += OnBattleStarted;
         m_Battle.OnCombatantDamaged += OnCombatantDamaged;
+        m_Battle.OnClassComparison += OnClassComparison;
+
+        m_Battle.OnEnemyTurnStarted += ResetAllAttackColors;
+        m_Battle.OnPlayerTurnStarted += ResetAllAttackColors;
 
         m_Battle.OnPlayerAllocationPhaseStarted += (pts) => { m_IsPlayerAllocationPhase = true; };
         m_Battle.OnAllocationsRevealed += (p, e) => { m_IsPlayerAllocationPhase = false; };
@@ -48,6 +52,10 @@ public class WeaponsHUDView : UIView
         {
             m_Battle.OnBattleStarted -= OnBattleStarted;
             m_Battle.OnCombatantDamaged -= OnCombatantDamaged;
+            m_Battle.OnClassComparison -= OnClassComparison;
+
+            m_Battle.OnEnemyTurnStarted -= ResetAllAttackColors;
+            m_Battle.OnPlayerTurnStarted -= ResetAllAttackColors;
 
             m_Battle.OnPlayerAllocationPhaseStarted -= (pts) => { m_IsPlayerAllocationPhase = true; };
             m_Battle.OnAllocationsRevealed -= (p, e) => { m_IsPlayerAllocationPhase = false; };
@@ -155,24 +163,60 @@ public class WeaponsHUDView : UIView
         }
     }
 
-
-    private void OnCombatantDamaged(Combatant combatant, float newHealth)
+    private void OnClassComparison(Combatant attacker, Combatant defender, float multiplier)
     {
-        if (combatant == null)
+        bool hasAdvantage = multiplier > 1.0f;
+        bool hasDisadvantage = multiplier < 1.0f;
+
+        if (m_PlayerCombatantsUI.TryGetValue(attacker, out var playerWeaponUI))
+        {
+            float newAttackValue = attacker.BaseAttack * multiplier;
+            playerWeaponUI.UpdateAttackPreview(newAttackValue, hasAdvantage, hasDisadvantage);
+        }
+
+        if (m_EnemyCombatantsUI.TryGetValue(attacker, out var enemyWeaponUI))
+        {
+            float newAttackValue = attacker.BaseAttack * multiplier;
+            enemyWeaponUI.UpdateAttackPreview(newAttackValue, hasAdvantage, hasDisadvantage);
+        }
+    }
+
+    private void ResetAllAttackColors()
+    {
+        foreach (var item in m_PlayerCombatantsUI.Values)
+            item.ResetAttackHudData();
+        foreach (var item in m_EnemyCombatantsUI.Values)
+            item.ResetAttackHudData();
+    }
+
+    private void OnCombatantDamaged( Combatant attacker, Combatant defender, int defenderNewHealth , int attackerDamage)
+    {
+        if (defender == null)
             return;
 
-        var instance = combatant.InstanceData;
+        bool isPlayerAttacker = attacker.InstanceData is WeaponInstance;
+        bool isEnemyDefender = defender.InstanceData is EnemyWeaponInstance;
 
-        if (instance is WeaponInstance)
+        WeaponItemComponent attackerUI = null;
+        WeaponItemComponent defenderUI = null;
+
+        if (isPlayerAttacker)
+            m_PlayerCombatantsUI.TryGetValue(attacker, out attackerUI);
+        else
+            m_EnemyCombatantsUI.TryGetValue(attacker, out attackerUI);
+
+        if (isEnemyDefender)
+            m_EnemyCombatantsUI.TryGetValue(defender, out defenderUI);
+        else
+            m_PlayerCombatantsUI.TryGetValue(defender, out defenderUI);
+
+        if (attackerUI == null || defenderUI == null)
         {
-            if (m_PlayerCombatantsUI.TryGetValue(combatant, out var uiItem))
-                uiItem.UpdateHealth(newHealth);
+            Debug.LogWarning("Missing UI card for combatants in OnCombatantDamaged");
+            return;
         }
-        else if (instance is EnemyWeaponInstance)
-        {
-            if (m_EnemyCombatantsUI.TryGetValue(combatant, out var uiItem))
-                uiItem.UpdateHealth(newHealth);
-        }
+
+        defenderUI.UpdateHealth(defenderNewHealth);
     }
 
     private void OnWeaponItemClicked(Combatant combatant, int index)

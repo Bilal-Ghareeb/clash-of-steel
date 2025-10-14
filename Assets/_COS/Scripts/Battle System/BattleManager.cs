@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -43,7 +44,9 @@ public class BattleManager : MonoBehaviour
     public event Action OnPlayerTurnStarted;
     public event Action OnEnemyTurnStarted;
 
-    public event Action<Combatant, float> OnCombatantDamaged;
+    public event Action<Combatant, Combatant, float> OnClassComparison;
+
+    public event Action< Combatant,Combatant, int , int> OnCombatantDamaged;
     public event Action<Combatant> OnCombatantDeath;
 
     public event Action<int, int> OnTurnChanged;
@@ -169,16 +172,19 @@ public class BattleManager : MonoBehaviour
                 // Execute player's attack
                 if (enemy != null && m_currentPlayerWeapon.AttackPoints > 0)
                 {
+                    float classMult = ActionResolver.GetClassMultiplier(m_currentPlayerWeapon.ClassType, enemy.ClassType);
+                    OnClassComparison?.Invoke(m_currentPlayerWeapon, enemy, classMult);
+
                     if (TimelineController.Instance != null)
                         await TimelineController.Instance.PlayAttackAnimationAsync(m_currentPlayerWeapon, enemy);
 
                     int damage = ActionResolver.ResolveDamage(m_currentPlayerWeapon, enemy);
                     enemy.CurrentHP = Mathf.Max(0, enemy.CurrentHP - damage);
-                    OnCombatantDamaged?.Invoke(enemy, enemy.CurrentHP);
+                    OnCombatantDamaged?.Invoke(m_currentPlayerWeapon, enemy, enemy.CurrentHP , damage);
                     if (!enemy.IsAlive) OnCombatantDeath?.Invoke(enemy);
                 }
 
-                await Task.Delay(800);
+                await Task.Delay(1500);
             }
 
             // --------------------------- ENEMY TURN ---------------------------
@@ -210,16 +216,19 @@ public class BattleManager : MonoBehaviour
                 // Execute enemy attack
                 if (actingEnemy.AttackPoints > 0)
                 {
+                    float classMult = ActionResolver.GetClassMultiplier(actingEnemy.ClassType, defendingPlayer.ClassType);
+                    OnClassComparison?.Invoke(actingEnemy, defendingPlayer, classMult);
+
                     if (TimelineController.Instance != null)
                         await TimelineController.Instance.PlayAttackAnimationAsync(actingEnemy, defendingPlayer);
 
                     int damage = ActionResolver.ResolveDamage(actingEnemy, defendingPlayer);
                     defendingPlayer.CurrentHP = Mathf.Max(0, defendingPlayer.CurrentHP - damage);
-                    OnCombatantDamaged?.Invoke(defendingPlayer, defendingPlayer.CurrentHP);
+                    OnCombatantDamaged?.Invoke(actingEnemy, defendingPlayer, defendingPlayer.CurrentHP, damage);
                     if (!defendingPlayer.IsAlive) OnCombatantDeath?.Invoke(defendingPlayer);
                 }
 
-                await Task.Delay(800);
+                await Task.Delay(1500);
             }
 
             // --------------------------- END OF ROUND ---------------------------

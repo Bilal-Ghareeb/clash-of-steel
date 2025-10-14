@@ -108,6 +108,30 @@ public class WeaponItemComponent
             m_weaponImage.style.backgroundImage = new StyleBackground(m_unknownWeaponIcon);
     }
 
+    public void UpdateAttackPreview(float newAttackValue, bool hasAdvantage, bool hasDisadvantage)
+    {
+        if (m_damageNumber == null) return;
+
+        if (hasAdvantage)
+            m_damageNumber.style.color = Color.green;
+        else if (hasDisadvantage)
+            m_damageNumber.style.color = Color.red;
+        else
+            m_damageNumber.style.color = Color.white;
+
+        m_damageNumber.text = Mathf.RoundToInt(newAttackValue).ToString();
+    }
+
+    public void ResetAttackHudData()
+    {
+        if (m_damageNumber == null) return;
+
+        if (m_WeaponInstance != null)
+            m_damageNumber.text = m_WeaponInstance.GetDamage().ToString();
+
+        m_damageNumber.style.color = Color.white;
+    }
+
     public void RegisterButtonCallbacks(bool useCustomClick = false)
     {
         if (m_weaponItemButton == null) return;

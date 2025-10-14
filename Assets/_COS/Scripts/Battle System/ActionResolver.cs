@@ -37,7 +37,7 @@ public static class ActionResolver
         return ResolveDamage(attacker, defender, out _);
     }
 
-    private static float GetClassMultiplier(string attackerClass, string defenderClass)
+    public static float GetClassMultiplier(string attackerClass, string defenderClass)
     {
         if (attackerClass == "Sword" && defenderClass == "Hammer") return AdvantageMultiplier;
         if (attackerClass == "Hammer" && defenderClass == "Shield") return AdvantageMultiplier;
