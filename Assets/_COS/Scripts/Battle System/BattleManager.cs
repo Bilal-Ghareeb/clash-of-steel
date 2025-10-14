@@ -45,7 +45,7 @@ public class BattleManager : MonoBehaviour
 
     public event Action<Combatant, Combatant, float> OnClassComparison;
 
-    public event Action< Combatant,Combatant, int , int> OnCombatantDamaged;
+    public event Action<Combatant,Combatant, int , int> OnCombatantDamaged;
     public event Action<Combatant> OnCombatantDeath;
 
     public event Action<int, int> OnTurnChanged;
