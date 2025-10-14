@@ -9,6 +9,7 @@ public class BattleVisualManager : MonoBehaviour
 
     private GameObject playerInstance;
     private GameObject enemyInstance;
+
     private BattleManager m_Battle;
 
     private void Start()
@@ -56,7 +57,11 @@ public class BattleVisualManager : MonoBehaviour
     {
         var prefab = combatant.InstanceData.Asset.WeaponPrefab;
         if (prefab == null) return;
-        playerInstance = Instantiate(prefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
+
+        var instance = Instantiate(prefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
+        playerInstance = instance;
+
+        combatant.CombatantAnimator = playerInstance.transform.GetChild(0).GetComponent<Animator>();
     }
 
     private void SpawnModelForEnemy(Combatant combatant)

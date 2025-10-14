@@ -1,32 +1,54 @@
-using System.Threading.Tasks;
+using UnityEngine.Playables;
 using UnityEngine;
+using System.Threading.Tasks;
+using Unity.Cinemachine;
 
 public class TimelineController : MonoBehaviour
 {
     public static TimelineController Instance { get; private set; }
 
+    [SerializeField] private PlayableDirector m_director;
+    [SerializeField] private CinemachineCamera m_cinematicCamer;
+
     private void Awake() => Instance = this;
 
-    /// <summary>
-    /// Play attack animation for the attacker (single animation even if AttackPoints > 1).
-    /// Must return a Task that completes when the animation/VFX finished.
-    /// Replace the body with Timeline/Playable logic when wiring animations.
-    /// </summary>
-    public Task PlayAttackAnimationAsync(Combatant attacker, Combatant target)
+    public async Task PlayTimelineAsync(Combatant source, PlayableAsset asset)
     {
+        if (asset == null)
+        {
+            Debug.LogWarning($"No timeline found for {source?.DisplayName}");
+            return;
+        }
+
         var tcs = new TaskCompletionSource<bool>();
 
-        // Example implementation: trigger an Animator or Timeline here.
-        // For prototype we just wait a fixed time (simulate animation).
-        float simulatedMs = 900f; // animation length in ms (tweak)
-        StartCoroutine(WaitThenComplete(simulatedMs / 1000f, tcs));
+        m_director.playableAsset = asset;
 
-        return tcs.Task;
+        foreach (var output in asset.outputs)
+        {
+            if (output.streamName == "CharacterRoot" && source.CombatantAnimator != null)
+                m_director.SetGenericBinding(output.sourceObject, source.CombatantAnimator);
+            else if (output.streamName == "CinematicCamera" && m_cinematicCamer != null)
+                m_director.SetGenericBinding(output.sourceObject, m_cinematicCamer);
+        }
+
+        m_director.stopped += OnTimelineStopped;
+        m_director.Play();
+
+        void OnTimelineStopped(PlayableDirector d)
+        {
+            if (d == m_director)
+            {
+                m_director.stopped -= OnTimelineStopped;
+                tcs.TrySetResult(true);
+            }
+        }
+
+        await tcs.Task;
     }
 
-    private System.Collections.IEnumerator WaitThenComplete(float seconds, TaskCompletionSource<bool> tcs)
-    {
-        yield return new WaitForSeconds(seconds);
-        tcs.SetResult(true);
-    }
+
+    public Task PlayEntranceAsync(Combatant c) => PlayTimelineAsync(c, c.Timelines?.entranceTimeline);
+    public Task PlayAttackAsync(Combatant c) => PlayTimelineAsync(c, c.Timelines?.attackTimeline);
+    public Task PlayDeathAsync(Combatant c) => PlayTimelineAsync(c, c.Timelines?.deathTimeline);
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -176,7 +175,7 @@ public class BattleManager : MonoBehaviour
                     OnClassComparison?.Invoke(m_currentPlayerWeapon, enemy, classMult);
 
                     if (TimelineController.Instance != null)
-                        await TimelineController.Instance.PlayAttackAnimationAsync(m_currentPlayerWeapon, enemy);
+                        await TimelineController.Instance.PlayAttackAsync(m_currentPlayerWeapon);
 
                     int damage = ActionResolver.ResolveDamage(m_currentPlayerWeapon, enemy);
                     enemy.CurrentHP = Mathf.Max(0, enemy.CurrentHP - damage);
@@ -220,7 +219,7 @@ public class BattleManager : MonoBehaviour
                     OnClassComparison?.Invoke(actingEnemy, defendingPlayer, classMult);
 
                     if (TimelineController.Instance != null)
-                        await TimelineController.Instance.PlayAttackAnimationAsync(actingEnemy, defendingPlayer);
+                        await TimelineController.Instance.PlayAttackAsync(actingEnemy);
 
                     int damage = ActionResolver.ResolveDamage(actingEnemy, defendingPlayer);
                     defendingPlayer.CurrentHP = Mathf.Max(0, defendingPlayer.CurrentHP - damage);

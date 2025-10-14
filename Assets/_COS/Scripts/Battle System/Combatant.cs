@@ -7,12 +7,17 @@ public class Combatant
     public string DisplayName;
     public WeaponInstanceBase InstanceData;
     public int CurrentHP;
+
     public int Level => InstanceData.Level;
     public string ClassType => InstanceData.CatalogData.@class;
+    public WeaponTimelineSet Timelines => InstanceData?.Asset?.Timelines;
+
 
     public int AttackPoints { get; private set; } = 0;
     public int DefendPoints { get; private set; } = 0;
     public int BankedPoints { get; private set; } = 0;
+
+    public Animator CombatantAnimator { get; set; }
 
     public bool HasSwitchedThisTurn { get; private set; } = false;
     public bool CanSwitchWeapon => !HasSwitchedThisTurn && BankedPoints > 0;
@@ -66,6 +71,6 @@ public class Combatant
     {
         AttackPoints = 0;
         DefendPoints = 0;
-        HasSwitchedThisTurn = false; // reset each new turn
+        HasSwitchedThisTurn = false;
     }
 }
