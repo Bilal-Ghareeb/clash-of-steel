@@ -216,6 +216,11 @@ public class WeaponsHUDView : UIView
             return;
         }
 
+        if(defenderNewHealth <= 0)
+        {
+            defenderUI.ApplyDeadCardStyle();
+        }
+
         defenderUI.UpdateHealth(defenderNewHealth);
     }
 

@@ -159,6 +159,11 @@ public class WeaponItemComponent
         m_healthNumber.text = newHealth.ToString("0");
     }
 
+    public void ApplyDeadCardStyle()
+    {
+        m_weaponItemButton.ClearClassList();
+        m_weaponItemButton.AddToClassList(WeaponItemComponentStyleClasses.GetDeadCardStyle());
+    }
 
     private void OnButtonClicked(ClickEvent evt)
     {

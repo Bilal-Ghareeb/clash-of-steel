@@ -126,3 +126,17 @@
     max-height: 100%;
     max-width: 100%;
 }
+
+.weapon-scroll-item-dead {
+    width: 350px;
+    height: 345px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/ItemFrame01_Single_Brown.png?fileID=21300000&guid=dd77367546bf4433dbbb2317a935df54&type=3#ItemFrame01_Single_Brown");
+    background-color: rgba(255, 255, 255, 0);
+    -unity-background-image-tint-color: rgb(12, 12, 12);
+    rotate: 7deg;
+}
