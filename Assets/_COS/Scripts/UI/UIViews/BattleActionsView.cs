@@ -47,7 +47,7 @@ public class BattleActionsView : UIView
         m_Battle.OnEnemyTurnStarted += OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed += OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        m_Battle.OnPlayerWeaponSwitched += HandleSwitchRequest;
+        m_Battle.OnWeaponSwitched += HandleWeaponSwitchRequest;
         m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
 
         HideAllUI();
@@ -62,7 +62,7 @@ public class BattleActionsView : UIView
         m_Battle.OnEnemyTurnStarted -= OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed -= OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        m_Battle.OnPlayerWeaponSwitched -= HandleSwitchRequest;
+        m_Battle.OnWeaponSwitched -= HandleWeaponSwitchRequest;
         m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
     }
 
@@ -282,26 +282,39 @@ public class BattleActionsView : UIView
         m_playerCurrentPoints.style.color = totalAvailable > basePts ? Color.yellow : Color.white;
     }
 
-    private void HandleSwitchRequest(Combatant incomingCombatant, Combatant outgoingCombatant , bool deductCost)
+    private void HandleWeaponSwitchRequest(
+        Combatant incomingCombatant,
+        Combatant outgoingCombatant,
+        bool deductCost,
+        bool isPlayer)
     {
-        var actor = m_Battle.GetActivePlayerCombatant();
+        var actor = isPlayer
+            ? m_Battle.GetActivePlayerCombatant()
+            : m_Battle.GetActiveEnemyCombatant();
+
         if (actor == null)
             return;
 
-        SetPlayerButtonsEnabled(false);
-
-        if (deductCost)
-            m_SwitchPoint += 1;
-
-        UpdatePointsUI();
-
-        int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;
-        if (remaining <= 0)
+        if (isPlayer)
         {
-            _ = FinalizeAfterDelay(actor, 600);
-            return;
+            SetPlayerButtonsEnabled(false);
+            if (deductCost)
+                m_SwitchPoint += 1;
+            UpdatePointsUI();
+
+            int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;
+            if (remaining <= 0)
+            {
+                _ = FinalizeAfterDelay(actor, 600);
+                return;
+            }
+        }
+        else
+        {
+            Debug.Log("Enemy Switched UI Points Should Update");
         }
     }
+
 
 
     private void ResetLocalPoints()

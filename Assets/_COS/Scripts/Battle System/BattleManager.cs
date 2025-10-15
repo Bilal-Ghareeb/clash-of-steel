@@ -24,12 +24,14 @@ public class BattleManager : MonoBehaviour
     public List<Combatant> EnemyTeam { get; private set; }
 
     private Combatant m_currentPlayerWeapon;
+    private Combatant m_currentEnemyWeapon;
 
     private int playerBasePoints;
     private int playerReservedPoints;
     private int enemyBasePoints;
     private int enemyReservedPoints;
     private int activePlayerWeaponIndex = 0;
+    private int activeEnemyWeaponIndex = 0;
 
     public event Action OnBattleCountdownStarted;
     public event Action OnBattleStarted;
@@ -50,7 +52,7 @@ public class BattleManager : MonoBehaviour
 
     public event Action<int, int> OnTurnChanged;
 
-    public event Action<Combatant, Combatant , bool> OnPlayerWeaponSwitched;
+    public event Action<Combatant, Combatant , bool , bool> OnWeaponSwitched;
     public event Action OnPlayerWeaponEntranceCompleted;
 
     private int turnNumber = 0;
@@ -154,7 +156,7 @@ public class BattleManager : MonoBehaviour
             await Task.Delay(1200);
 
             m_currentPlayerWeapon = PlayerTeam[activePlayerWeaponIndex];
-            Combatant enemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
+            m_currentEnemyWeapon = EnemyTeam[activeEnemyWeaponIndex];
 
             if (m_currentPlayerWeapon != null && m_currentPlayerWeapon.IsAlive)
             {
@@ -170,23 +172,29 @@ public class BattleManager : MonoBehaviour
                 m_currentPlayerWeapon.TryAllocate(playerAlloc.attack, playerAlloc.defend, playerAlloc.reserve, out _);
 
                 // Show only player's attack vs enemy's defend
-                var playerReveal = (m_currentPlayerWeapon.AttackPoints, enemy?.DefendPoints ?? 0);
+                var playerReveal = (m_currentPlayerWeapon.AttackPoints, m_currentEnemyWeapon?.DefendPoints ?? 0);
                 OnAllocationsRevealed?.Invoke(playerReveal, (0, 0));
                 await Task.Delay(3000);
 
                 // Execute player's attack
-                if (enemy != null && m_currentPlayerWeapon.AttackPoints > 0)
+                if (m_currentEnemyWeapon != null && m_currentPlayerWeapon.AttackPoints > 0)
                 {
-                    float classMult = ActionResolver.GetClassMultiplier(m_currentPlayerWeapon.ClassType, enemy.ClassType);
-                    OnClassComparison?.Invoke(m_currentPlayerWeapon, enemy, classMult);
+                    float classMult = ActionResolver.GetClassMultiplier(m_currentPlayerWeapon.ClassType, m_currentEnemyWeapon.ClassType);
+                    OnClassComparison?.Invoke(m_currentPlayerWeapon, m_currentEnemyWeapon, classMult);
 
                     if (TimelineController.Instance != null)
                         await TimelineController.Instance.PlayAttackAsync(m_currentPlayerWeapon);
 
-                    int damage = ActionResolver.ResolveDamage(m_currentPlayerWeapon, enemy);
-                    enemy.CurrentHP = Mathf.Max(0, enemy.CurrentHP - damage);
-                    OnCombatantDamaged?.Invoke(m_currentPlayerWeapon, enemy, enemy.CurrentHP , damage);
-                    if (!enemy.IsAlive) OnCombatantDeath?.Invoke(enemy);
+                    int damage = ActionResolver.ResolveDamage(m_currentPlayerWeapon, m_currentEnemyWeapon);
+                    m_currentEnemyWeapon.CurrentHP = Mathf.Max(0, m_currentEnemyWeapon.CurrentHP - damage);
+                    OnCombatantDamaged?.Invoke(m_currentPlayerWeapon, m_currentEnemyWeapon, m_currentEnemyWeapon.CurrentHP , damage);
+
+                    if (!m_currentEnemyWeapon.IsAlive)
+                    {
+                        await TimelineController.Instance.PlayDeathAsync(m_currentEnemyWeapon);
+                        OnCombatantDeath?.Invoke(m_currentEnemyWeapon);
+                        ForceSwitchActiveWeapon(isPlayer:false);
+                    }
                 }
 
                 await Task.Delay(1500);
@@ -198,44 +206,41 @@ public class BattleManager : MonoBehaviour
             OnEnemyTurnStarted?.Invoke();
             await Task.Delay(1200);
 
-            Combatant actingEnemy = EnemyTeam.FirstOrDefault(e => e.IsAlive);
-            Combatant defendingPlayer = GetActivePlayerCombatant();
-
-            if (actingEnemy != null && defendingPlayer != null)
+            if (m_currentEnemyWeapon != null && m_currentPlayerWeapon != null)
             {
                 int enemyAvailablePoints = Mathf.Min(enemyBasePoints + enemyReservedPoints, bankCap);
-                actingEnemy.StartTurnWithAvailablePoints(enemyAvailablePoints, bankCap);
+                m_currentEnemyWeapon.StartTurnWithAvailablePoints(enemyAvailablePoints, bankCap);
 
                 // Enemy simple AI (example: attack everything)
                 int attack = enemyAvailablePoints;
                 int defend = 0;
                 int reserve = 0;
-                actingEnemy.TryAllocate(attack, defend, reserve, out _);
+                m_currentEnemyWeapon.TryAllocate(attack, defend, reserve, out _);
                 enemyReservedPoints = reserve;
 
                 // Reveal enemy attack vs player defend (from previous turn)
-                var enemyReveal = (actingEnemy.AttackPoints, defendingPlayer.DefendPoints);
+                var enemyReveal = (m_currentEnemyWeapon.AttackPoints, m_currentPlayerWeapon.DefendPoints);
                 OnAllocationsRevealed?.Invoke((0, 0), enemyReveal);
                 await Task.Delay(3000);
 
                 // Execute enemy attack
-                if (actingEnemy.AttackPoints > 0)
+                if (m_currentEnemyWeapon.AttackPoints > 0)
                 {
-                    float classMult = ActionResolver.GetClassMultiplier(actingEnemy.ClassType, defendingPlayer.ClassType);
-                    OnClassComparison?.Invoke(actingEnemy, defendingPlayer, classMult);
+                    float classMult = ActionResolver.GetClassMultiplier(m_currentEnemyWeapon.ClassType, m_currentPlayerWeapon.ClassType);
+                    OnClassComparison?.Invoke(m_currentEnemyWeapon, m_currentPlayerWeapon, classMult);
 
                     if (TimelineController.Instance != null)
-                        await TimelineController.Instance.PlayAttackAsync(actingEnemy);
+                        await TimelineController.Instance.PlayAttackAsync(m_currentEnemyWeapon);
 
-                    int damage = ActionResolver.ResolveDamage(actingEnemy, defendingPlayer);
-                    defendingPlayer.CurrentHP = Mathf.Max(0, defendingPlayer.CurrentHP - damage);
-                    OnCombatantDamaged?.Invoke(actingEnemy, defendingPlayer, defendingPlayer.CurrentHP, damage);
+                    int damage = ActionResolver.ResolveDamage(m_currentEnemyWeapon, m_currentPlayerWeapon);
+                    m_currentPlayerWeapon.CurrentHP = Mathf.Max(0, m_currentPlayerWeapon.CurrentHP - damage);
+                    OnCombatantDamaged?.Invoke(m_currentEnemyWeapon, m_currentPlayerWeapon, m_currentPlayerWeapon.CurrentHP, damage);
 
-                    if (!defendingPlayer.IsAlive)
+                    if (!m_currentPlayerWeapon.IsAlive)
                     {
-                        await TimelineController.Instance.PlayDeathAsync(defendingPlayer);
-                        OnCombatantDeath?.Invoke(defendingPlayer);
-                        ForceSwitchActivePlayerWeapon();
+                        await TimelineController.Instance.PlayDeathAsync(m_currentPlayerWeapon);
+                        OnCombatantDeath?.Invoke(m_currentPlayerWeapon);
+                        ForceSwitchActiveWeapon(isPlayer: true);
                     }
                 }
 
@@ -300,57 +305,81 @@ public class BattleManager : MonoBehaviour
     /// This does not change Combatant runtime health/state — it's only swapping which one is active.
     /// Fire OnPlayerWeaponSwitched(newActive, oldActive) when successful.
     /// </summary>
-    public async void SwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost)
+    public async void SwitchActivePlayerWeapon(Combatant incomingCombatant)
     {
-        TrySwitchActivePlayerWeapon(incomingCombatant, switchCost, deductCost: true);
+        TrySwitchActiveWeapon(incomingCombatant, 1, deductCost: true, isPlayer:true);
         await TimelineController.Instance.PlayEntranceAsync(incomingCombatant);
         OnPlayerWeaponEntranceCompleted?.Invoke();
     }
 
-    public async void ForceSwitchActivePlayerWeapon()
+    public async void ForceSwitchActiveWeapon(bool isPlayer = true)
     {
-        if (PlayerTeam.All(w => !w.IsAlive || w == GetActivePlayerCombatant()))
+        var team = isPlayer ? PlayerTeam : EnemyTeam;
+        if (team == null || team.All(w => !w.IsAlive))
             return;
 
-        for (int i = 0; i < PlayerTeam.Count; i++)
+        int activeIndex = isPlayer ? activePlayerWeaponIndex : activeEnemyWeaponIndex;
+        var activeCombatant = team[activeIndex];
+
+        if (team.All(w => !w.IsAlive || w == activeCombatant))
+            return;
+
+        for (int i = 0; i < team.Count; i++)
         {
-            if (i != activePlayerWeaponIndex && PlayerTeam[i].IsAlive)
+            if (i != activeIndex && team[i].IsAlive)
             {
-                var newCombatant = PlayerTeam[i];
-                TrySwitchActivePlayerWeapon(newCombatant, 0, deductCost: false);
-                await TimelineController.Instance.PlayEntranceAsync(newCombatant);
-                OnPlayerWeaponEntranceCompleted?.Invoke();
+                var newCombatant = team[i];
+
+                if (isPlayer)
+                {
+                    TrySwitchActiveWeapon(newCombatant, 0, deductCost: false, isPlayer: true);
+                    await TimelineController.Instance.PlayEntranceAsync(newCombatant);
+                    OnPlayerWeaponEntranceCompleted?.Invoke();
+                }
+                else
+                {
+                    TrySwitchActiveWeapon(newCombatant, 0, deductCost: false, isPlayer: false);
+                    await TimelineController.Instance.PlayEntranceAsync(newCombatant);
+                }
+
                 return;
             }
         }
     }
 
+
     /// <summary>
-    /// Handles the full switching process, with optional cost deduction.
+    /// Handles the full switching process for either player or enemy.
     /// </summary>
-    private void TrySwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost, bool deductCost)
+    private void TrySwitchActiveWeapon(Combatant incomingCombatant, int switchCost, bool deductCost, bool isPlayer)
     {
-        if (PlayerTeam == null)
+        var team = isPlayer ? PlayerTeam : EnemyTeam;
+        if (team == null)
             return;
 
-        int newIndex = PlayerTeam.IndexOf(incomingCombatant);
-        if (newIndex < 0 || newIndex >= PlayerTeam.Count)
+        int activeIndex = isPlayer ? activePlayerWeaponIndex : activeEnemyWeaponIndex;
+        int newIndex = team.IndexOf(incomingCombatant);
+
+        if (newIndex < 0 || newIndex >= team.Count)
             return;
 
-        if (newIndex == activePlayerWeaponIndex)
+        if (newIndex == activeIndex)
             return;
 
-        var oldActive = PlayerTeam[activePlayerWeaponIndex];
-        var newActive = PlayerTeam[newIndex];
+        var oldActive = team[activeIndex];
+        var newActive = team[newIndex];
 
         if (newActive == null || !newActive.IsAlive)
             return;
 
-        int availablePoints = GetCurrentPlayerAvailablePoints();
+        int availablePoints = isPlayer
+            ? GetCurrentPlayerAvailablePoints()
+            : GetCurrentEnemyAvailablePoints();
+
         if (deductCost && availablePoints < switchCost)
             return;
 
-        if (!oldActive.CanSwitchWeapon)
+        if (isPlayer && !oldActive.CanSwitchWeapon)
         {
             Debug.Log("Cannot switch again this turn.");
             return;
@@ -358,24 +387,37 @@ public class BattleManager : MonoBehaviour
 
         newActive.Switch();
 
-        if (availablePoints > 0 || !deductCost)
+        if (isPlayer)
         {
             m_currentPlayerWeapon = newActive;
-            newActive.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints(), bankCap);
+            newActive.StartTurnWithAvailablePoints(availablePoints, bankCap);
+        }
+        else
+        {
+            m_currentEnemyWeapon = newActive;
+            newActive.StartTurnWithAvailablePoints(availablePoints, bankCap);
         }
 
-        OnPlayerWeaponSwitched?.Invoke(newActive, oldActive , deductCost);
-        OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
+        OnWeaponSwitched?.Invoke(newActive, oldActive, deductCost, isPlayer);
 
-        PlayerTeam.RemoveAt(newIndex);
-        PlayerTeam.Insert(0, newActive);
+        if (isPlayer)
+            OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
 
-        activePlayerWeaponIndex = 0;
+        team.RemoveAt(newIndex);
+        team.Insert(0, newActive);
+
+        if (isPlayer)
+            activePlayerWeaponIndex = 0;
+        else
+            activeEnemyWeaponIndex = 0;
     }
+
+
 
     private bool AnyAlive(List<Combatant> team) => team != null && team.Any(x => x.IsAlive);
     public int GetCurrentPlayerBasePoints() => playerBasePoints;
     public int GetCurrentPlayerAvailablePoints() => Mathf.Min(playerBasePoints + playerReservedPoints, bankCap);
+    public int GetCurrentEnemyAvailablePoints() => Mathf.Min(enemyBasePoints + enemyBasePoints, bankCap);
 
 
     public Combatant GetActivePlayerCombatant()
@@ -383,6 +425,13 @@ public class BattleManager : MonoBehaviour
         if (PlayerTeam == null || PlayerTeam.Count == 0) return null;
         activePlayerWeaponIndex = Mathf.Clamp(activePlayerWeaponIndex, 0, PlayerTeam.Count - 1);
         return PlayerTeam[activePlayerWeaponIndex];
+    }
+
+    public Combatant GetActiveEnemyCombatant()
+    {
+        if (EnemyTeam == null || EnemyTeam.Count == 0) return null;
+        activeEnemyWeaponIndex = Mathf.Clamp(activeEnemyWeaponIndex, 0, EnemyTeam.Count - 1);
+        return EnemyTeam[activeEnemyWeaponIndex];
     }
 
     public void EndBattleAndReturnToScene(string sceneName)

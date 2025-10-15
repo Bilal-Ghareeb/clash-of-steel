@@ -16,7 +16,7 @@ public class WeaponsHUDView : UIView
     private readonly Dictionary<Combatant, WeaponItemComponent> m_EnemyCombatantsUI = new();
 
 
-    public event Action<Combatant, int> OnRequestSwitch;
+    public event Action<Combatant> OnRequestSwitch;
     public event Action OnInitialized;
     private bool m_IsPlayerAllocationPhase = false;
 
@@ -33,7 +33,7 @@ public class WeaponsHUDView : UIView
         m_Battle.OnBattleStarted += OnBattleStarted;
         m_Battle.OnCombatantDamaged += OnCombatantDamaged;
         m_Battle.OnClassComparison += OnClassComparison;
-        m_Battle.OnPlayerWeaponSwitched += OnPlayerWeaponSwitched;
+        m_Battle.OnWeaponSwitched += OnWeaponSwitched;
 
         m_Battle.OnEnemyTurnStarted += ResetAllAttackColors;
         m_Battle.OnPlayerTurnStarted += ResetAllAttackColors;
@@ -54,7 +54,7 @@ public class WeaponsHUDView : UIView
             m_Battle.OnBattleStarted -= OnBattleStarted;
             m_Battle.OnCombatantDamaged -= OnCombatantDamaged;
             m_Battle.OnClassComparison -= OnClassComparison;
-            m_Battle.OnPlayerWeaponSwitched -= OnPlayerWeaponSwitched;
+            m_Battle.OnWeaponSwitched -= OnWeaponSwitched;
 
             m_Battle.OnEnemyTurnStarted -= ResetAllAttackColors;
             m_Battle.OnPlayerTurnStarted -= ResetAllAttackColors;
@@ -126,32 +126,50 @@ public class WeaponsHUDView : UIView
         }
     }
 
-    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost)
+    private void OnWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost , bool isPlayer)
     {
-        if (m_PlayerCombatantsUI == null) return;
-
-        int newIndex = m_Battle.PlayerTeam.IndexOf(newActive);
-        if (newIndex >= 0)
+        if (isPlayer)
         {
-            UpdatePlayerWeaponsOrderAfterSwitch(newIndex);
+            if (m_PlayerCombatantsUI == null) return;
+
+            int newIndex = m_Battle.PlayerTeam.IndexOf(newActive);
+            if (newIndex >= 0)
+            {
+                UpdateWeaponsOrderAfterSwitch(isPlayer, newIndex);
+            }
         }
+        else
+        {
+            if (m_EnemyCombatantsUI == null) return;
+
+            int newIndex = m_Battle.EnemyTeam.IndexOf(newActive);
+            if (newIndex >= 0)
+            {
+                UpdateWeaponsOrderAfterSwitch(isPlayer,newIndex);
+            }
+        }
+
     }
 
-    public void UpdatePlayerWeaponsOrderAfterSwitch(int newActiveIndex)
+    public void UpdateWeaponsOrderAfterSwitch(bool isPlayer, int newActiveIndex)
     {
-        if (m_PlayerCombatantsUI == null || newActiveIndex < 0 || newActiveIndex >= m_Battle.PlayerTeam.Count)
+        var team = isPlayer ? m_Battle.PlayerTeam : m_Battle.EnemyTeam;
+        var combatantUI = isPlayer ? m_PlayerCombatantsUI : m_EnemyCombatantsUI;
+        var container = isPlayer ? m_PlayerContainer : m_EnemyContainer;
+
+        if (team == null || combatantUI == null || newActiveIndex < 0 || newActiveIndex >= team.Count)
             return;
 
-        var newActiveWeapon = m_Battle.PlayerTeam[newActiveIndex];
-        var outgoingWeapon = m_Battle.PlayerTeam[0];
+        var newActiveWeapon = team[newActiveIndex];
+        var outgoingWeapon = team[0];
 
-        if (m_PlayerCombatantsUI.TryGetValue(newActiveWeapon, out var newActiveWeaponItem))
+        if (combatantUI.TryGetValue(newActiveWeapon, out var newActiveWeaponItem))
         {
             newActiveWeaponItem.UnRegisterButtonCallbacks();
             newActiveWeaponItem.OnCustomClick = null;
         }
 
-        if (m_PlayerCombatantsUI.TryGetValue(outgoingWeapon, out var oldActiveWeaponItem))
+        if (combatantUI.TryGetValue(outgoingWeapon, out var oldActiveWeaponItem))
         {
             if (outgoingWeapon.IsAlive)
             {
@@ -165,34 +183,33 @@ public class WeaponsHUDView : UIView
             }
         }
 
-        m_PlayerContainer.Clear();
+        container.Clear();
 
-        if (m_PlayerCombatantsUI.TryGetValue(newActiveWeapon, out var activeWeaponItem))
+        if (combatantUI.TryGetValue(newActiveWeapon, out var activeWeaponItem))
         {
             VisualElement root = activeWeaponItem.Root;
             root.experimental.animation
                 .Scale(1f, 500)
                 .Ease(Easing.OutCubic);
-            m_PlayerContainer.Add(root);
+            container.Add(root);
         }
 
-        for (int i = 0; i < m_Battle.PlayerTeam.Count; i++)
+        for (int i = 0; i < team.Count; i++)
         {
             if (i == newActiveIndex)
                 continue;
 
-            var combatant = m_Battle.PlayerTeam[i];
-            if (!m_PlayerCombatantsUI.TryGetValue(combatant, out var weaponItem))
+            var combatant = team[i];
+            if (!combatantUI.TryGetValue(combatant, out var weaponItem))
                 continue;
 
             VisualElement root = weaponItem.Root;
             root.experimental.animation
                 .Scale(0.7f, 500)
                 .Ease(Easing.OutCubic);
-            m_PlayerContainer.Add(root);
+            container.Add(root);
         }
     }
-
 
     private void OnClassComparison(Combatant attacker, Combatant defender, float multiplier)
     {
@@ -260,9 +277,7 @@ public class WeaponsHUDView : UIView
         if (!m_IsPlayerAllocationPhase) return;
         var active = m_Battle?.GetActivePlayerCombatant();
         if (active == null || combatant == active) return;
-
-        int currentIndex = m_Battle.PlayerTeam.IndexOf(combatant);
-        OnRequestSwitch?.Invoke(combatant, currentIndex);
+        OnRequestSwitch?.Invoke(combatant);
     }
 
 }

@@ -21,7 +21,7 @@ public class BattleVisualManager : MonoBehaviour
             return;
         }
         m_Battle.OnBattleStarted += () => SpawnInitialModels(m_Battle);
-        m_Battle.OnPlayerWeaponSwitched += OnPlayerWeaponSwitched;
+        m_Battle.OnWeaponSwitched += OnWeaponSwitched;
         m_Battle.OnCombatantDeath += OnCombatantDeath;
     }
 
@@ -30,7 +30,7 @@ public class BattleVisualManager : MonoBehaviour
         if (m_Battle != null)
         {
             m_Battle.OnBattleStarted -= () => SpawnInitialModels(m_Battle);
-            m_Battle.OnPlayerWeaponSwitched -= OnPlayerWeaponSwitched;
+            m_Battle.OnWeaponSwitched -= OnWeaponSwitched;
             m_Battle.OnCombatantDeath -= OnCombatantDeath;
         }
     }
@@ -38,11 +38,11 @@ public class BattleVisualManager : MonoBehaviour
     private void SpawnInitialModels(BattleManager battle)
     {
         var player = battle.GetActivePlayerCombatant();
-        var enemy = battle.EnemyTeam?.FirstOrDefault();
+        var enemy = battle.GetActiveEnemyCombatant();
 
         if (player != null && player.InstanceData?.Asset?.WeaponPrefab != null)
         {
-            SpawnModelForPlayer(player);
+            SpawnModelForWeapon(player);
         }
         if (enemy != null && enemy.InstanceData?.Asset?.WeaponPrefab != null)
         {
@@ -50,14 +50,26 @@ public class BattleVisualManager : MonoBehaviour
         }
     }
 
-    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost)
+    private void OnWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost , bool isPlayer)
     {
-        if (playerInstance != null)
+        if (isPlayer)
         {
-            Destroy(playerInstance);
-            playerInstance = null;
+            if (playerInstance != null)
+            {
+                Destroy(playerInstance);
+                playerInstance = null;
+            }
+            SpawnModelForWeapon(newActive);
         }
-        SpawnModelForPlayer(newActive);
+        else
+        {
+            if (enemyInstance != null)
+            {
+                Destroy(enemyInstance);
+                enemyInstance = null;
+            }
+            SpawnModelForEnemy(newActive);
+        }
     }
 
     private void OnCombatantDeath(Combatant deadCombatant)
@@ -82,7 +94,7 @@ public class BattleVisualManager : MonoBehaviour
         }
     }
 
-    private void SpawnModelForPlayer(Combatant combatant)
+    private void SpawnModelForWeapon(Combatant combatant)
     {
         var prefab = combatant.InstanceData.Asset.WeaponPrefab;
         if (prefab == null) return;
