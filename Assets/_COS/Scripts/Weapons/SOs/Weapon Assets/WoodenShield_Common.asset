@@ -15,6 +15,6 @@ MonoBehaviour:
   weaponId: Wooden Shield
   WeaponPrefab: {fileID: 4626643307549331207, guid: 3137fc259639fac42a1db997b6bd2900, type: 3}
   Timelines:
-    entranceTimeline: {fileID: 0}
-    attackTimeline: {fileID: 0}
-    deathTimeline: {fileID: 0}
+    entranceTimeline: {fileID: 11400000, guid: 73318f20600b3cf4ca78d19f47ab5b2b, type: 2}
+    attackTimeline: {fileID: 11400000, guid: 3553800e212a2be4b88a937bcf061959, type: 2}
+    deathTimeline: {fileID: 11400000, guid: 415223d37a7e91d44bdd190d28284395, type: 2}
