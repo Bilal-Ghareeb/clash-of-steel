@@ -25,5 +25,6 @@ public class StageEnemyData
 [System.Serializable]
 public class StageRewardData
 {
-    public int gold;
+    public int GD;
 }
+

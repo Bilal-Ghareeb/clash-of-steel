@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class BattleResultView : UIView
@@ -81,6 +82,37 @@ public class BattleResultView : UIView
         m_actionButton.RemoveFromClassList("lose-style");
         m_actionButton.RemoveFromClassList("win-style");
         m_actionButton.AddToClassList(m_playerWon ? "win-style" : "lose-style");
+
+        if (m_playerWon)
+            PopulateRewards();
+    }
+
+    private void PopulateRewards()
+    {
+        m_rewardsContainer.Clear();
+
+        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        if (currentStage == null)
+        {
+            Debug.LogWarning("BattleResultView: No current stage found for rewards.");
+            return;
+        }
+
+        StageRewardData rewards = currentStage.rewards;
+        if (rewards == null)
+        {
+            Debug.LogWarning("BattleResultView: No rewards data found for current stage.");
+            return;
+        }
+
+        if (rewards.GD > 0)
+        {
+            TemplateContainer itemTemplate = m_rewardItemAsset.Instantiate();
+            var rewardItem = new RewardItemComponent();
+            rewardItem.SetVisualElements(itemTemplate);
+            rewardItem.SetRewardData(rewards.GD);
+            m_rewardsContainer.Add(itemTemplate);
+        }
     }
 
     private void OnActionButtonClickedWin()
@@ -90,12 +122,11 @@ public class BattleResultView : UIView
 
     private void OnActionButtonClickedLose()
     {
-        Debug.Log("Player Lost — leave without rewards");
+        SceneManager.LoadScene("GameScene");
     }
 
     public override void Hide()
     {
         base.Hide();
-        UnregisterButtonCallbacks();
     }
 }
