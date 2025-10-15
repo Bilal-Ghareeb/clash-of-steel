@@ -65,14 +65,15 @@ public class BattleUIManager : MonoBehaviour
         m_OnWeaponsHUDInitializedHandler = () =>
         {
             m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
-            m_BattleActionsView.InitializeBattleManager(m_battle, m_WeaponsHUDView);
+            m_BattleActionsView.InitializeBattleManager(m_battle);
 
-            // after initialization, unsubscribe immediately to avoid leaks
             m_WeaponsHUDView.OnInitialized -= m_OnWeaponsHUDInitializedHandler;
         };
 
         m_WeaponsHUDView.OnInitialized += m_OnWeaponsHUDInitializedHandler;
         m_WeaponsHUDView.InitializeBattleManager(m_battle);
+
+        m_battle.Init(m_WeaponsHUDView);
 
         m_AllViews.Add(m_WeaponsHUDView);
     }

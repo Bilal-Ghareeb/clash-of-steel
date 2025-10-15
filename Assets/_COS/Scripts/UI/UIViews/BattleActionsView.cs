@@ -38,19 +38,16 @@ public class BattleActionsView : UIView
     public BattleActionsView(VisualElement topElement, bool hideOnAwake = true)
         : base(topElement, hideOnAwake) { }
 
-    public void InitializeBattleManager(BattleManager battle, WeaponsHUDView weaponsHud)
+    public void InitializeBattleManager(BattleManager battle)
     {
         m_Battle = battle;
-        m_WeaponsHUD = weaponsHud;
 
         m_Battle.OnBattleCountdownStarted += OnCountdownStarted;
         m_Battle.OnPlayerAllocationPhaseStarted += OnPlayerAllocationPhaseStarted;
         m_Battle.OnEnemyTurnStarted += OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed += OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted += OnPlayerTurnStarted;
-
-        if (m_WeaponsHUD != null)
-            m_WeaponsHUD.OnRequestSwitch += HandleSwitchRequest;
+        m_Battle.OnPlayerWeaponSwitched += HandleSwitchRequest;
 
         HideAllUI();
     }
@@ -64,9 +61,7 @@ public class BattleActionsView : UIView
         m_Battle.OnEnemyTurnStarted -= OnEnemyTurnStarted;
         m_Battle.OnAllocationsRevealed -= OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-
-        if (m_WeaponsHUD != null)
-            m_WeaponsHUD.OnRequestSwitch -= HandleSwitchRequest;
+        m_Battle.OnPlayerWeaponSwitched -= HandleSwitchRequest;
     }
 
     protected override void SetVisualElements()
@@ -285,29 +280,15 @@ public class BattleActionsView : UIView
         m_playerCurrentPoints.style.color = totalAvailable > basePts ? Color.yellow : Color.white;
     }
 
-    private void HandleSwitchRequest(Combatant targetCombatant, int targetIndex)
+    private void HandleSwitchRequest(Combatant incomingCombatant, Combatant outgoingCombatant , bool deductCost)
     {
         var actor = m_Battle.GetActivePlayerCombatant();
         if (actor == null)
             return;
-        if (!actor.CanSwitchWeapon)
-        {
-            Debug.Log("Cannot switch again this turn.");
-            return;
-        }
 
-        int switchCost = 1;
-        string err;
-        bool ok = m_Battle.SwitchActivePlayerWeapon(targetIndex, switchCost, out err);
-        if (!ok)
-        {
-            Debug.LogError("Switch failed: " + err);
-            return;
-        }
+        if(deductCost)
+            m_SwitchPoint += 1;
 
-        actor.Switch();
-
-        m_SwitchPoint += switchCost;
         UpdatePointsUI();
 
         int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;

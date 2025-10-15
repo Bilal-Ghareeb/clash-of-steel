@@ -50,21 +50,26 @@ public class BattleManager : MonoBehaviour
 
     public event Action<int, int> OnTurnChanged;
 
-    public event Action<Combatant, Combatant> OnPlayerWeaponSwitched;
-
+    public event Action<Combatant, Combatant , bool> OnPlayerWeaponSwitched;
 
     private int turnNumber = 0;
 
-    // Internal: when waiting for player's submission
     private TaskCompletionSource<(int attack, int defend, int reserve)> _playerAllocationTcs;
-    private (int attack, int defend, int reserve) _lastEnemyAllocation;
+
+    private WeaponsHUDView m_weaponHUDView;
 
     [Header("Timing Settings (ms)")]
     [SerializeField] private int turnStartDelayMs = 1000;
     [SerializeField] private int revealDelayMs = 2000;    
     [SerializeField] private int resultDelayMs = 1500; 
-    [SerializeField] private int countdownDelayMs = 3500;  
+    [SerializeField] private int countdownDelayMs = 3500;
 
+
+    public void Init(WeaponsHUDView wHUd)
+    {
+        m_weaponHUDView = wHUd;
+        m_weaponHUDView.OnRequestSwitch += SwitchActivePlayerWeapon;
+    }
 
     private async void Start()
     {
@@ -295,68 +300,73 @@ public class BattleManager : MonoBehaviour
     /// This does not change Combatant runtime health/state — it's only swapping which one is active.
     /// Fire OnPlayerWeaponSwitched(newActive, oldActive) when successful.
     /// </summary>
-    public bool SwitchActivePlayerWeapon(int newIndex, int switchCost, out string error)
+    public void SwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost)
     {
-        error = null;
-        if (PlayerTeam == null || newIndex < 0 || newIndex >= PlayerTeam.Count)
-        {
-            error = "Invalid index";
-            return false;
-        }
-        if (newIndex == activePlayerWeaponIndex)
-        {
-            error = "Already active";
-            return false;
-        }
-
-        var oldActive = PlayerTeam[activePlayerWeaponIndex];
-        var newActive = PlayerTeam[newIndex];
-
-        if (newActive == null || !newActive.IsAlive)
-        {
-            error = "Target weapon is not available/alive.";
-            return false;
-        }
-
-        int availablePoints = GetCurrentPlayerAvailablePoints();
-        if (availablePoints < switchCost)
-        {
-            error = "Not enough points to switch.";
-            return false;
-        }
-
-        PlayerTeam.RemoveAt(newIndex);
-        PlayerTeam.Insert(0, newActive);
-
-        if(GetCurrentPlayerAvailablePoints() > 0)
-        {
-            m_currentPlayerWeapon = newActive;
-            newActive.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints() , bankCap);
-        }
-
-        OnPlayerWeaponSwitched?.Invoke(newActive, oldActive);
-        OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
-        return true;
+        TrySwitchActivePlayerWeapon(incomingCombatant, switchCost, deductCost: true);
     }
 
     public void ForceSwitchActivePlayerWeapon()
     {
-        var oldActive = GetActivePlayerCombatant();
+        // Find the next alive combatant
         for (int i = 0; i < PlayerTeam.Count; i++)
         {
             if (i != activePlayerWeaponIndex && PlayerTeam[i].IsAlive)
             {
-                activePlayerWeaponIndex = i;
-                m_currentPlayerWeapon = PlayerTeam[i];
-                m_currentPlayerWeapon.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints(), bankCap);
-
-                OnPlayerWeaponSwitched?.Invoke(m_currentPlayerWeapon, oldActive);
-                OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
+                var newCombatant = PlayerTeam[i];
+                TrySwitchActivePlayerWeapon(newCombatant, 0, deductCost: false);
                 return;
             }
         }
 
         Debug.LogWarning("No alive player combatant left to switch to!");
+    }
+
+    /// <summary>
+    /// Handles the full switching process, with optional cost deduction.
+    /// </summary>
+    private void TrySwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost, bool deductCost)
+    {
+        if (PlayerTeam == null)
+            return;
+
+        int newIndex = PlayerTeam.IndexOf(incomingCombatant);
+        if (newIndex < 0 || newIndex >= PlayerTeam.Count)
+            return;
+
+        if (newIndex == activePlayerWeaponIndex)
+            return;
+
+        var oldActive = PlayerTeam[activePlayerWeaponIndex];
+        var newActive = PlayerTeam[newIndex];
+
+        if (newActive == null || !newActive.IsAlive)
+            return;
+
+        int availablePoints = GetCurrentPlayerAvailablePoints();
+        if (deductCost && availablePoints < switchCost)
+            return;
+
+        if (!oldActive.CanSwitchWeapon)
+        {
+            Debug.Log("Cannot switch again this turn.");
+            return;
+        }
+
+        newActive.Switch();
+
+        if (availablePoints > 0 || !deductCost)
+        {
+            m_currentPlayerWeapon = newActive;
+            newActive.StartTurnWithAvailablePoints(GetCurrentPlayerAvailablePoints(), bankCap);
+        }
+
+        OnPlayerWeaponSwitched?.Invoke(newActive, oldActive , deductCost);
+        OnTurnChanged?.Invoke(turnNumber, GetCurrentPlayerAvailablePoints());
+
+        PlayerTeam.RemoveAt(newIndex);
+        PlayerTeam.Insert(0, newActive);
+
+        activePlayerWeaponIndex = 0;
     }
 
 

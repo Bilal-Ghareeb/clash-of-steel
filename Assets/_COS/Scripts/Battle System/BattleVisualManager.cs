@@ -43,7 +43,7 @@ public class BattleVisualManager : MonoBehaviour
         }
     }
 
-    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive)
+    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost)
     {
         if (playerInstance != null)
         {

@@ -19,7 +19,7 @@ public class Combatant
 
     public Animator CombatantAnimator { get; set; }
 
-    public bool HasSwitchedThisTurn { get; private set; } = false;
+    public bool HasSwitchedThisTurn { get; private set; }
     public bool CanSwitchWeapon => !HasSwitchedThisTurn && BankedPoints > 0;
 
     public int MaxHP => InstanceData.GetHealth();

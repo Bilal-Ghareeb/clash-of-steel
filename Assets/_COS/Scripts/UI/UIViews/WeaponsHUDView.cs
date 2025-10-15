@@ -126,7 +126,7 @@ public class WeaponsHUDView : UIView
         }
     }
 
-    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive)
+    private void OnPlayerWeaponSwitched(Combatant newActive, Combatant oldActive, bool deductCost)
     {
         if (m_PlayerCombatantsUI == null) return;
 
