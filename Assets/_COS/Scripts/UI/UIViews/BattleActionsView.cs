@@ -48,6 +48,7 @@ public class BattleActionsView : UIView
         m_Battle.OnAllocationsRevealed += OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted += OnPlayerTurnStarted;
         m_Battle.OnPlayerWeaponSwitched += HandleSwitchRequest;
+        m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
 
         HideAllUI();
     }
@@ -62,6 +63,7 @@ public class BattleActionsView : UIView
         m_Battle.OnAllocationsRevealed -= OnAllocationsRevealed;
         m_Battle.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         m_Battle.OnPlayerWeaponSwitched -= HandleSwitchRequest;
+        m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
     }
 
     protected override void SetVisualElements()
@@ -286,7 +288,9 @@ public class BattleActionsView : UIView
         if (actor == null)
             return;
 
-        if(deductCost)
+        SetPlayerButtonsEnabled(false);
+
+        if (deductCost)
             m_SwitchPoint += 1;
 
         UpdatePointsUI();
@@ -294,10 +298,8 @@ public class BattleActionsView : UIView
         int remaining = m_Battle.GetCurrentPlayerAvailablePoints() - m_SwitchPoint;
         if (remaining <= 0)
         {
-            m_playerAttackButton?.SetEnabled(false);
-            m_playerDefendButton?.SetEnabled(false);
-            m_playerReserveButton?.SetEnabled(false);
             _ = FinalizeAfterDelay(actor, 600);
+            return;
         }
     }
 
@@ -332,8 +334,14 @@ public class BattleActionsView : UIView
         m_playerDefendButton.style.display = DisplayStyle.Flex;
         m_playerReserveButton.style.display = DisplayStyle.Flex;
 
-        m_playerAttackButton?.SetEnabled(true);
-        m_playerDefendButton?.SetEnabled(true);
-        m_playerReserveButton?.SetEnabled(true);
+        SetPlayerButtonsEnabled(true);
     }
+
+    private void SetPlayerButtonsEnabled(bool enabled)
+    {
+        m_playerAttackButton?.SetEnabled(enabled);
+        m_playerDefendButton?.SetEnabled(enabled);
+        m_playerReserveButton?.SetEnabled(enabled);
+    }
+
 }

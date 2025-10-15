@@ -51,6 +51,7 @@ public class BattleManager : MonoBehaviour
     public event Action<int, int> OnTurnChanged;
 
     public event Action<Combatant, Combatant , bool> OnPlayerWeaponSwitched;
+    public event Action OnPlayerWeaponEntranceCompleted;
 
     private int turnNumber = 0;
 
@@ -300,9 +301,11 @@ public class BattleManager : MonoBehaviour
     /// This does not change Combatant runtime health/state — it's only swapping which one is active.
     /// Fire OnPlayerWeaponSwitched(newActive, oldActive) when successful.
     /// </summary>
-    public void SwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost)
+    public async void SwitchActivePlayerWeapon(Combatant incomingCombatant, int switchCost)
     {
         TrySwitchActivePlayerWeapon(incomingCombatant, switchCost, deductCost: true);
+        await TimelineController.Instance.PlayEntranceAsync(incomingCombatant);
+        OnPlayerWeaponEntranceCompleted?.Invoke();
     }
 
     public void ForceSwitchActivePlayerWeapon()
@@ -368,7 +371,6 @@ public class BattleManager : MonoBehaviour
 
         activePlayerWeaponIndex = 0;
     }
-
 
     private bool AnyAlive(List<Combatant> team) => team != null && team.Any(x => x.IsAlive);
     public int GetCurrentPlayerBasePoints() => playerBasePoints;
