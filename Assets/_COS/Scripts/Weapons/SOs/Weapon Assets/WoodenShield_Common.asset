@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: WoodenShield_Common
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAsset
   weaponId: Wooden Shield
-  WeaponPrefab: {fileID: 3897805855367130361, guid: 3137fc259639fac42a1db997b6bd2900, type: 3}
+  WeaponPrefab: {fileID: 4626643307549331207, guid: 3137fc259639fac42a1db997b6bd2900, type: 3}
+  Timelines:
+    entranceTimeline: {fileID: 0}
+    attackTimeline: {fileID: 0}
+    deathTimeline: {fileID: 0}

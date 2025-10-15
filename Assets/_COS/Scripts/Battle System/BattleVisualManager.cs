@@ -33,6 +33,7 @@ public class BattleVisualManager : MonoBehaviour
     {
         var player = battle.GetActivePlayerCombatant();
         var enemy = battle.EnemyTeam?.FirstOrDefault();
+
         if (player != null && player.InstanceData?.Asset?.WeaponPrefab != null)
         {
             SpawnModelForPlayer(player);
@@ -57,10 +58,10 @@ public class BattleVisualManager : MonoBehaviour
     {
         var prefab = combatant.InstanceData.Asset.WeaponPrefab;
         if (prefab == null) return;
-
         var instance = Instantiate(prefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
         playerInstance = instance;
 
+        combatant.ModelRoot = playerInstance.transform;
         combatant.CombatantAnimator = playerInstance.transform.GetChild(0).GetComponent<Animator>();
     }
 
@@ -69,5 +70,7 @@ public class BattleVisualManager : MonoBehaviour
         var prefab = combatant.InstanceData.Asset.WeaponPrefab;
         if (prefab == null) return;
         enemyInstance = Instantiate(prefab, enemySpawnPoint.position, enemySpawnPoint.rotation);
+        combatant.ModelRoot = enemyInstance.transform;
+        combatant.CombatantAnimator = enemyInstance.transform.GetChild(0).GetComponent<Animator>();
     }
 }

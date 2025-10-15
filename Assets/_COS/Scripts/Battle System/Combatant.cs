@@ -17,6 +17,8 @@ public class Combatant
     public int DefendPoints { get; private set; } = 0;
     public int BankedPoints { get; private set; } = 0;
 
+    public Transform ModelRoot { get; set; }
+
     public Animator CombatantAnimator { get; set; }
 
     public bool HasSwitchedThisTurn { get; private set; }
