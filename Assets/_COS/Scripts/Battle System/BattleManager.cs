@@ -32,6 +32,8 @@ public class BattleManager : MonoBehaviour
     private int enemyReservedPoints;
     private int activePlayerWeaponIndex = 0;
     private int activeEnemyWeaponIndex = 0;
+    public bool PlayerWon { get; private set; }
+
 
     public event Action OnBattleCountdownStarted;
     public event Action OnBattleStarted;
@@ -102,7 +104,6 @@ public class BattleManager : MonoBehaviour
         await RunBattleLoop();
 
         OnBattleEnded?.Invoke();
-        BattleSessionHolder.CurrentSession = null;
     }
 
     private void BuildTeamsFromSession(BattleSession session)
@@ -256,8 +257,7 @@ public class BattleManager : MonoBehaviour
             await Task.Delay(1000);
         }
 
-        bool playerWon = AnyAlive(PlayerTeam) && !AnyAlive(EnemyTeam);
-        Debug.Log(playerWon ? "Player wins battle" : "Enemy wins battle");
+        PlayerWon = AnyAlive(PlayerTeam) && !AnyAlive(EnemyTeam);
     }
 
 

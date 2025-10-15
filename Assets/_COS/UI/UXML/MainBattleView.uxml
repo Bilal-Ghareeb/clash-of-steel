@@ -1,10 +1,12 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="WeaponsHUDView" src="project://database/Assets/_COS/UI/UXML/WeaponsHUDView.uxml?fileID=9197481963319205126&amp;guid=5d0572744d79eab4f9a2a707d7ccfb4e&amp;type=3#WeaponsHUDView" />
     <ui:Template name="BattleActionsView" src="project://database/Assets/_COS/UI/UXML/BattleActionsView.uxml?fileID=9197481963319205126&amp;guid=f74960df7930f534ba631f10967ee97f&amp;type=3#BattleActionsView" />
+    <ui:Template name="BattleResultView" src="project://database/Assets/_COS/UI/UXML/BattleResultView.uxml?fileID=9197481963319205126&amp;guid=13c16970bc1774b47a1c6b7b8ada9842&amp;type=3#BattleResultView" />
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
     <Style src="project://database/Assets/_COS/UI/USS/Tabs.uss?fileID=7433441132597879392&amp;guid=7f5ae17052e34eb4db728cdec75f22f3&amp;type=3#Tabs" />
     <ui:VisualElement name="safe-area" style="width: 100%; height: 100%; position: absolute;">
         <ui:Instance template="WeaponsHUDView" name="WeaponsHUDView" style="width: 100%; height: 50%; align-self: flex-start;" />
         <ui:Instance template="BattleActionsView" name="BattleActionsView" style="width: 100%; height: 50%; align-self: flex-end;" />
     </ui:VisualElement>
+    <ui:Instance template="BattleResultView" name="BattleResultView" style="position: absolute; top: 0%; left: 0%; right: 0%; bottom: 0%;" />
 </ui:UXML>

@@ -55,6 +55,7 @@ public class BattleActionsView : UIView
         m_Battle.OnPlayerTurnStarted += OnPlayerTurnStarted;
         m_Battle.OnWeaponSwitched += HandleWeaponSwitchRequest;
         m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
+        m_Battle.OnBattleEnded += HideAllUI;
 
         HideAllUI();
     }
@@ -71,6 +72,7 @@ public class BattleActionsView : UIView
         m_Battle.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         m_Battle.OnWeaponSwitched -= HandleWeaponSwitchRequest;
         m_Battle.OnPlayerWeaponEntranceCompleted += () => SetPlayerButtonsEnabled(true);
+        m_Battle.OnBattleEnded -= HideAllUI;
     }
 
     protected override void SetVisualElements()

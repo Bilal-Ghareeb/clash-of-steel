@@ -13,9 +13,11 @@ public class BattleUIManager : MonoBehaviour
 
     private WeaponsHUDView m_WeaponsHUDView;
     private BattleActionsView m_BattleActionsView;
+    private BattleResultView m_BattleResultView;
 
     const string k_WeaponsHUDView = "WeaponsHUDView";
     const string k_BattleActionsView = "BattleActionsView";
+    const string k_BattleResultView = "BattleResultView";
 
     private Action m_OnWeaponsHUDInitializedHandler;
 
@@ -60,8 +62,9 @@ public class BattleUIManager : MonoBehaviour
         VisualElement root = m_BattleUIDocument.rootVisualElement;
 
         m_WeaponsHUDView = new WeaponsHUDView(root.Q<VisualElement>(k_WeaponsHUDView), false);
+        m_BattleResultView = new BattleResultView(root.Q<VisualElement>(k_BattleResultView));
+        m_BattleResultView.InitializeManagers(m_battle);
 
-        // store handler reference
         m_OnWeaponsHUDInitializedHandler = () =>
         {
             m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
@@ -76,6 +79,8 @@ public class BattleUIManager : MonoBehaviour
         m_battle.Init(m_WeaponsHUDView);
 
         m_AllViews.Add(m_WeaponsHUDView);
+        m_AllViews.Add(m_BattleActionsView);
+        m_AllViews.Add(m_BattleResultView);
     }
 
 

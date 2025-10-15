@@ -140,3 +140,8 @@
     -unity-background-image-tint-color: rgb(12, 12, 12);
     rotate: 7deg;
 }
+
+.reward-item-base {
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/ItemFrame03_Single_Navy.png?fileID=21300000&guid=a4771f2cf68494470ab5d3d0bb83abad&type=3#ItemFrame03_Single_Navy");
+    -unity-background-scale-mode: scale-to-fit;
+}
