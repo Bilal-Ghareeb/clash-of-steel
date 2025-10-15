@@ -220,7 +220,7 @@ public class WeaponsHUDView : UIView
             item.ResetAttackHudData();
     }
 
-    private void OnCombatantDamaged( Combatant attacker, Combatant defender, int defenderNewHealth , int attackerDamage)
+    private void OnCombatantDamaged(Combatant attacker, Combatant defender, int defenderNewHealth , int attackerDamage)
     {
         if (defender == null)
             return;

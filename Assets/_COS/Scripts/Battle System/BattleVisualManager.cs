@@ -1,4 +1,5 @@
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class BattleVisualManager : MonoBehaviour
@@ -21,12 +22,17 @@ public class BattleVisualManager : MonoBehaviour
         }
         m_Battle.OnBattleStarted += () => SpawnInitialModels(m_Battle);
         m_Battle.OnPlayerWeaponSwitched += OnPlayerWeaponSwitched;
+        m_Battle.OnCombatantDeath += OnCombatantDeath;
     }
 
     private void OnDestroy()
     {
         if (m_Battle != null)
+        {
+            m_Battle.OnBattleStarted -= () => SpawnInitialModels(m_Battle);
             m_Battle.OnPlayerWeaponSwitched -= OnPlayerWeaponSwitched;
+            m_Battle.OnCombatantDeath -= OnCombatantDeath;
+        }
     }
 
     private void SpawnInitialModels(BattleManager battle)
@@ -52,6 +58,28 @@ public class BattleVisualManager : MonoBehaviour
             playerInstance = null;
         }
         SpawnModelForPlayer(newActive);
+    }
+
+    private void OnCombatantDeath(Combatant deadCombatant)
+    {
+        if (m_Battle.GetActivePlayerCombatant() == deadCombatant)
+        {
+            if (playerInstance != null)
+            {
+                Destroy(playerInstance);
+                playerInstance = null;
+            }
+            return;
+        }
+
+        if (m_Battle.EnemyTeam != null && m_Battle.EnemyTeam.Contains(deadCombatant))
+        {
+            if (enemyInstance != null)
+            {
+                Destroy(enemyInstance);
+                enemyInstance = null;
+            }
+        }
     }
 
     private void SpawnModelForPlayer(Combatant combatant)

@@ -17,4 +17,4 @@ MonoBehaviour:
   Timelines:
     entranceTimeline: {fileID: 11400000, guid: be826387c2091154fa147329ad0a1f65, type: 2}
     attackTimeline: {fileID: 11400000, guid: 4428f8834efcaee4c81d5463b50083d7, type: 2}
-    deathTimeline: {fileID: 0}
+    deathTimeline: {fileID: 11400000, guid: 9e4db7fdfc57763488c2dbd16abb0926, type: 2}

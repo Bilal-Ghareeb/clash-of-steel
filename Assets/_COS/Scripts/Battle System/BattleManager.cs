@@ -233,6 +233,7 @@ public class BattleManager : MonoBehaviour
 
                     if (!defendingPlayer.IsAlive)
                     {
+                        await TimelineController.Instance.PlayDeathAsync(defendingPlayer);
                         OnCombatantDeath?.Invoke(defendingPlayer);
                         ForceSwitchActivePlayerWeapon();
                     }
@@ -243,7 +244,6 @@ public class BattleManager : MonoBehaviour
 
             // --------------------------- END OF ROUND ---------------------------
 
-            // Increment base points (like in JW)
             playerBasePoints = Mathf.Min(playerBasePoints + 1, maxPointsPerTurn);
             enemyBasePoints = Mathf.Min(enemyBasePoints + 1, maxPointsPerTurn);
 
@@ -255,7 +255,6 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    // Wait for the UI to call AllocateForCombatant. This returns the submitted allocation.
     private Task<(int attack, int defend, int reserve)> WaitForPlayerAllocationAsync(int availablePoints)
     {
         _playerAllocationTcs = new TaskCompletionSource<(int attack, int defend, int reserve)>();
@@ -308,20 +307,22 @@ public class BattleManager : MonoBehaviour
         OnPlayerWeaponEntranceCompleted?.Invoke();
     }
 
-    public void ForceSwitchActivePlayerWeapon()
+    public async void ForceSwitchActivePlayerWeapon()
     {
-        // Find the next alive combatant
+        if (PlayerTeam.All(w => !w.IsAlive || w == GetActivePlayerCombatant()))
+            return;
+
         for (int i = 0; i < PlayerTeam.Count; i++)
         {
             if (i != activePlayerWeaponIndex && PlayerTeam[i].IsAlive)
             {
                 var newCombatant = PlayerTeam[i];
                 TrySwitchActivePlayerWeapon(newCombatant, 0, deductCost: false);
+                await TimelineController.Instance.PlayEntranceAsync(newCombatant);
+                OnPlayerWeaponEntranceCompleted?.Invoke();
                 return;
             }
         }
-
-        Debug.LogWarning("No alive player combatant left to switch to!");
     }
 
     /// <summary>
