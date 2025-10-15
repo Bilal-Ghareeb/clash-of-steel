@@ -38,7 +38,10 @@ public class BattleManager : MonoBehaviour
     public event Action OnBattleEnded;
 
     public event Action<int> OnPlayerAllocationPhaseStarted;
+
     public event Action<int> OnEnemyAllocationPhaseStarted;
+    public event Action OnEnemyFinishedAllocating;
+
 
     public event Action<(int attack, int defend) /* playerPublic */, (int attack, int defend) /* enemyPublic */> OnAllocationsRevealed;
 
@@ -163,20 +166,16 @@ public class BattleManager : MonoBehaviour
                 m_currentPlayerWeapon.ResetRoundAllocations();
                 m_currentPlayerWeapon.StartTurnWithAvailablePoints(availablePlayerPoints, bankCap);
 
-                // Allow player allocation
                 OnPlayerAllocationPhaseStarted?.Invoke(availablePlayerPoints);
                 var playerAlloc = await WaitForPlayerAllocationAsync(availablePlayerPoints);
 
-                // Apply reserve logic
                 playerReservedPoints = playerAlloc.reserve;
                 m_currentPlayerWeapon.TryAllocate(playerAlloc.attack, playerAlloc.defend, playerAlloc.reserve, out _);
 
-                // Show only player's attack vs enemy's defend
                 var playerReveal = (m_currentPlayerWeapon.AttackPoints, m_currentEnemyWeapon?.DefendPoints ?? 0);
                 OnAllocationsRevealed?.Invoke(playerReveal, (0, 0));
                 await Task.Delay(3000);
 
-                // Execute player's attack
                 if (m_currentEnemyWeapon != null && m_currentPlayerWeapon.AttackPoints > 0)
                 {
                     float classMult = ActionResolver.GetClassMultiplier(m_currentPlayerWeapon.ClassType, m_currentEnemyWeapon.ClassType);
@@ -211,19 +210,21 @@ public class BattleManager : MonoBehaviour
                 int enemyAvailablePoints = Mathf.Min(enemyBasePoints + enemyReservedPoints, bankCap);
                 m_currentEnemyWeapon.StartTurnWithAvailablePoints(enemyAvailablePoints, bankCap);
 
-                // Enemy simple AI (example: attack everything)
                 int attack = enemyAvailablePoints;
                 int defend = 0;
                 int reserve = 0;
+
+                await Task.Delay(2000);
+
                 m_currentEnemyWeapon.TryAllocate(attack, defend, reserve, out _);
                 enemyReservedPoints = reserve;
 
-                // Reveal enemy attack vs player defend (from previous turn)
+                OnEnemyFinishedAllocating?.Invoke();
+
                 var enemyReveal = (m_currentEnemyWeapon.AttackPoints, m_currentPlayerWeapon.DefendPoints);
                 OnAllocationsRevealed?.Invoke((0, 0), enemyReveal);
                 await Task.Delay(3000);
 
-                // Execute enemy attack
                 if (m_currentEnemyWeapon.AttackPoints > 0)
                 {
                     float classMult = ActionResolver.GetClassMultiplier(m_currentEnemyWeapon.ClassType, m_currentPlayerWeapon.ClassType);
@@ -416,8 +417,10 @@ public class BattleManager : MonoBehaviour
 
     private bool AnyAlive(List<Combatant> team) => team != null && team.Any(x => x.IsAlive);
     public int GetCurrentPlayerBasePoints() => playerBasePoints;
+    public int GetCurrentEnemyBasePoints() => enemyBasePoints;
+
     public int GetCurrentPlayerAvailablePoints() => Mathf.Min(playerBasePoints + playerReservedPoints, bankCap);
-    public int GetCurrentEnemyAvailablePoints() => Mathf.Min(enemyBasePoints + enemyBasePoints, bankCap);
+    public int GetCurrentEnemyAvailablePoints() => Mathf.Min(enemyBasePoints + enemyReservedPoints, bankCap);
 
 
     public Combatant GetActivePlayerCombatant()

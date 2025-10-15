@@ -76,11 +76,11 @@ public class WeaponsHUDView : UIView
     {
         if (m_Battle == null) return;
 
-        CreateWeaponsCardsHUD(m_Battle.PlayerTeam, m_PlayerContainer , m_PlayerCombatantsUI);
-        CreateWeaponsCardsHUD(m_Battle.EnemyTeam, m_EnemyContainer , m_EnemyCombatantsUI);
+        CreateWeaponsCardsHUD(m_Battle.PlayerTeam, m_PlayerContainer , m_PlayerCombatantsUI , true);
+        CreateWeaponsCardsHUD(m_Battle.EnemyTeam, m_EnemyContainer , m_EnemyCombatantsUI , false);
     }
 
-    private void CreateWeaponsCardsHUD(List<Combatant> combatants, VisualElement container, Dictionary<Combatant, WeaponItemComponent> combatantsDictionary)
+    private void CreateWeaponsCardsHUD(List<Combatant> combatants, VisualElement container, Dictionary<Combatant, WeaponItemComponent> combatantsDictionary , bool isPlayer)
     {
         foreach (var kvp in combatantsDictionary)
         {
@@ -110,7 +110,7 @@ public class WeaponsHUDView : UIView
 
             weaponItem.UnRegisterButtonCallbacks();
 
-            if (!isFirst)
+            if (!isFirst && isPlayer)
             {
                 int indexCopy = i;
                 weaponItem.OnCustomClick = () => OnWeaponItemClicked(combatant, indexCopy);
@@ -171,7 +171,7 @@ public class WeaponsHUDView : UIView
 
         if (combatantUI.TryGetValue(outgoingWeapon, out var oldActiveWeaponItem))
         {
-            if (outgoingWeapon.IsAlive)
+            if (outgoingWeapon.IsAlive && isPlayer)
             {
                 oldActiveWeaponItem.OnCustomClick = () => OnWeaponItemClicked(outgoingWeapon, newActiveIndex);
                 oldActiveWeaponItem.RegisterButtonCallbacks(useCustomClick: true);
