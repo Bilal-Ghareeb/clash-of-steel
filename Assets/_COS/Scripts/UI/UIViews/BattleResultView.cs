@@ -115,10 +115,21 @@ public class BattleResultView : UIView
         }
     }
 
-    private void OnActionButtonClickedWin()
+    private async void OnActionButtonClickedWin()
     {
-        Debug.Log("Player Won — claim rewards and leave");
+        var stage = BattleStageManager.Instance.CurrentStage;
+        if (stage == null)
+        {
+            Debug.LogError("No current stage found!");
+            return;
+        }
+
+        int stageId = stage.id;
+        int gold = stage.rewards?.GD ?? stage.rewards?.GD ?? 0;
+
+        await PlayFabManager.Instance.GrantStageRewardsAsync(stageId, gold);
     }
+
 
     private void OnActionButtonClickedLose()
     {

@@ -44,6 +44,7 @@ public class PlayFabManager : MonoBehaviour
     public int CurrentStageId => m_currentStageId;
 
     public event Action OnLoginAndDataReady;
+    public event Action OnBattleStageRewardsClaimed;
 
     private void Awake()
     {
@@ -469,6 +470,36 @@ public class PlayFabManager : MonoBehaviour
 
         await taskCompletionSource.Task;
     }
+
+    public async Task GrantStageRewardsAsync(int stageId, int gold)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "GrantStageRewards",
+            FunctionParameter = new { stageId, gold },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            async result =>
+            {
+                Debug.Log($"GrantStageRewards executed: {result.FunctionResult}");
+                await FetchAndCachePlayerInventoryAsync();
+                await FetchPlayerStageProgressAsync();
+                OnBattleStageRewardsClaimed?.Invoke();
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                Debug.LogError($"GrantStageRewards failed: {error.GenerateErrorReport()}");
+                tcs.SetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
 
     #endregion
 

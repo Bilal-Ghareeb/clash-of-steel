@@ -28,10 +28,17 @@ public class BattleStageManager : MonoBehaviour
 
     private void Start()
     {
-        PlayFabManager.Instance.OnLoginAndDataReady += Initialize;
+        PlayFabManager.Instance.OnLoginAndDataReady += SetCurrentStage;
+        PlayFabManager.Instance.OnBattleStageRewardsClaimed += SetCurrentStage;
     }
 
-    public async void Initialize()
+    private void OnDestroy()
+    {
+        PlayFabManager.Instance.OnLoginAndDataReady -= SetCurrentStage;
+        PlayFabManager.Instance.OnBattleStageRewardsClaimed -= SetCurrentStage;
+    }
+
+    public async void SetCurrentStage()
     {
         m_stages = PlayFabManager.Instance.BattleStages.ToList();
 
