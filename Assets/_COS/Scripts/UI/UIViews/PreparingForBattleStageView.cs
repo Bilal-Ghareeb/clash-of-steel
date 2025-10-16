@@ -1,3 +1,5 @@
+using PlayFab;
+using PlayFab.CloudScriptModels;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -87,21 +89,22 @@ public class PreparingForBattleStageView : UIView
         PreparingForBattleStageEvents.LeavePreparingForBattle?.Invoke();
     }
 
-    private void BeginBattle(ClickEvent evt)
+    private async void BeginBattle(ClickEvent evt)
     {
-        var playerTeam = m_playerSelectedWeapons
-            .Where(w => w != null)
-            .ToList();
-
-        if (playerTeam.Count == 0)
-        {
-            return;
-        }
+        var playerTeam = m_playerSelectedWeapons.Where(w => w != null).ToList();
+        if (playerTeam.Count == 0) return;
 
         var enemies = BattleStageManager.Instance?.CurrentStage?.enemies;
-        if (enemies == null)
+        if (enemies == null) return;
+
+        foreach (var weapon in playerTeam)
         {
-            return;
+            await PlayFabManager.Instance.StartWeaponCooldownAsync(
+                weapon.Item.Id,
+                weapon.Level,
+                weapon.CatalogData.rarity,
+                weapon.CatalogData.progressionId
+            );
         }
 
         PreparingForBattleStageEvents.RequestBeginBattle?.Invoke(playerTeam, enemies);
@@ -120,7 +123,7 @@ public class PreparingForBattleStageView : UIView
         {
             TemplateContainer weaponUIElement = m_WeaponItemAsset.Instantiate();
             m_playerTeamSlotComponents[i] = new WeaponItemComponent();
-            m_playerTeamSlotComponents[i].SetVisualElements(weaponUIElement);
+            m_playerTeamSlotComponents[i].SetVisualElements(weaponUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
             m_playerTeamSlotComponents[i].SetGameData();
 
             int slotIndex = i;
@@ -161,7 +164,7 @@ public class PreparingForBattleStageView : UIView
 
             TemplateContainer enemyUIElement = m_WeaponItemAsset.Instantiate();
             var enemyItemComponent = new WeaponItemComponent();
-            enemyItemComponent.SetVisualElements(enemyUIElement);
+            enemyItemComponent.SetVisualElements(enemyUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
             enemyItemComponent.SetGameData(enemyInstance);
 
             m_opponentTeamContainer.Add(enemyUIElement);
@@ -200,13 +203,18 @@ public class PreparingForBattleStageView : UIView
             TemplateContainer weaponUIElement = m_WeaponItemAsset.Instantiate();
             WeaponItemComponent weaponItem = new WeaponItemComponent();
 
-            weaponItem.SetVisualElements(weaponUIElement);
+            weaponItem.SetVisualElements(weaponUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
             weaponItem.SetGameData(weapon);
 
             m_arsenalWeaponComponents.Add(weaponItem);
 
             weaponItem.OnCustomClick = () => OnArsenalWeaponClicked(weaponItem,weapon);
             weaponItem.RegisterButtonCallbacks(useCustomClick: true);
+
+            if (weapon.IsOnCooldown)
+            {
+                weaponItem.DisableInteractions();
+            }
 
             contentContainer.Add(weaponUIElement);
         }

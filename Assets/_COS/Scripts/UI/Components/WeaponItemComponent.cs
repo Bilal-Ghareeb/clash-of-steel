@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,6 +15,13 @@ public class WeaponItemComponent
     private VisualElement m_classIcon;
     private Texture2D m_unknownWeaponIcon;
     private bool m_isSelected = false;
+
+    private VisualElement m_cooldownOverlay;
+    private Label m_cooldownTimer;
+
+    private Coroutine m_cooldownRoutine;
+
+    private WeaponItemComponentDisplayContext m_displayContext; 
 
     public bool IsSelected
     {
@@ -38,10 +46,11 @@ public class WeaponItemComponent
 
     public Action OnCustomClick { get; set; }
 
-    public void SetVisualElements(TemplateContainer weaponItemUXMLTemplate)
+    public void SetVisualElements(TemplateContainer weaponItemUXMLTemplate , WeaponItemComponentDisplayContext context)
     {
         if (weaponItemUXMLTemplate == null) return;
 
+        m_displayContext = context;
         Root = weaponItemUXMLTemplate;
         m_weaponItemButton = weaponItemUXMLTemplate.Q<VisualElement>("Weapon-item-button");
         m_Lvl = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-lvl");
@@ -50,6 +59,9 @@ public class WeaponItemComponent
         m_classIcon = weaponItemUXMLTemplate.Q<VisualElement>("Class-icon");
         m_healthNumber = weaponItemUXMLTemplate.Q<Label>("health-number");
         m_damageNumber = weaponItemUXMLTemplate.Q<Label>("damage-number");
+
+        m_cooldownTimer = weaponItemUXMLTemplate.Q<Label>("countdown-counter");
+        m_cooldownOverlay = weaponItemUXMLTemplate.Q<VisualElement>("countdown-timer-container");
     }
 
     public async void SetGameData(WeaponInstanceBase weaponInstance = null)
@@ -58,6 +70,12 @@ public class WeaponItemComponent
         {
             ClearUnknownState();
             return;
+        }
+
+        if (m_cooldownRoutine != null)
+        {
+            CoroutineRunner.Stop(m_cooldownRoutine);
+            m_cooldownRoutine = null;
         }
 
         m_WeaponInstance = weaponInstance;
@@ -71,6 +89,20 @@ public class WeaponItemComponent
             await weaponInstance.EnsureIconLoadedAsync();
 
             m_weaponImage.style.backgroundImage = new StyleBackground(weaponInstance.IconTexture);
+        }
+
+        if (weaponInstance is WeaponInstance playerweaponInstance && m_displayContext == WeaponItemComponentDisplayContext.PrepareForBattle)
+        {
+            if (playerweaponInstance.IsOnCooldown) 
+            {
+                m_cooldownOverlay.style.display = DisplayStyle.Flex;
+                StartCooldownTimer(playerweaponInstance);
+            }
+            else
+            {
+                m_cooldownOverlay.style.display = DisplayStyle.None;
+                m_cooldownTimer.text = "";
+            }
         }
 
 
@@ -159,6 +191,27 @@ public class WeaponItemComponent
         m_healthNumber.text = newHealth.ToString("0");
     }
 
+    private void StartCooldownTimer(WeaponInstance playerWeapon)
+    {
+        m_cooldownRoutine = CoroutineRunner.Start(UpdateCooldown(playerWeapon));
+    }
+
+    private IEnumerator UpdateCooldown(WeaponInstance playerWeapon)
+    {
+
+        while (playerWeapon != null && playerWeapon.IsOnCooldown)
+        {
+            var remaining = TimeSpan.FromSeconds(playerWeapon.RemainingCooldownSeconds);
+            m_cooldownTimer.text = $"{(int)remaining.TotalHours}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+            yield return new WaitForSeconds(1f);
+        }
+
+        m_cooldownOverlay.style.display = DisplayStyle.None;
+        m_cooldownTimer.text = "";
+
+        EnableInteractions();
+    }
+
     public void ApplyDeadCardStyle()
     {
         m_weaponItemButton.ClearClassList();
@@ -173,6 +226,16 @@ public class WeaponItemComponent
     private void OnCustomButtonClicked(ClickEvent evt)
     {
         OnCustomClick?.Invoke();
+    }
+
+    public void DisableInteractions()
+    {
+        Root.SetEnabled(false);
+    }
+
+    public void EnableInteractions()
+    {
+        Root.SetEnabled(true);
     }
 
     public WeaponInstanceBase GetWeaponInstance() => m_WeaponInstance;

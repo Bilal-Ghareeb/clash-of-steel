@@ -101,7 +101,7 @@ public class WeaponsHUDView : UIView
 
             TemplateContainer itemTemplate = m_WeaponItemAsset.Instantiate();
             var weaponItem = new WeaponItemComponent();
-            weaponItem.SetVisualElements(itemTemplate);
+            weaponItem.SetVisualElements(itemTemplate, WeaponItemComponentDisplayContext.Battle);
             weaponItem.SetGameData(combatant.InstanceData);
 
             bool isFirst = i == 0;

@@ -116,7 +116,7 @@ public class ArsenalView : UIView
 
         WeaponItemComponent weaponItem = new();
 
-        weaponItem.SetVisualElements(weaponUIElement);
+        weaponItem.SetVisualElements(weaponUIElement , WeaponItemComponentDisplayContext.Arsenal);
         weaponItem.SetGameData(weaponData);
         weaponItem.RegisterButtonCallbacks();
 

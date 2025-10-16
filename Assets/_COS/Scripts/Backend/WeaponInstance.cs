@@ -26,6 +26,9 @@ public class WeaponInstance : WeaponInstanceBase
         Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.name);
     }
 
+    public bool IsOnCooldown => InstanceData?.IsOnCooldown ?? false;
+    public float RemainingCooldownSeconds => InstanceData?.RemainingCooldownSeconds ?? 0f;
+
     public async Task DownloadIconAsync()
     {
         await EnsureIconLoadedAsync();

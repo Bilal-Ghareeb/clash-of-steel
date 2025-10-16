@@ -458,8 +458,9 @@ public class PlayFabManager : MonoBehaviour
         };
 
         PlayFabCloudScriptAPI.ExecuteFunction(request,
-            result =>
+            async result =>
             {
+                await FetchAndCachePlayerInventoryAsync();
                 taskCompletionSource.SetResult(true);
             },
             error =>
@@ -470,6 +471,36 @@ public class PlayFabManager : MonoBehaviour
 
         await taskCompletionSource.Task;
     }
+
+    public async Task StartWeaponCooldownAsync(string weaponInstanceId, int level, string rarity, string progressionId)
+    {
+        var taskCompletionSource = new TaskCompletionSource<bool>();
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "StartWeaponCooldown",
+            FunctionParameter = new
+            {
+                instanceId = weaponInstanceId,
+                level,
+                rarity,
+                progressionId
+            },
+            GeneratePlayStreamEvent = true
+        };
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            async result =>
+            {
+                await FetchAndCachePlayerInventoryAsync();
+                taskCompletionSource.SetResult(true);
+            },
+            error =>
+            {
+                taskCompletionSource.SetException(new Exception(error.GenerateErrorReport()));
+            }
+        );
+        await taskCompletionSource.Task;
+    }
+
 
     public async Task GrantStageRewardsAsync(int stageId, int gold)
     {
