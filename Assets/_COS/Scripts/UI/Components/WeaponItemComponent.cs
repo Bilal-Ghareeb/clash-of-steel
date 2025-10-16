@@ -198,7 +198,6 @@ public class WeaponItemComponent
 
     private IEnumerator UpdateCooldown(WeaponInstance playerWeapon)
     {
-
         while (playerWeapon != null && playerWeapon.IsOnCooldown)
         {
             var remaining = TimeSpan.FromSeconds(playerWeapon.RemainingCooldownSeconds);
@@ -211,6 +210,7 @@ public class WeaponItemComponent
 
         EnableInteractions();
     }
+
 
     public void ApplyDeadCardStyle()
     {

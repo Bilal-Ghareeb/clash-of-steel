@@ -22,9 +22,11 @@ public class WeaponInstanceData
 
 
     [JsonIgnore]
-    public bool IsOnCooldown => CooldownEndUtc.HasValue && System.DateTime.UtcNow < CooldownEndUtc.Value;
+    public bool IsOnCooldown =>
+        CooldownEndUtc.HasValue && PlayFabManager.ServerUtcNow < CooldownEndUtc.Value;
 
     [JsonIgnore]
-    public float RemainingCooldownSeconds => IsOnCooldown ?
-        (float)(CooldownEndUtc.Value - System.DateTime.UtcNow).TotalSeconds : 0f;
+    public float RemainingCooldownSeconds =>
+        IsOnCooldown ? (float)(CooldownEndUtc.Value - PlayFabManager.ServerUtcNow).TotalSeconds : 0f;
+
 }

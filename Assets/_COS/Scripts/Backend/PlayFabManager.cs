@@ -43,6 +43,10 @@ public class PlayFabManager : MonoBehaviour
     private int m_currentStageId = 1;
     public int CurrentStageId => m_currentStageId;
 
+    public static DateTime ServerUtcNow => Instance != null ? Instance._serverUtcNow : DateTime.UtcNow;
+    private DateTime _serverUtcNow;
+    private double _serverOffsetSeconds;
+
     public event Action OnLoginAndDataReady;
     public event Action OnBattleStageRewardsClaimed;
 
@@ -73,8 +77,7 @@ public class PlayFabManager : MonoBehaviour
 
     private void OnLoginSuccess(LoginResult result)
     {
-        Debug.Log($"Logged in: {result.PlayFabId}");
-
+        SyncServerTime();
         PlayFabAuthenticationAPI.GetEntityToken(new GetEntityTokenRequest(),
             resp => {
                 m_entity = new PlayFab.EconomyModels.EntityKey { Id = resp.Entity.Id, Type = resp.Entity.Type };
@@ -288,6 +291,24 @@ public class PlayFabManager : MonoBehaviour
         await tcs.Task;
     }
 
+    public void SyncServerTime(Action onComplete = null)
+    {
+        PlayFabClientAPI.GetTime(new GetTimeRequest(),
+            result =>
+            {
+                var serverTime = result.Time.ToUniversalTime();
+                var localTime = DateTime.UtcNow;
+                _serverOffsetSeconds = (serverTime - localTime).TotalSeconds;
+                _serverUtcNow = serverTime;
+
+                onComplete?.Invoke();
+            },
+            error =>
+            {
+                _serverUtcNow = DateTime.UtcNow;
+                onComplete?.Invoke();
+            });
+    }
 
     private void RefreshCurrencies()
     {
@@ -606,6 +627,14 @@ public class PlayFabManager : MonoBehaviour
            item.AlternateIds.Any(a => a.Type == "FriendlyId" && a.Value == friendlyId));
     }
 
+
+    private void Update()
+    {
+        if (_serverOffsetSeconds != 0)
+        {
+            _serverUtcNow = DateTime.UtcNow.AddSeconds(_serverOffsetSeconds);
+        }
+    }
 
     #region Scene Flow
     private void LoadNextScene()
