@@ -1,3 +1,5 @@
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using PlayFab;
 using PlayFab.AuthenticationModels;
 using PlayFab.ClientModels;
@@ -10,6 +12,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using CatalogItem = PlayFab.EconomyModels.CatalogItem;
+
 
 public class PlayFabManager : MonoBehaviour
 {
@@ -43,20 +46,84 @@ public class PlayFabManager : MonoBehaviour
     private int m_currentStageId = 1;
     public int CurrentStageId => m_currentStageId;
 
-    public static DateTime ServerUtcNow => Instance != null ? Instance._serverUtcNow : DateTime.UtcNow;
-    private DateTime _serverUtcNow;
-    private double _serverOffsetSeconds;
+    public static DateTime ServerUtcNow => Instance != null ? Instance.m_serverUtcNow : DateTime.UtcNow;
+    private DateTime m_serverUtcNow;
+    private double m_serverOffsetSeconds;
+
+    public bool IsGoogleLinked { get; private set; }
 
     public event Action OnLoginAndDataReady;
     public event Action OnBattleStageRewardsClaimed;
 
     private void Awake()
     {
+        InitializeGooglePlayGames();
         if (m_instance != null && m_instance != this) { Destroy(gameObject); }
         else { m_instance = this; DontDestroyOnLoad(gameObject); }
     }
 
-    #region Login
+    public void Login()
+    {
+#if UNITY_ANDROID
+        TryGoogleLogin();
+#else
+    LoginWithCustomID();
+#endif
+    }
+
+    /// <summary>
+    /// Tries to log in with Google if that account is linked to any PlayFab account.
+    /// Otherwise logs in with device ID.
+    /// </summary>
+    private void TryGoogleLogin()
+    {
+        Debug.Log("Attempting silent Google sign-in...");
+
+        // "Authenticate" now returns bool, not SignInStatus
+        PlayGamesPlatform.Instance.Authenticate(success =>
+        {
+            if (success == SignInStatus.Success)
+            {
+                Debug.Log("Silent sign-in succeeded — checking if this Google account is linked to PlayFab.");
+                PlayGamesPlatform.Instance.RequestServerSideAccess(false, serverAuthCode =>
+                {
+                    if (!string.IsNullOrEmpty(serverAuthCode))
+                    {
+                        TryPlayFabLoginWithGoogle(serverAuthCode);
+                    }
+                    else
+                    {
+                        Debug.Log("Silent sign-in returned no auth code, falling back to custom login.");
+                        LoginWithCustomID();
+                    }
+                });
+            }
+            else
+            {
+                Debug.Log("Silent sign-in failed or no Google account found. Using Custom ID login.");
+                LoginWithCustomID();
+            }
+        });
+    }
+
+    private void TryPlayFabLoginWithGoogle(string serverAuthCode)
+    {
+        var request = new LoginWithGooglePlayGamesServicesRequest
+        {
+            ServerAuthCode = serverAuthCode,
+            CreateAccount = false 
+        };
+
+        PlayFabClientAPI.LoginWithGooglePlayGamesServices(request,
+            OnAnyLoginSuccess,
+            error =>
+            {
+                Debug.LogWarning("Google account not linked to any PlayFab account: " + error.ErrorMessage);
+                LoginWithCustomID();
+            });
+    }
+
+
     public void LoginWithCustomID()
     {
 #if UNITY_ANDROID
@@ -65,25 +132,35 @@ public class PlayFabManager : MonoBehaviour
             AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
             CreateAccount = true
         };
-        PlayFabClientAPI.LoginWithAndroidDeviceID(request, OnLoginSuccess, OnLoginFailure);
+        PlayFabClientAPI.LoginWithAndroidDeviceID(request, OnAnyLoginSuccess, OnLoginFailure);
 #else
-        var request = new LoginWithCustomIDRequest {
-            CustomId = SystemInfo.deviceUniqueIdentifier,
-            CreateAccount = true
-        };
-        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFailure);
+    var request = new LoginWithCustomIDRequest
+    {
+        CustomId = SystemInfo.deviceUniqueIdentifier,
+        CreateAccount = true
+    };
+    PlayFabClientAPI.LoginWithCustomID(request, OnAnyLoginSuccess, OnLoginFailure);
 #endif
     }
 
-    private void OnLoginSuccess(LoginResult result)
+    private void OnAnyLoginSuccess(LoginResult result)
     {
+        Debug.Log($"? Login successful. PlayFabId: {result.PlayFabId}");
         SyncServerTime();
+
         PlayFabAuthenticationAPI.GetEntityToken(new GetEntityTokenRequest(),
-            resp => {
-                m_entity = new PlayFab.EconomyModels.EntityKey { Id = resp.Entity.Id, Type = resp.Entity.Type };
+            resp =>
+            {
+                m_entity = new PlayFab.EconomyModels.EntityKey
+                {
+                    Id = resp.Entity.Id,
+                    Type = resp.Entity.Type
+                };
+
                 CheckOrAssignDisplayName(result.PlayFabId);
             },
-            err => {
+            err =>
+            {
                 Debug.LogError("GetEntityToken failed: " + err.GenerateErrorReport());
                 LoadNextScene();
             });
@@ -91,9 +168,66 @@ public class PlayFabManager : MonoBehaviour
 
     private void OnLoginFailure(PlayFabError error)
     {
-        Debug.LogError("Login failed: " + error.GenerateErrorReport());
+        Debug.LogError("? Login failed: " + error.GenerateErrorReport());
     }
-    #endregion
+
+    public void LinkGooglePlayAccount(Action<bool> onLinked = null)
+    {
+        Debug.Log("Starting Google account link...");
+
+        PlayGamesPlatform.Instance.RequestServerSideAccess(false, serverAuthCode =>
+        {
+            if (string.IsNullOrEmpty(serverAuthCode))
+            {
+                Debug.LogError("Failed to obtain ServerAuthCode.");
+                onLinked?.Invoke(false);
+                return;
+            }
+
+            var linkRequest = new LinkGooglePlayGamesServicesAccountRequest
+            {
+                ServerAuthCode = serverAuthCode,
+                ForceLink = true
+            };
+
+            PlayFabClientAPI.LinkGooglePlayGamesServicesAccount(linkRequest,
+                result =>
+                {
+                    Debug.Log("Successfully linked PlayFab with Google Play account.");
+                    IsGoogleLinked = true;
+                    onLinked?.Invoke(true);
+                },
+                error =>
+                {
+                    Debug.LogError("Failed to link Google account: " + error.GenerateErrorReport());
+                    onLinked?.Invoke(false);
+                });
+        });
+    }
+
+
+    public void CheckIfGoogleIsLinked(Action<bool> onComplete = null)
+    {
+        PlayFabClientAPI.GetAccountInfo(new GetAccountInfoRequest(),
+            result =>
+            {
+                IsGoogleLinked = result.AccountInfo?.GooglePlayGamesInfo != null;
+                Debug.Log("Google link status: " + IsGoogleLinked);
+                onComplete?.Invoke(IsGoogleLinked);
+            },
+            error =>
+            {
+                Debug.LogError("Failed to get account info: " + error.GenerateErrorReport());
+                IsGoogleLinked = false;
+                onComplete?.Invoke(false);
+            });
+    }
+
+    private void InitializeGooglePlayGames()
+    {
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.Activate();
+    }
 
     #region Display Name
     private void CheckOrAssignDisplayName(string playFabId)
@@ -298,14 +432,14 @@ public class PlayFabManager : MonoBehaviour
             {
                 var serverTime = result.Time.ToUniversalTime();
                 var localTime = DateTime.UtcNow;
-                _serverOffsetSeconds = (serverTime - localTime).TotalSeconds;
-                _serverUtcNow = serverTime;
+                m_serverOffsetSeconds = (serverTime - localTime).TotalSeconds;
+                m_serverUtcNow = serverTime;
 
                 onComplete?.Invoke();
             },
             error =>
             {
-                _serverUtcNow = DateTime.UtcNow;
+                m_serverUtcNow = DateTime.UtcNow;
                 onComplete?.Invoke();
             });
     }
@@ -630,9 +764,9 @@ public class PlayFabManager : MonoBehaviour
 
     private void Update()
     {
-        if (_serverOffsetSeconds != 0)
+        if (m_serverOffsetSeconds != 0)
         {
-            _serverUtcNow = DateTime.UtcNow.AddSeconds(_serverOffsetSeconds);
+            m_serverUtcNow = DateTime.UtcNow.AddSeconds(m_serverOffsetSeconds);
         }
     }
 

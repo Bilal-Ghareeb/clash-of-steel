@@ -28,7 +28,7 @@ public class MainMenuUIManager : MonoBehaviour
 
     private void ClickLoginWithGoogleButton(ClickEvent evt)
     {
-        PlayFabManager.Instance.LoginWithCustomID();
+        PlayFabManager.Instance.Login();
     }
 
     public void OnDisable()

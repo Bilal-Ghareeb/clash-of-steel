@@ -46,7 +46,6 @@ public class TimelineController : MonoBehaviour
                                 if (shot == null)
                                     continue;
 
-                                shot.VirtualCamera.exposedName = UnityEditor.GUID.Generate().ToString();
                                 m_director.SetReferenceValue(shot.VirtualCamera.exposedName, m_cinematicCamer);
 
                                 m_director.RebuildGraph();

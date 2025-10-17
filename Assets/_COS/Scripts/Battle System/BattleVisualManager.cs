@@ -1,5 +1,3 @@
-using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class BattleVisualManager : MonoBehaviour

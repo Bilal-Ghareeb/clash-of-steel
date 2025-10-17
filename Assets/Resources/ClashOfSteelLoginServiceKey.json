@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "clash-of-steel-475319",
+  "private_key_id": "449cef0142c18a9bf57e2363cd8e8ef823353fe6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC50r/jM3dvy4G3\npQWjbLzmGC4518vKzCt55UUK14570tFS7YUUaSHqV+BZWjAAblcRQ5I/dAXXComB\nY8LwO8rJ98KJgSQe1rEiFCr6WymIgGxFNL56jCskBk8H2oXJ3QSxmiTUh9yXN3kX\nnkjZvmoKQ9SQiHFVKuClYEFP7rlpnYicBRp8Hl7gQnVZ7qdXW9QhkgySXW1S+Vpg\n59FFtMojrbXuZQ4/3Mc/s76igoAwOxHNnLFY92FD0Ck93Q5Wo29/kez7+AKvYByj\n7Zd3IaR1F/zxaMZhxnP5FRvKN3Peq/3HotO17AqmVNDM4BjBbqAdhpAXmW9Qjvd1\nwQzxZl8HAgMBAAECggEAUGUPw/qGWAXR72QkFlp7N4mKplfowaqnvKsmvdQYvxWs\nnpZIl1YM6FhwpffRAL68SKnVYkKOLEVQzHwe4NTdnZflwJvwxq7YIAhdt8ctJvN4\n5FA3gMmX+JQKKTmv3HAVEcnA2XqWQ44qg79lgV9SfXJvSsDdV52fZ61HVI/SBBD3\nmPupkYdW/DAGsRHhktr4mWCSa2mcEGkfj4uEYdjiBRtW1UqirloUcGebkW6ozb/v\n6bExndJ8YmHkzBlxCg6Tp09Iu542X6XQs7Rec5TdirBhEdWqwNTbtmhzRRati6TH\nS6C/0Lacg15/Yy65N+rze++UNSN7NVJQMJP4ZslvMQKBgQD5TqH1oHVSQr0RjlQU\nKrYAws86T6uX/ok31j1lz2NQlEVCe7306Wy2LWxGwTZXl0X9YlPIDXznCNSvZmgx\nIdz0QXHkX2G748qYOEpy60X86hJ63fLWLKpVGzlx20zx4GIYC79Hos8y5A92ZAkS\nI9cPiKjAAg672mxQPHDjq1Y9YwKBgQC+z9KbgKkryWQ13Yw2pDyzR2uWePmZJO+x\nWgufniQ5YlxMgqgJyAMVQaATho6SVokU1naxbx9yuo4zKjrDWjrYlR4HZMfz29oh\n3g61mhyK7RLx6/ZkujuNuk0xlbHfvpjj3s++QtWmPuBCyxbfjTZimWzmBHZY4NKp\nzEyPF7YLDQKBgGv4iR4WyxjAPKAA0xsU0FQOCq+HV5pxKz5ac6bHJYz9We2MJ92M\nxn8ztuQBw6Y1pqMxVXWbmc95PJtmL5OvxcCnI0szn+E+qzw3jM6uZFY/jZdWzlfB\naleHfd54ip9qfTFKzSGaOkAhEy1D78XCbd6VYfgeLAFhfG1Xb9C6IJRfAoGBAJkb\nk2f5nkUnTUS3qCm0MYy9k0PjgIx1CewqT8ddkr2FAoDWGlX26xpkVTk1sDMWQtq4\nl/caLobV0QKXMR3Nygg95yGRqawwTmD8mJr5tUt4ncoHR+ddVCoOQqC1+EuL2YyH\nHfUSFfNW4oZWBd2NpwUJDUuoavo4NHHRH+F16joFAoGBAJ+ODBPCRQ30z8zP/DvW\nhfd6wmWvYiowVj+VfoVnSI7Xum+Kbve9egcsATkqkg4sQvXJFWLzuVaJUCeHQiAy\nz4xPNTASxfGKJiklHYkyBWkeYjr3CitSMHraVkR5VurNx42eJpuDqmZ2lOJk5J3G\nNJLTVzDUQOAQVWN5hvM96pzl\n-----END PRIVATE KEY-----\n",
+  "client_email": "clash-of-steel@clash-of-steel-475319.iam.gserviceaccount.com",
+  "client_id": "114577025645075590077",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/clash-of-steel%40clash-of-steel-475319.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

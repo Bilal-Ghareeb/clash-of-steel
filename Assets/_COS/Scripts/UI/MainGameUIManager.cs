@@ -12,6 +12,7 @@ public class MainGameUIManager : MonoBehaviour
     private List<UIView> m_AllViews = new List<UIView>();
 
     private UIView m_PlayView;
+    private UIView m_SettingView;
     private UIView m_ArsenalView;
     private UIView m_InspectView;
     private UIView m_TabsView;
@@ -19,6 +20,7 @@ public class MainGameUIManager : MonoBehaviour
     private UIView m_PreparingForBattleStageView;
 
     const string k_PlayViewName = "PlayView";
+    const string k_SettingView = "SettingsView";
     const string k_ArsenalViewName = "ArsenalView";
     const string k_TabsViewName = "TabsView";
     const string k_InspectViewName = "InspectView";
@@ -57,6 +59,7 @@ public class MainGameUIManager : MonoBehaviour
         ArsenalEvents.WeaponItemClicked += OnInspectViewShown;
 
         PlayScreenEvents.PlayBattleStageButtonPressed += OnPreparingForBattleStageShown;
+        PlayScreenEvents.SettingsButtonPressed += OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle += OnPlayViewShown;
 
     }
@@ -71,8 +74,8 @@ public class MainGameUIManager : MonoBehaviour
         ArsenalEvents.WeaponItemClicked -= OnInspectViewShown;
 
         PlayScreenEvents.PlayBattleStageButtonPressed -= OnPreparingForBattleStageShown;
+        PlayScreenEvents.SettingsButtonPressed -= OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle -= OnPlayViewShown;
-
     }
 
     private void SetupViews()
@@ -80,6 +83,7 @@ public class MainGameUIManager : MonoBehaviour
         VisualElement root = m_MainGameDocument.rootVisualElement;
 
         m_PlayView = new PlayView(root.Q<VisualElement>(k_PlayViewName));
+        m_SettingView = new SettingsView(root.Q<VisualElement>(k_SettingView));
         m_ArsenalView = new ArsenalView(root.Q<VisualElement>(k_ArsenalViewName));
         m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName) , m_WeaponInspectPresenter);
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
@@ -87,6 +91,7 @@ public class MainGameUIManager : MonoBehaviour
         m_PreparingForBattleStageView = new PreparingForBattleStageView(root.Q<VisualElement>(k_PreparingForBattleStageViewName));
 
         m_AllViews.Add(m_PlayView);
+        m_AllViews.Add(m_SettingView);
         m_AllViews.Add(m_TabsView);
         m_AllViews.Add(m_ArsenalView);
         m_AllViews.Add(m_InspectView);
@@ -97,6 +102,11 @@ public class MainGameUIManager : MonoBehaviour
     private void OnArsenalViewShown()
     {
         ShowModalView(m_ArsenalView);
+    }
+
+    private void OnSettingsPanelShown()
+    {
+        ShowModalView(m_SettingView);
     }
 
     private void OnPlayViewShown()
