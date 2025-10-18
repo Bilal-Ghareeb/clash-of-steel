@@ -14,6 +14,7 @@ public class EconomyService
     private List<WeaponInstance> m_playerWeapons = new();
     private Dictionary<string, WeaponProgressionData> m_progressionFormulas = new();
     private Dictionary<string, CatalogItem> m_currencyCatalog = new();
+    private List<CatalogItem> m_diamondBundlesCatalog = new();
     private Dictionary<string, int> m_playerCurrencies = new();
     private List<StageData> m_battleStages = new();
     #endregion
@@ -23,6 +24,7 @@ public class EconomyService
     public IReadOnlyDictionary<string, WeaponProgressionData> ProgressionFormulas => m_progressionFormulas;
     public Dictionary<string, int> PlayerCurrencies => m_playerCurrencies;
     public IReadOnlyList<StageData> BattleStages => m_battleStages;
+    public IReadOnlyList<CatalogItem> DiamondBundlesCatalog => m_diamondBundlesCatalog;
     #endregion
 
     #region Events
@@ -36,6 +38,7 @@ public class EconomyService
             FetchCatalogFormulasAsync(),
             FetchCatalogCurrenciesAsync(),
             FetchCatalogStagesAsync(),
+            FetchCatalogBundlesAsync(), 
             FetchAndCachePlayerInventoryAsync()
         );
     }
@@ -62,6 +65,30 @@ public class EconomyService
 
         await tcs.Task;
     }
+
+    private async Task FetchCatalogBundlesAsync()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new SearchItemsRequest
+        {
+            Filter = "type eq 'DiamondBundle'"
+        };
+
+        PlayFabEconomyAPI.SearchItems(request,
+            result =>
+            {
+                m_diamondBundlesCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                tcs.SetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
 
     private async Task FetchCatalogFormulasAsync()
     {
