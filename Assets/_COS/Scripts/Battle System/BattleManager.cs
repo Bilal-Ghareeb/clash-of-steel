@@ -121,13 +121,13 @@ public class BattleManager : MonoBehaviour
         WeaponInstanceBase instance = null;
         if (isPlayer && !string.IsNullOrEmpty(dto.instanceId))
         {
-            instance = PlayFabManager.Instance?.PlayerWeapons?.FirstOrDefault(w => w.Item?.Id == dto.instanceId) as WeaponInstance;
+            instance = PlayFabManager.Instance?.EconomyService.PlayerWeapons?.FirstOrDefault(w => w.Item?.Id == dto.instanceId) as WeaponInstance;
         }
 
         if (instance != null)
             return new Combatant(instance, dto.instanceId, instance.CatalogData.name);
 
-        var weaponData = PlayFabManager.Instance.GetWeaponDataByFriendlyId(dto.friendlyId);
+        var weaponData = PlayFabManager.Instance.EconomyService.GetWeaponDataByFriendlyId(dto.friendlyId);
         if (weaponData == null)
         {
             Debug.LogError($"No WeaponData for friendly id {dto.friendlyId}. Creating placeholder.");

@@ -1,5 +1,3 @@
-using PlayFab;
-using PlayFab.CloudScriptModels;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -94,12 +92,12 @@ public class PreparingForBattleStageView : UIView
         var playerTeam = m_playerSelectedWeapons.Where(w => w != null).ToList();
         if (playerTeam.Count == 0) return;
 
-        var enemies = BattleStageManager.Instance?.CurrentStage?.enemies;
+        var enemies = PlayFabManager.Instance.PlayerService?.CurrentStage.enemies;
         if (enemies == null) return;
 
         foreach (var weapon in playerTeam)
         {
-            await PlayFabManager.Instance.StartWeaponCooldownAsync(
+            await PlayFabManager.Instance.AzureService.StartWeaponCooldownAsync(
                 weapon.Item.Id,
                 weapon.Level,
                 weapon.CatalogData.rarity,
@@ -136,7 +134,7 @@ public class PreparingForBattleStageView : UIView
 
     private void SpawnEnemyTeamHolders()
     {
-        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
         if (currentStage == null)
         {
             Debug.LogError("Cannot spawn enemies: current stage not found.");
@@ -153,7 +151,7 @@ public class PreparingForBattleStageView : UIView
 
         foreach (var enemy in currentStage.enemies)
         {
-            var weaponData = PlayFabManager.Instance.GetWeaponDataByFriendlyId(enemy.weaponId);
+            var weaponData = PlayFabManager.Instance.EconomyService.GetWeaponDataByFriendlyId(enemy.weaponId);
             if (weaponData == null)
             {
                 Debug.LogWarning($"No WeaponData found for friendly ID: {enemy.weaponId}");
@@ -190,7 +188,7 @@ public class PreparingForBattleStageView : UIView
         contentContainer.Clear();
         m_arsenalWeaponComponents.Clear();
 
-        var playerWeapons = PlayFabManager.Instance.PlayerWeapons;
+        var playerWeapons = PlayFabManager.Instance.EconomyService.PlayerWeapons;
 
         if (playerWeapons == null || playerWeapons.Count == 0)
         {
@@ -267,7 +265,7 @@ public class PreparingForBattleStageView : UIView
 
     private void UpdateStageInfo()
     {
-        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
         if (currentStage == null)
         {
             m_stageNumber.text = "?";

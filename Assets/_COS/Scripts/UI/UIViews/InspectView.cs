@@ -91,11 +91,11 @@ public class InspectView : UIView
         if (m_currentWeapon is not WeaponInstance playerWeapon)
             return;
 
-        WeaponProgressionData progression = PlayFabManager.Instance.ProgressionFormulas[playerWeapon.CatalogData.progressionId];
+        WeaponProgressionData progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[playerWeapon.CatalogData.progressionId];
         int cost = WeaponProgressionCalculator.GetCostForLevelUp(playerWeapon.InstanceData.level, progression);
         string currencyFriendlyId = progression.currencyId;
 
-        if (!PlayFabManager.Instance.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) || playerCurrency < cost)
+        if (!PlayFabManager.Instance.EconomyService.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) || playerCurrency < cost)
         {
             m_weaponLevelUpButton.SetEnabled(false);
             m_weaponLevelUpButton.style.opacity = 0.6f;
@@ -111,7 +111,7 @@ public class InspectView : UIView
         }
 
         // Deduct locally
-        PlayFabManager.Instance.PlayerCurrencies[currencyFriendlyId] = playerCurrency - cost;
+        PlayFabManager.Instance.EconomyService.PlayerCurrencies[currencyFriendlyId] = playerCurrency - cost;
         OnCurrenciesUpdated();
         playerWeapon.InstanceData.level++;
         UpdateWeaponDataUI();
@@ -121,7 +121,7 @@ public class InspectView : UIView
         {
             try
             {
-                await PlayFabManager.Instance.LevelWeaponAsync(
+                await PlayFabManager.Instance.AzureService.LevelWeaponAsync(
                     playerWeapon.Item.Id,
                     currencyFriendlyId,
                     cost
@@ -130,7 +130,7 @@ public class InspectView : UIView
             catch (Exception ex)
             {
                 // Roll back
-                PlayFabManager.Instance.PlayerCurrencies[currencyFriendlyId] = playerCurrency;
+                PlayFabManager.Instance.EconomyService.PlayerCurrencies[currencyFriendlyId] = playerCurrency;
                 OnCurrenciesUpdated();
                 playerWeapon.InstanceData.level--;
                 UpdateWeaponDataUI();
@@ -166,14 +166,14 @@ public class InspectView : UIView
         if (m_currentWeapon == null)
             return;
 
-        var progression = PlayFabManager.Instance.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
+        var progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[m_currentWeapon.CatalogData.progressionId];
 
         int level = 1;
         if (m_currentWeapon is WeaponInstance playerWeapon)
             level = playerWeapon.InstanceData.level;
 
         m_weaponLvl.text = level.ToString();
-        m_currentHealth.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseHealth, level, progression).ToString();
+        m_currentHealth.text = WeaponProgressionCalculator.GetHealth(m_currentWeapon.CatalogData.baseHealth, level, progression).ToString();
         m_currentDamage.text = WeaponProgressionCalculator.GetDamage(m_currentWeapon.CatalogData.baseDamage, level, progression).ToString();
 
 
@@ -181,7 +181,7 @@ public class InspectView : UIView
         m_nextLvlCost.text = cost.ToString();
 
         string currencyFriendlyId = progression.currencyId;
-        bool hasEnoughCurrency = PlayFabManager.Instance.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) && playerCurrency >= cost;
+        bool hasEnoughCurrency = PlayFabManager.Instance.EconomyService.PlayerCurrencies.TryGetValue(currencyFriendlyId, out int playerCurrency) && playerCurrency >= cost;
         bool isMaxLevel = level >= progression.maxLevel;
 
         m_maxLevelReached.style.display = isMaxLevel ? DisplayStyle.Flex : DisplayStyle.None;
@@ -194,6 +194,6 @@ public class InspectView : UIView
 
     private void OnCurrenciesUpdated()
     {
-        PlayFabManager.Instance.NotifyCurrenciesUpdated();
+        PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
     }
 }

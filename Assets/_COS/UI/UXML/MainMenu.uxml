@@ -4,7 +4,7 @@
     <ui:VisualElement name="Title-Container" style="flex-grow: 1; position: absolute; width: 100%; height: 47%; left: auto; top: 8%; flex-direction: column; justify-content: center;">
         <ui:VisualElement name="Logo" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_COS/Images/PNGs/Icons/ClashOfSteel_Logo.png?fileID=2800000&amp;guid=abf8ed1b2823220448934d95ac64c282&amp;type=3#ClashOfSteel_Logo&quot;); align-self: center; width: 99%; -unity-background-scale-mode: scale-to-fit; height: auto;" />
     </ui:VisualElement>
-    <ui:VisualElement name="Buttons-Container" style="flex-grow: 1; position: absolute; width: 100%; height: 20%; top: 64%; flex-direction: row; align-items: center; justify-content: center;">
-        <ui:Button text="LOGIN" name="Login_btn" class="rectangleButton" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button01_175_Orange.png?fileID=21300000&amp;guid=9d6416d621a034779a5cb7792aaabc3a&amp;type=3#Button01_175_Orange&quot;); background-size: contain; -unity-background-scale-mode: stretch-to-fill;" />
+    <ui:VisualElement name="Buttons-Container" style="position: absolute; width: 100%; height: 10%; top: 64%;">
+        <ui:Label text="xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" name="loading-state" class="lable" style="-unity-font-style: bold; font-size: 101px; color: rgb(255, 255, 255); width: 100%; height: 100%; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); -unity-text-align: middle-center; white-space: pre-wrap;" />
     </ui:VisualElement>
 </ui:UXML>

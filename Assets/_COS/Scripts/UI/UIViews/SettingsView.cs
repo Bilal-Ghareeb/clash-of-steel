@@ -15,7 +15,7 @@ public class SettingsView : UIView
         m_settingsPanel.transform.scale = new Vector3(0.1f, 0.1f, 0.1f);
         m_settingsPanel.experimental.animation.Scale(1f, 200);
 
-        PlayFabManager.Instance.CheckIfGoogleIsLinked(UpdateGoogleButtonState);
+        PlayFabManager.Instance.AuthService.CheckIfGoogleIsLinked(UpdateGoogleButtonState);
     }
 
     private void UpdateGoogleButtonState(bool isLinked)
@@ -37,7 +37,7 @@ public class SettingsView : UIView
         m_linkAccountWithGoogleButton.SetEnabled(false);
         m_linkAccountWithGoogleButton.text = "LINKING...";
 
-        PlayFabManager.Instance.LinkGooglePlayAccount(success =>
+        PlayFabManager.Instance.AuthService.LinkGooglePlayAccount(success =>
         {
             if (success)
             {

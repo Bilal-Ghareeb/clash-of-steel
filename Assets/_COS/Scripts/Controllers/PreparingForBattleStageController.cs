@@ -16,7 +16,7 @@ public class PreparingForBattleStageController : MonoBehaviour
 
     private void HandleBeginBattle(List<WeaponInstance> playerTeam, List<StageEnemyData> enemies)
     {
-        var currentStage = BattleStageManager.Instance.CurrentStage;
+        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
         if (currentStage == null)
         {
             Debug.LogError("Cannot start battle: Current stage not found.");

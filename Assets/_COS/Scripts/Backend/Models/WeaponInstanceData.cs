@@ -23,10 +23,10 @@ public class WeaponInstanceData
 
     [JsonIgnore]
     public bool IsOnCooldown =>
-        CooldownEndUtc.HasValue && PlayFabManager.ServerUtcNow < CooldownEndUtc.Value;
+        CooldownEndUtc.HasValue && PlayFabManager.Instance.TimeService.ServerUtcNow < CooldownEndUtc.Value;
 
     [JsonIgnore]
     public float RemainingCooldownSeconds =>
-        IsOnCooldown ? (float)(CooldownEndUtc.Value - PlayFabManager.ServerUtcNow).TotalSeconds : 0f;
+        IsOnCooldown ? (float)(CooldownEndUtc.Value - PlayFabManager.Instance.TimeService.ServerUtcNow).TotalSeconds : 0f;
 
 }

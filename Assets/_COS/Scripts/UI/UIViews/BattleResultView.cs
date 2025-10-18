@@ -91,7 +91,7 @@ public class BattleResultView : UIView
     {
         m_rewardsContainer.Clear();
 
-        var currentStage = BattleStageManager.Instance?.CurrentStage;
+        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
         if (currentStage == null)
         {
             Debug.LogWarning("BattleResultView: No current stage found for rewards.");
@@ -117,7 +117,7 @@ public class BattleResultView : UIView
 
     private async void OnActionButtonClickedWin()
     {
-        var stage = BattleStageManager.Instance.CurrentStage;
+        var stage = PlayFabManager.Instance.PlayerService?.CurrentStage;
         if (stage == null)
         {
             Debug.LogError("No current stage found!");
@@ -127,7 +127,7 @@ public class BattleResultView : UIView
         int stageId = stage.id;
         int gold = stage.rewards?.GD ?? stage.rewards?.GD ?? 0;
 
-        await PlayFabManager.Instance.GrantStageRewardsAsync(stageId, gold);
+        await PlayFabManager.Instance.AzureService.GrantStageRewardsAsync(stageId, gold);
     }
 
 

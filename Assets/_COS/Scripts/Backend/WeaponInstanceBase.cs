@@ -23,14 +23,14 @@ public abstract class WeaponInstanceBase
 
     public virtual int GetDamage()
     {
-        var progression = PlayFabManager.Instance.ProgressionFormulas[CatalogData.progressionId];
+        var progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[CatalogData.progressionId];
         return WeaponProgressionCalculator.GetDamage(CatalogData.baseDamage, Level, progression);
     }
 
     public virtual int GetHealth()
     {
-        var progression = PlayFabManager.Instance.ProgressionFormulas[CatalogData.progressionId];
-        return WeaponProgressionCalculator.GetDamage(CatalogData.baseHealth, Level, progression);
+        var progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[CatalogData.progressionId];
+        return WeaponProgressionCalculator.GetHealth(CatalogData.baseHealth, Level, progression);
     }
 
     public virtual async Task EnsureIconLoadedAsync()

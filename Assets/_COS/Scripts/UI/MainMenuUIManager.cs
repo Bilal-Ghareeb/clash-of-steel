@@ -5,34 +5,24 @@ using UnityEngine.UIElements;
 public class MainMenuUIManager : MonoBehaviour
 {
     private UIDocument m_MainMenuDocument;
-    private VisualElement m_LoginWithGoogleButton;
+    private Label m_loadingState;
 
     private void OnEnable()
     {
         m_MainMenuDocument = GetComponent<UIDocument>();
+        m_loadingState = m_MainMenuDocument.rootVisualElement.Q<Label>("loading-state");
 
-        SetupLoginButton();
-        RegisterButtonCallbacks();
+        AuthService.OnAuthProgress += UpdateLoadingLabel;
     }
 
-    private void SetupLoginButton()
+    private void OnDisable()
     {
-        VisualElement root = m_MainMenuDocument.rootVisualElement;
-        m_LoginWithGoogleButton = root.Q("Login_btn");
+        AuthService.OnAuthProgress -= UpdateLoadingLabel;
     }
 
-    protected void RegisterButtonCallbacks()
+    private void UpdateLoadingLabel(string message)
     {
-        m_LoginWithGoogleButton.RegisterCallback<ClickEvent>(ClickLoginWithGoogleButton);
-    }
-
-    private void ClickLoginWithGoogleButton(ClickEvent evt)
-    {
-        PlayFabManager.Instance.Login();
-    }
-
-    public void OnDisable()
-    {
-        m_LoginWithGoogleButton.UnregisterCallback<ClickEvent>(ClickLoginWithGoogleButton);
+        if (m_loadingState != null)
+            m_loadingState.text = message;
     }
 }

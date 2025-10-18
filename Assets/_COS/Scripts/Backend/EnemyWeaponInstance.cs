@@ -9,7 +9,7 @@ public class EnemyWeaponInstance : WeaponInstanceBase
         EnemyId = enemyId;
         Initialize(catalogData, level);
 
-        var catalogItem = PlayFabManager.Instance.GetCatalogItemByFriendlyId(enemyId);
+        var catalogItem = PlayFabManager.Instance.EconomyService.GetCatalogItemByFriendlyId(enemyId);
         IconUrl = catalogItem?.Images?.FirstOrDefault()?.Url;
     }
 }

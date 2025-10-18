@@ -22,14 +22,14 @@ public class ArsenalController : MonoBehaviour
 
     private void OnArsenalScreenEnabled()
     {
-        UpdateInventory(PlayFabManager.Instance.PlayerWeapons);
+        UpdateInventory(PlayFabManager.Instance.EconomyService.PlayerWeapons);
     }
 
     private void OnGearFiltered(Rarity rarity, WeaponType weaponType)
     {
         IReadOnlyList<WeaponInstance> filteredGear = new List<WeaponInstance>();
 
-        filteredGear = FilterGearList(PlayFabManager.Instance.PlayerWeapons, rarity, weaponType);
+        filteredGear = FilterGearList(PlayFabManager.Instance.EconomyService.PlayerWeapons, rarity, weaponType);
 
         UpdateInventory(filteredGear);
     }

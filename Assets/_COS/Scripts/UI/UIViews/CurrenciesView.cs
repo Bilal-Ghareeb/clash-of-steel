@@ -9,9 +9,9 @@ public class CurrenciesView : UIView
 
     public CurrenciesView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
     {
-        PlayFabManager.Instance.OnCurrenciesUpdated += UpdateCurrencies;
+        PlayFabManager.Instance.EconomyService.OnCurrenciesUpdated += UpdateCurrencies;
 
-        UpdateCurrencies(PlayFabManager.Instance.PlayerCurrencies);
+        UpdateCurrencies(PlayFabManager.Instance.EconomyService.PlayerCurrencies);
     }
 
     public override void Show()
@@ -22,7 +22,7 @@ public class CurrenciesView : UIView
     public override void Dispose()
     {
         base.Dispose();
-        PlayFabManager.Instance.OnCurrenciesUpdated -= UpdateCurrencies;
+        PlayFabManager.Instance.EconomyService.OnCurrenciesUpdated -= UpdateCurrencies;
     }
 
     protected override void SetVisualElements()
