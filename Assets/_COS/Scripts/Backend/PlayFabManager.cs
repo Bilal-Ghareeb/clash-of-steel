@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayFabManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class PlayFabManager : MonoBehaviour
     public TimeService TimeService => ServiceLocator.Get<TimeService>();
     public PlayerService PlayerService => ServiceLocator.Get<PlayerService>();
     public AzureService AzureService => ServiceLocator.Get<AzureService>();
+    public NetworkService NetworkService => ServiceLocator.Get<NetworkService>();
     #endregion
 
     #region Events
@@ -30,19 +32,48 @@ public class PlayFabManager : MonoBehaviour
         ServiceLocator.Register(new TimeService()); 
         ServiceLocator.Register(new PlayerService());
         ServiceLocator.Register(new AzureService());
+        ServiceLocator.Register(new NetworkService());
     }
 
     private void Start()
     {
         OnLoginAndDataReady += HandleLoginAndDataReady;
         AzureService.OnBattleStageRewardsClaimed += HandleBattleStageClaimed;
-        AuthService.Login();
+        NetworkService.OnDisconnected += HandleDisconnected;
+
+        NetworkService.StartMonitoring(this, isOnline =>
+        {
+            if (isOnline)
+                AuthService.Login();
+        });
     }
 
     private void OnDisable()
     {
         OnLoginAndDataReady -= HandleLoginAndDataReady;
         AzureService.OnBattleStageRewardsClaimed -= HandleBattleStageClaimed;
+        NetworkService.OnDisconnected -= HandleDisconnected;
+    }
+
+    private void HandleDisconnected()
+    {
+        NetworkService.StopMonitoring(this);
+
+        if (SceneManager.GetActiveScene().name != "LoginScene")
+        {
+            SceneManager.LoadScene("LoginScene");
+        }
+    }
+
+    public void RetryConnection()
+    {
+        NetworkService.StartMonitoring(this, isOnline =>
+        {
+            if (isOnline)
+            {
+                AuthService.Login();
+            }
+        });
     }
 
     public void RaiseLoginReady()
@@ -52,11 +83,11 @@ public class PlayFabManager : MonoBehaviour
 
     private void HandleLoginAndDataReady()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("GameScene");
     }
 
     private void HandleBattleStageClaimed()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("GameScene");
     }
 }
