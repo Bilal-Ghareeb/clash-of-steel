@@ -136,4 +136,36 @@ public class AzureService
 
         await tcs.Task;
     }
+
+    public async Task ValidateAndGrantPurchaseAsync(string productId, string receiptJson, string signature)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "ValidateAndGrantPurchase",
+            FunctionParameter = new
+            {
+                productId,
+                receiptJson,
+                signature
+            },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            async result =>
+            {
+                await PlayFabManager.Instance.EconomyService.FetchAndCachePlayerInventoryAsync();
+                PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
+                tcs.TrySetResult(true);
+            },
+            error =>
+            {
+                tcs.TrySetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
 }

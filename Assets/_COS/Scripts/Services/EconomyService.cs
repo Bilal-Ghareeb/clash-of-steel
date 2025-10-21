@@ -14,7 +14,7 @@ public class EconomyService
     private List<WeaponInstance> m_playerWeapons = new();
     private Dictionary<string, WeaponProgressionData> m_progressionFormulas = new();
     private Dictionary<string, CatalogItem> m_currencyCatalog = new();
-    private List<CatalogItem> m_diamondBundlesCatalog = new();
+    private List<DiamondBundleData> m_diamondBundlesCatalog = new();
     private Dictionary<string, int> m_playerCurrencies = new();
     private List<StageData> m_battleStages = new();
     #endregion
@@ -24,7 +24,7 @@ public class EconomyService
     public IReadOnlyDictionary<string, WeaponProgressionData> ProgressionFormulas => m_progressionFormulas;
     public Dictionary<string, int> PlayerCurrencies => m_playerCurrencies;
     public IReadOnlyList<StageData> BattleStages => m_battleStages;
-    public IReadOnlyList<CatalogItem> DiamondBundlesCatalog => m_diamondBundlesCatalog;
+    public IReadOnlyList<DiamondBundleData> DiamondBundlesCatalog => m_diamondBundlesCatalog;
     #endregion
 
     #region Events
@@ -72,22 +72,46 @@ public class EconomyService
 
         var request = new SearchItemsRequest
         {
-            Filter = "type eq 'DiamondBundle'"
+            Filter = $"contentType eq 'DiamondBundle'"
         };
 
         PlayFabEconomyAPI.SearchItems(request,
             result =>
             {
-                m_diamondBundlesCatalog = result.Items?.ToList() ?? new List<CatalogItem>();
+                m_diamondBundlesCatalog.Clear();
+
+                foreach (var bundle in result.Items ?? new List<CatalogItem>())
+                {
+
+                    var bundleData = new DiamondBundleData();
+
+                    bundleData.MarketplaceId = GetMarketplaceIdForCatalogItem(bundle, "GooglePlay");
+
+                    int totalAmount = 0;
+                    if (bundle.ItemReferences != null)
+                    {
+                        foreach (var itemRef in bundle.ItemReferences)
+                        {
+                            if (itemRef.Amount.HasValue)
+                                totalAmount += itemRef.Amount.Value;
+                        }
+                    }
+
+                    bundleData.Amount = totalAmount;
+
+                    m_diamondBundlesCatalog.Add(bundleData);
+                }
+
                 tcs.SetResult(true);
             },
             error =>
             {
-                tcs.SetException(new Exception(error.ErrorMessage));
+            tcs.SetException(new Exception(error.ErrorMessage));
             });
 
         await tcs.Task;
     }
+
 
 
     private async Task FetchCatalogFormulasAsync()
@@ -300,5 +324,20 @@ public class EconomyService
         }
 
         return currencyId;
+    }
+
+    private string GetMarketplaceIdForCatalogItem(CatalogItem item, string marketplaceAlternateIdType = "GooglePlay")
+    {
+        if (item?.AlternateIds == null) return null;
+
+        foreach (var alt in item.AlternateIds)
+        {
+            if (string.Equals(alt.Type, marketplaceAlternateIdType, StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrEmpty(alt.Value))
+            {
+                return alt.Value;
+            }
+        }
+        return null;
     }
 }

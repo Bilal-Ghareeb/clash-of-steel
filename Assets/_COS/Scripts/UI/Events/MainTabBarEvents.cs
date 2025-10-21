@@ -4,4 +4,5 @@ public static class MainTabBarEvents
 {
     public static Action PlayScreenShown;
     public static Action ArsenalViewShown;
+    public static Action ShopViewShown;
 }

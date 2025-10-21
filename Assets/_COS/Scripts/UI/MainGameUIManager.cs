@@ -18,6 +18,7 @@ public class MainGameUIManager : MonoBehaviour
     private UIView m_TabsView;
     private UIView m_CurrenciesView;
     private UIView m_PreparingForBattleStageView;
+    private UIView m_ShopView;
 
     const string k_PlayViewName = "PlayView";
     const string k_SettingView = "SettingsView";
@@ -26,6 +27,7 @@ public class MainGameUIManager : MonoBehaviour
     const string k_InspectViewName = "InspectView";
     const string k_CurrenciesViewName = "CurrenciesView";
     const string k_PreparingForBattleStageViewName = "PrepareForBattleStageView";
+    const string k_ShopView = "ShopView";
 
     [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
 
@@ -53,6 +55,7 @@ public class MainGameUIManager : MonoBehaviour
     {
         MainTabBarEvents.ArsenalViewShown += OnArsenalViewShown;
         MainTabBarEvents.PlayScreenShown += OnPlayViewShown;
+        MainTabBarEvents.ShopViewShown += OnShopViewShown;
 
         InspectWeaponEvents.BackToArsenalButtonPressed += OnArsenalViewShown;
 
@@ -68,6 +71,8 @@ public class MainGameUIManager : MonoBehaviour
     {
         MainTabBarEvents.PlayScreenShown -= OnPlayViewShown;
         MainTabBarEvents.ArsenalViewShown -= OnArsenalViewShown;
+        MainTabBarEvents.ShopViewShown += OnShopViewShown;
+
 
         InspectWeaponEvents.BackToArsenalButtonPressed -= OnArsenalViewShown;
 
@@ -89,6 +94,7 @@ public class MainGameUIManager : MonoBehaviour
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
         m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName) , false);
         m_PreparingForBattleStageView = new PreparingForBattleStageView(root.Q<VisualElement>(k_PreparingForBattleStageViewName));
+        m_ShopView = new ShopView(root.Q<VisualElement>(k_ShopView));
 
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_SettingView);
@@ -97,6 +103,7 @@ public class MainGameUIManager : MonoBehaviour
         m_AllViews.Add(m_InspectView);
         m_AllViews.Add(m_CurrenciesView);
         m_AllViews.Add(m_PreparingForBattleStageView);
+        m_AllViews.Add(m_ShopView);
     }
 
     private void OnArsenalViewShown()
@@ -112,6 +119,11 @@ public class MainGameUIManager : MonoBehaviour
     private void OnPlayViewShown()
     {
         ShowModalView(m_PlayView);
+    }
+
+    private void OnShopViewShown()
+    {
+        ShowModalView(m_ShopView);
     }
 
     private void OnInspectViewShown(WeaponItemComponent comp)

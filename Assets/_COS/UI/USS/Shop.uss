@@ -1,0 +1,20 @@
+:root {
+}
+
+.shop-item-diamond {
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/CardFrame05_Bg_Green.png?fileID=21300000&guid=c1149bc1568124c86a752314b78000ab&type=3#CardFrame05_Bg_Green");
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.shop-item-box {
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Frame/CardFrame06_Bg_Yellow.png?fileID=21300000&guid=28554fc966eb749e587c11db562e7eeb&type=3#CardFrame06_Bg_Yellow");
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.shop-item:active {
+    scale: 1.1 1.1 1.1;
+}
+
+.shop-item {
+}

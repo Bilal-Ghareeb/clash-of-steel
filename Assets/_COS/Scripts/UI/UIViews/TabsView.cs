@@ -105,7 +105,7 @@ public class TabsView : UIView
     private void ClickShopViewMenuButton(ClickEvent evt)
     {
         ActivateButton(m_ShopViewMenuButton);
-
+        MainTabBarEvents.ShopViewShown?.Invoke();
         MoveMarkerToClick(evt);
     }
 

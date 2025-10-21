@@ -14,6 +14,7 @@ public class PlayFabManager : MonoBehaviour
     public PlayerService PlayerService => ServiceLocator.Get<PlayerService>();
     public AzureService AzureService => ServiceLocator.Get<AzureService>();
     public NetworkService NetworkService => ServiceLocator.Get<NetworkService>();
+    public IAPService IAPService => ServiceLocator.Get<IAPService>();
     #endregion
 
     #region Events
@@ -33,6 +34,7 @@ public class PlayFabManager : MonoBehaviour
         ServiceLocator.Register(new PlayerService());
         ServiceLocator.Register(new AzureService());
         ServiceLocator.Register(new NetworkService());
+        ServiceLocator.Register(new IAPService());
     }
 
     private void Start()
@@ -41,12 +43,23 @@ public class PlayFabManager : MonoBehaviour
         AzureService.OnBattleStageRewardsClaimed += HandleBattleStageClaimed;
         NetworkService.OnDisconnected += HandleDisconnected;
 
-        NetworkService.StartMonitoring(this, isOnline =>
+        NetworkService.StartMonitoring(this, async isOnline =>
         {
             if (isOnline)
-                AuthService.Login();
+            {
+                try
+                {
+                    await IAPService.InintIAP();
+                    AuthService.Login();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to initialize IAP or login: {ex.Message}");
+                }
+            }
         });
     }
+
 
     private void OnDisable()
     {
@@ -67,7 +80,7 @@ public class PlayFabManager : MonoBehaviour
 
     public void RetryConnection()
     {
-        NetworkService.StartMonitoring(this, isOnline =>
+        NetworkService.StartMonitoring(this,isOnline =>
         {
             if (isOnline)
             {

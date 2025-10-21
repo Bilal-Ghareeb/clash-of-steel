@@ -6,6 +6,7 @@ public class CurrenciesView : UIView
 {
     private VisualElement m_goldCurrencyButton;
     private Label m_playerGoldCountLabel;
+    private Label m_playerDiamondCountLabel;
 
     public CurrenciesView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
     {
@@ -30,6 +31,7 @@ public class CurrenciesView : UIView
         base.SetVisualElements();
         m_goldCurrencyButton = m_TopElement.Q<VisualElement>("Gold-Btn");
         m_playerGoldCountLabel = m_TopElement.Q<Label>("Gold-Count");
+        m_playerDiamondCountLabel = m_TopElement.Q<Label>("Gems-Count");
     }
 
     protected override void RegisterButtonCallbacks()
@@ -48,7 +50,10 @@ public class CurrenciesView : UIView
         if (m_playerGoldCountLabel == null) return;
 
         currencies.TryGetValue("GD", out var gold);
+        currencies.TryGetValue("DM", out var diamond);
+
         m_playerGoldCountLabel.text = gold.ToString();
+        m_playerDiamondCountLabel.text = diamond.ToString();
     }
 
     private void GoToShop(ClickEvent evt)
