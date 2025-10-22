@@ -89,7 +89,6 @@ public class PlayerService
                     m_currentStageId = 1;
                 }
 
-                Debug.Log($"Fetched player current stage: {m_currentStageId}");
                 tcs.SetResult(true);
             },
             error =>
@@ -111,7 +110,6 @@ public class PlayerService
         int currentId = CurrentStageId;
         m_currentStage = m_stages.FirstOrDefault(s => s.id == currentId) ?? m_stages.FirstOrDefault();
 
-        Debug.Log($"StageManager initialized with current stage: {m_currentStage?.name}");
         OnStageChanged?.Invoke(m_currentStage);
     }
 }

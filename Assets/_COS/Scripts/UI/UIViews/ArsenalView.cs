@@ -73,10 +73,6 @@ public class ArsenalView : UIView
 
         WeaponType weaponType = WeaponType.Sword;
 
-        if (!Enum.TryParse<WeaponType>(weaponTypeString, out weaponType))
-        {
-            Debug.LogWarning("Converted " + weaponTypeString + " failed to convert");
-        }
         return weaponType;
     }
 
@@ -87,8 +83,6 @@ public class ArsenalView : UIView
 
         WeaponType gearType = GetWeaponType(weaponTypeKey);
         Rarity rarity = GetRarity(rarityKey);
-
-        Debug.Log("Geras Filtered To :" + rarity +" and "+ gearType);
 
         ArsenalEvents.GearFiltered?.Invoke(rarity, gearType);
     }
@@ -108,7 +102,6 @@ public class ArsenalView : UIView
     {
         if (container == null)
         {
-            Debug.Log("InventoryScreen.CreateGearItemButton: missing parent element");
             return;
         }
 
@@ -151,7 +144,6 @@ public class ArsenalView : UIView
     private void OnWeaponItemClicked(WeaponItemComponent weaponComponent)
     {
         var weaponInstance = weaponComponent.GetWeaponInstance();
-        Debug.Log(weaponInstance.CatalogData.name + " Is Clicked");
 
         InspectWeaponEvents.WeaponSelectedForInspect?.Invoke(weaponInstance);
     }

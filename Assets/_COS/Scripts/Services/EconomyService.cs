@@ -148,7 +148,6 @@ public class EconomyService
                         Debug.LogError($"Failed to parse loot box '{item.Id}': {ex.Message}");
                     }
                 }
-                Debug.Log($"Fetched LootBoxes : {m_lootBoxes.Count}");
                 tcs.SetResult(true);
             },
             error =>
