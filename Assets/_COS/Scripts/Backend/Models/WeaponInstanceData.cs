@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 public class WeaponInstanceData
 {
     public int level;
-    public string cooldownEndTime; // stored as ISO 8601 string, e.g. "2025-10-16T18:00:00Z"
+    public string cooldownEndTime;
 
     [JsonIgnore]
     public System.DateTime? CooldownEndUtc

@@ -17,6 +17,7 @@ public class EconomyService
     private List<DiamondBundleData> m_diamondBundlesCatalog = new();
     private Dictionary<string, int> m_playerCurrencies = new();
     private List<StageData> m_battleStages = new();
+    private List<LootBoxData> m_lootBoxes = new();
     #endregion
 
     #region Properties
@@ -25,6 +26,7 @@ public class EconomyService
     public Dictionary<string, int> PlayerCurrencies => m_playerCurrencies;
     public IReadOnlyList<StageData> BattleStages => m_battleStages;
     public IReadOnlyList<DiamondBundleData> DiamondBundlesCatalog => m_diamondBundlesCatalog;
+    public IReadOnlyList<LootBoxData> LootBoxes => m_lootBoxes;
     #endregion
 
     #region Events
@@ -38,7 +40,8 @@ public class EconomyService
             FetchCatalogFormulasAsync(),
             FetchCatalogCurrenciesAsync(),
             FetchCatalogStagesAsync(),
-            FetchCatalogBundlesAsync(), 
+            FetchCatalogBundlesAsync(),
+            FetchCatalogLootBoxesAsync(),
             FetchAndCachePlayerInventoryAsync()
         );
     }
@@ -107,6 +110,50 @@ public class EconomyService
             error =>
             {
             tcs.SetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
+    private async Task FetchCatalogLootBoxesAsync()
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new SearchItemsRequest
+        {
+            Filter = $"contentType eq 'LootBox'"
+        };
+
+        PlayFabEconomyAPI.SearchItems(request,
+            result =>
+            {
+                m_lootBoxes.Clear();
+
+                foreach (var item in result.Items ?? new List<CatalogItem>())
+                {
+                    if (item.DisplayProperties == null)
+                        continue;
+
+                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(item.DisplayProperties);
+
+                    try
+                    {
+                        var lootBox = Newtonsoft.Json.JsonConvert.DeserializeObject<LootBoxData>(json);
+
+                        if (lootBox != null)
+                            m_lootBoxes.Add(lootBox);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"Failed to parse loot box '{item.Id}': {ex.Message}");
+                    }
+                }
+                Debug.Log($"Fetched LootBoxes : {m_lootBoxes.Count}");
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                tcs.SetException(new Exception(error.ErrorMessage));
             });
 
         await tcs.Task;
@@ -267,9 +314,9 @@ public class EconomyService
                         }
                     }
 
-                    if (!ownedFriendlyIds.Contains("sword_common_01"))
+                    if (!ownedFriendlyIds.Contains("Broad Sword"))
                     {
-                        await PlayFabManager.Instance.AzureService.GrantStarterBundleAsync("sword_common_01");
+                        await PlayFabManager.Instance.AzureService.GrantStarterBundleAsync("Broad Sword");
                     }
 
                     tcs.TrySetResult(true);
@@ -287,7 +334,7 @@ public class EconomyService
         await tcs.Task;
     }
 
-    public CatalogItem GetCatalogItemByFriendlyId(string friendlyId)
+    public CatalogItem GetWeaponCatalogItemByFriendlyId(string friendlyId)
     {
         return m_weaponCatalog?.FirstOrDefault(item =>
            item.AlternateIds != null &&
@@ -306,6 +353,31 @@ public class EconomyService
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(catalogItem.DisplayProperties);
         return Newtonsoft.Json.JsonConvert.DeserializeObject<WeaponData>(json);
     }
+
+    public List<LootBoxWeaponEntry> GetWeaponsCatalogItemsInLootBox(string lootBoxId)
+    {
+        var lootBox = LootBoxes.FirstOrDefault(l => l.id == lootBoxId);
+        if (lootBox == null)
+            return new List<LootBoxWeaponEntry>();
+
+        List<LootBoxWeaponEntry> entries = new();
+
+        foreach (var entry in lootBox.rewards)
+        {
+            var weaponItem = m_weaponCatalog?.FirstOrDefault(item =>
+           item.AlternateIds != null &&
+           item.AlternateIds.Any(a => a.Type == "FriendlyId" && a.Value == entry.id));
+
+            if (weaponItem != null)
+            {
+                entries.Add(new LootBoxWeaponEntry(weaponItem, entry.weight));
+            }
+        }
+
+        return entries;
+    }
+
+
 
     public string GetCurrencyFriendlyId(string currencyId)
     {

@@ -1,7 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_COS/UI/USS/ScrollViews.uss?fileID=7433441132597879392&amp;guid=8d9377dbe54cf294c9d2f496a3098cac&amp;type=3#ScrollViews" />
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
-    <ui:Button name="Weapon-item-button" class="weapon-scroll-item weapon-scroll-item-base" style="justify-content: center; align-self: flex-start; transition-duration: 0.25s; transition-timing-function: ease-in-out-back; width: 470px; height: 458px; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);">
+    <ui:Button name="Weapon-item-button" class="weapon-scroll-item weapon-scroll-item-base" style="justify-content: center; align-self: center; transition-duration: 0.25s; transition-timing-function: ease-in-out-back; width: 470px; height: 458px; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0);">
         <ui:VisualElement name="weapon-scroll-item-icon" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_PictoIcons/256/Pictoicon_Question.Png?fileID=2800000&amp;guid=76712d171e4464645928fd7dc8297c44&amp;type=3#Pictoicon_Question&quot;); -unity-background-scale-mode: scale-to-fit; width: 60%; height: 60%; align-self: center; rotate: 35deg; background-color: rgba(0, 0, 0, 0);" />
         <ui:Label text="??" name="weapon-scroll-item-lvl" class="weapon-scroll-text-lvl" style="top: -5px; left: -65px;" />
         <ui:VisualElement name="Class-icon" style="top: -14px;" />
@@ -19,4 +19,5 @@
             <ui:Label text="xx:xx:xx" name="countdown-counter" class="lable" style="position: absolute; width: 451px; height: 177px; color: rgb(255, 255, 255); font-size: 91px; -unity-font-style: bold; left: 0%; top: -5%; right: 0%; bottom: 0%; padding-left: 48px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 45px;" />
         </ui:VisualElement>
     </ui:Button>
+    <ui:Label text="44 %" name="weapon-scroll-item-chance" class="weapon-scroll-text-lvl lable" style="align-self: center; position: relative; top: 18px; left: 12px; display: none;" />
 </ui:UXML>

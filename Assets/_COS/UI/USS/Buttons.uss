@@ -43,3 +43,8 @@
 .lose-style {
     background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button01_145_Red.Png?fileID=21300000&guid=681db73f19fb24efe843aad713eccb43&type=3#Button01_145_Red");
 }
+
+.unity-scroll-view__content-container {
+    flex-direction: row;
+    justify-content: space-around;
+}

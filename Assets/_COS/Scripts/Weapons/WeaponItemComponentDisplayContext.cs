@@ -2,5 +2,6 @@ public enum WeaponItemComponentDisplayContext
 {
     PrepareForBattle,
     Battle,
-    Arsenal
+    Arsenal,
+    LootBoxDetails
 }

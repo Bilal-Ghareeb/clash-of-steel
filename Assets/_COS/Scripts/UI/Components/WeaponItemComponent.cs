@@ -12,6 +12,7 @@ public class WeaponItemComponent
     private Label m_Lvl;
     private Label m_healthNumber;
     private Label m_damageNumber;
+    private Label m_chanceLabel;
     private VisualElement m_classIcon;
     private Texture2D m_unknownWeaponIcon;
     private bool m_isSelected = false;
@@ -59,6 +60,7 @@ public class WeaponItemComponent
         m_classIcon = weaponItemUXMLTemplate.Q<VisualElement>("Class-icon");
         m_healthNumber = weaponItemUXMLTemplate.Q<Label>("health-number");
         m_damageNumber = weaponItemUXMLTemplate.Q<Label>("damage-number");
+        m_chanceLabel = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-chance");
 
         m_cooldownTimer = weaponItemUXMLTemplate.Q<Label>("countdown-counter");
         m_cooldownOverlay = weaponItemUXMLTemplate.Q<VisualElement>("countdown-timer-container");
@@ -104,7 +106,6 @@ public class WeaponItemComponent
                 m_cooldownTimer.text = "";
             }
         }
-
 
         if (m_weaponItemButton != null)
         {
@@ -189,6 +190,12 @@ public class WeaponItemComponent
 
         newHealth = Mathf.Max(0, newHealth);
         m_healthNumber.text = newHealth.ToString("0");
+    }
+
+    public void SetChance(float newChance)
+    {
+        m_chanceLabel.text = $"{newChance:0.#}%";
+        m_chanceLabel.style.display = DisplayStyle.Flex;
     }
 
     private void StartCooldownTimer(WeaponInstance playerWeapon)

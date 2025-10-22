@@ -14,6 +14,7 @@ public class WeaponInstance : WeaponInstanceBase
     public WeaponInstance(InventoryItem item, CatalogItem catalogItemRef)
     {
         Item = item;
+
         CatalogBaseItem = catalogItemRef;
 
         string catalogJson = JsonConvert.SerializeObject(catalogItemRef.DisplayProperties);

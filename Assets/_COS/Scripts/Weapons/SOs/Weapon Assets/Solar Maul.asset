@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f88f67c489e42f34fa0d24822924e70b, type: 3}
+  m_Name: Solar Maul
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponAsset
+  weaponId: Solar Maul
+  WeaponPrefab: {fileID: 5882740418562934682, guid: dea89ad487fba0d43998917fd5f30879, type: 3}
+  Timelines:
+    entranceTimeline: {fileID: 0}
+    attackTimeline: {fileID: 0}
+    deathTimeline: {fileID: 0}
