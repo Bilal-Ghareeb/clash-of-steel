@@ -18,3 +18,46 @@
 
 .shop-item {
 }
+
+.loot-box {
+    width: 100%;
+    height: 23%;
+    justify-content: center;
+    align-self: center;
+    align-items: center;
+    align-content: center;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/256/Icon_Chest.png?fileID=21300000&guid=df17fb01be9934202a68b3fe1769ef2a&type=3#Icon_Chest");
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-background-scale-mode: scale-to-fit;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+.loot-box-shake-middle {
+    rotate: 1deg;
+}
+
+.loot-box-shake-right {
+    rotate: 10deg;
+    translate: 0 -5px;
+}
+
+.loot-box-shake-left {
+    rotate: -10deg;
+    translate: 0 54px;
+}
+
+.loot-box-opened {
+    width: 100%;
+    height: 23%;
+    justify-content: center;
+    align-self: center;
+    align-items: center;
+    align-content: center;
+    scale: 1.3 1.3 1.3;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-background-scale-mode: scale-to-fit;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out;
+    background-image: url("project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_ItemIcons/Original/Icon_Chest_Open_m.png?fileID=21300000&guid=905b2801c596244898cbaaef5f202683&type=3#Icon_Chest_Open_m");
+}

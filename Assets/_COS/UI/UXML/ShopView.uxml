@@ -1,5 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
+    <Style src="project://database/Assets/_COS/UI/USS/Shop.uss?fileID=7433441132597879392&amp;guid=2f3874590f8c4794c92371142da97273&amp;type=3#Shop" />
     <ui:VisualElement name="ShopView" style="width: 100%; height: 100%;">
         <ui:VisualElement name="diamond_title_container" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Green.png?fileID=21300000&amp;guid=4f004328d7c9547edae34787869f3e8a&amp;type=3#Title_Ribbon_Bg_Green&quot;); -unity-background-scale-mode: scale-and-crop; width: 100%; height: 10%; top: 15%;">
             <ui:Label text="DIAMOND" name="diamonds-label" class="lable" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; font-size: 178px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 11%;" />
@@ -16,6 +17,12 @@
             <ui:VisualElement name="loot-box-panel-title-container" style="position: absolute; width: 85%; height: 9%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Yellow.png?fileID=21300000&amp;guid=03a52e934f88f4a699b498a51573c186&amp;type=3#Title_Ribbon_Bg_Yellow&quot;); -unity-background-scale-mode: scale-and-crop; top: 27%; left: 8%;">
                 <ui:Label text="LEGENDARY BOX" name="loot-box-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); position: absolute; top: 13%; left: 10%;" />
             </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="loot-box-opening-container" style="width: 100%; height: 100%; position: absolute; top: 0%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button_Square04.png?fileID=2800000&amp;guid=9a7976714d40049be9d58d49c442c7e9&amp;type=3#Button_Square04&quot;); -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgba(0, 0, 0, 0.81); justify-content: center; padding-top: 50px; padding-right: 50px; padding-bottom: 50px; padding-left: 50px; display: flex; align-items: center;">
+            <ui:VisualElement name="loot-box" class="loot-box">
+                <ui:VisualElement name="loot-box-result-container" style="width: 43%; height: 100%;" />
+            </ui:VisualElement>
+            <ui:Label text="OPEN BOX" name="loot-box-open-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 7%;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
