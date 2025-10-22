@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using UnityEngine.UIElements.Experimental;
 
@@ -15,11 +16,15 @@ public class ShopView : UIView
     private bool m_isShaking = true;
     private string m_lootBoxShakeCurrentState = "loot-box-shake-middle";
 
-    private Label m_lootBoxTitle;
+    private Label m_lootBoxName;
+    private Label m_lootBoxOpenPrompt;
     private ScrollView m_lootBoxContentScrollView;
 
     private VisualTreeAsset m_shopItemAsset;
     private VisualTreeAsset m_weaponItemAsset;
+
+    private Button m_closeDetailsPanelButton;
+    private Button m_claimLootBoxRewardButton;
 
 
     public ShopView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
@@ -37,15 +42,18 @@ public class ShopView : UIView
         m_lootBoxOpenContainer = m_TopElement.Q<VisualElement>("loot-box-opening-container");
         m_lootBoxResultContainer = m_TopElement.Q<VisualElement>("loot-box-result-container");
         m_lootBox = m_TopElement.Q<VisualElement>("loot-box");
-        m_lootBoxTitle = m_TopElement.Q<Label>("loot-box-title");
+        m_lootBoxName = m_TopElement.Q<Label>("loot-box-title");
+        m_lootBoxOpenPrompt = m_TopElement.Q<Label>("loot-box-open-title");
         m_lootBoxContentScrollView = m_TopElement.Q<ScrollView>("loot-box-content-scrollview");
+        m_closeDetailsPanelButton = m_TopElement.Q<Button>("close-details-btn");
+        m_claimLootBoxRewardButton = m_TopElement.Q<Button>("claim-reward-btn");
+        
     }
 
     public override void Show()
     {
         base.Show();
         m_lootBoxesContentContainer.style.display = DisplayStyle.None;
-        ResetLootBoxOpenState();
         PopulateDiamondBundles();
         PopulateLootBoxes();
     }
@@ -55,6 +63,23 @@ public class ShopView : UIView
         base.Hide();
     }
 
+    public override void Dispose()
+    {
+        ResetLootBoxOpenState();
+        UnRegisterButtonCallbacls();
+    }
+
+    protected override void RegisterButtonCallbacks()
+    {
+        m_closeDetailsPanelButton.RegisterCallback<ClickEvent>(CloseDetailsPanel);
+        m_claimLootBoxRewardButton.RegisterCallback<ClickEvent>(HandleAfterClaimReward);
+    }
+
+    private void UnRegisterButtonCallbacls()
+    {
+        m_closeDetailsPanelButton.UnregisterCallback<ClickEvent>(CloseDetailsPanel);
+        m_claimLootBoxRewardButton.UnregisterCallback<ClickEvent>(HandleAfterClaimReward);
+    }
 
     private void PopulateDiamondBundles()
     {
@@ -137,7 +162,7 @@ public class ShopView : UIView
 
     private void PopulateLootBoxDetailsPanel(List<LootBoxWeaponEntry> weaponEntries , string lootBoxName)
     {
-        m_lootBoxTitle.text = lootBoxName;
+        m_lootBoxName.text = lootBoxName;
         m_lootBoxContentScrollView.Clear();
 
         foreach (var entry in weaponEntries)
@@ -160,6 +185,7 @@ public class ShopView : UIView
     private void SetupAndShowOpenLootBoxContainer()
     {
         m_lootBoxOpenContainer.style.display = DisplayStyle.Flex;
+        ShopEvents.LootBoxPurchased?.Invoke();
 
         m_lootBox.RegisterCallback<TransitionEndEvent>(OnTransitionEnd);
         m_lootBox.RegisterCallback<ClickEvent>(OnLootBoxClicked);
@@ -216,9 +242,9 @@ public class ShopView : UIView
         m_lootBox.RemoveFromClassList("loot-box-shake-right");
         m_lootBox.RemoveFromClassList("loot-box-shake-left");
         m_lootBox.RemoveFromClassList("loot-box-middle");
-
         m_lootBox.AddToClassList("loot-box-opened");
-
+        m_claimLootBoxRewardButton.style.display = DisplayStyle.Flex;
+        m_lootBoxOpenPrompt.style.display = DisplayStyle.None;
         ShowLootBoxReward();
     }
 
@@ -260,11 +286,23 @@ public class ShopView : UIView
             m_lootBox.RemoveFromClassList("loot-box-opened");
             m_lootBox.AddToClassList("loot-box");
         }
-
+        m_claimLootBoxRewardButton.style.display = DisplayStyle.None;
+        m_lootBoxOpenPrompt.style.display = DisplayStyle.Flex;
         m_lootBoxOpenContainer.style.display = DisplayStyle.None;
         m_lootBoxResultContainer.Clear();
 
         m_lootBoxShakeCurrentState = "loot-box";
+    }
+
+    private void CloseDetailsPanel(ClickEvent evt)
+    {
+        m_lootBoxesContentContainer.style.display = DisplayStyle.None;
+    }
+
+    private void HandleAfterClaimReward(ClickEvent evt)
+    {
+        ResetLootBoxOpenState();
+        ShopEvents.LootBoxRewardClaimed?.Invoke();
     }
 
 }

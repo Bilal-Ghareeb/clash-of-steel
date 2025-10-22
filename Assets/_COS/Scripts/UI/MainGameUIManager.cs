@@ -65,6 +65,9 @@ public class MainGameUIManager : MonoBehaviour
         PlayScreenEvents.SettingsButtonPressed += OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle += OnPlayViewShown;
 
+        ShopEvents.LootBoxPurchased += OnLootBoxPurchased;
+        ShopEvents.LootBoxRewardClaimed += OnLootBoxRewardClaimed;
+
     }
 
     private void UnSubscribeFromEvents()
@@ -134,6 +137,16 @@ public class MainGameUIManager : MonoBehaviour
     private void OnPreparingForBattleStageShown()
     {
         ShowModalView(m_PreparingForBattleStageView);
+    }
+
+    private void OnLootBoxPurchased()
+    {
+        m_TabsView.Hide();
+    }
+
+    private void OnLootBoxRewardClaimed()
+    {
+        m_TabsView.Show();
     }
 
     private void ShowModalView(UIView newView)
