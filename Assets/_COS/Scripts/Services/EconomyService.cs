@@ -353,6 +353,7 @@ public class EconomyService
         return Newtonsoft.Json.JsonConvert.DeserializeObject<WeaponData>(json);
     }
 
+
     public List<LootBoxWeaponEntry> GetWeaponsCatalogItemsInLootBox(string lootBoxId)
     {
         var lootBox = LootBoxes.FirstOrDefault(l => l.id == lootBoxId);

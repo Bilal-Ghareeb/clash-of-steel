@@ -59,21 +59,32 @@ public class ArsenalView : UIView
     private Rarity GetRarity(string rarityString)
     {
 
-        Rarity rarity = Rarity.Common;
-
-        if (!Enum.TryParse<Rarity>(rarityString, out rarity))
+        switch (rarityString)
         {
-            Debug.Log("String " + rarityString + " failed to convert");
+            case "Common":
+                return Rarity.Common;
+            case "Legendary":
+                return Rarity.Legendary;
+            case "Rare":
+                return Rarity.Rare;
+            default:
+                return Rarity.All;
         }
-        return rarity;
     }
 
     private WeaponType GetWeaponType(string weaponTypeString)
     {
-
-        WeaponType weaponType = WeaponType.Sword;
-
-        return weaponType;
+        switch (weaponTypeString)
+        {
+            case "Sword":
+                return WeaponType.Sword;
+            case "Shield":
+                return WeaponType.Shield;
+            case "Hammer":
+                return WeaponType.Hammer;
+            default:
+                return WeaponType.All;
+        }
     }
 
     private void UpdateFilters(ChangeEvent<string> evt)

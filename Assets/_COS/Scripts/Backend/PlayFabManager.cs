@@ -37,27 +37,29 @@ public class PlayFabManager : MonoBehaviour
         ServiceLocator.Register(new IAPService());
     }
 
-    private void Start()
+    private async void Start()
     {
         OnLoginAndDataReady += HandleLoginAndDataReady;
         AzureService.OnBattleStageRewardsClaimed += HandleBattleStageClaimed;
         NetworkService.OnDisconnected += HandleDisconnected;
 
-        NetworkService.StartMonitoring(this, async isOnline =>
+        try
         {
-            if (isOnline)
-            {
-                try
-                {
-                    await IAPService.InintIAP();
-                    AuthService.Login();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Failed to initialize IAP or login: {ex.Message}");
-                }
-            }
-        });
+            await IAPService.InintIAP();
+            AuthService.Login();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to initialize IAP or login: {ex.Message}");
+        }
+
+        //NetworkService.StartMonitoring(this, async isOnline =>
+        //{
+        //    if (isOnline)
+        //    {
+
+        //    }
+        //});
     }
 
 

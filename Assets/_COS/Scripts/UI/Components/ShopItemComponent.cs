@@ -94,6 +94,16 @@ public class ShopItemComponent
         m_detailsButton?.RegisterCallback<ClickEvent>(OnDetailsButtonClicked);
     }
 
+    public void DisableButton()
+    {
+        m_shopItemButton.SetEnabled(false);
+    }
+
+    public void EnableButton()
+    {
+        m_shopItemButton.SetEnabled(true);
+    }
+
     private void OnShopItemClicked(ClickEvent evt)
     {
         OnPurchaseClicked?.Invoke();

@@ -1,3 +1,4 @@
+using PlayFab.EconomyModels;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +27,7 @@ public class ShopView : UIView
     private Button m_closeDetailsPanelButton;
     private Button m_claimLootBoxRewardButton;
 
+    private CatalogItem m_currentLootBoxReward;
 
     public ShopView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
     {
@@ -140,22 +142,32 @@ public class ShopView : UIView
             shopItem.Configure(ShopItemType.LootBox);
             shopItem.SetPrice(lootBox.cost.ToString());
 
+            if(!PlayFabManager.Instance.EconomyService.PlayerCurrencies.TryGetValue("DM", out int playerCurrency) || playerCurrency < lootBox.cost)
+            {
+                shopItem.DisableButton();
+            }
+            else
+            {
+                shopItem.EnableButton();
+                shopItem.OnPurchaseClicked = async () =>
+                {
+
+                    CatalogItem rewardItem = await PlayFabManager.Instance.AzureService.GrantLootBoxRewardAsync(lootBox);
+                    SetupAndShowOpenLootBoxContainer(rewardItem);
+                };
+            }
+
             shopItem.OnDetailsClicked = () =>
             {
                 var weaponEntries = PlayFabManager.Instance.EconomyService.GetWeaponsCatalogItemsInLootBox(lootBox.id);
-                PopulateLootBoxDetailsPanel(weaponEntries , lootBox.id);
+                PopulateLootBoxDetailsPanel(weaponEntries, lootBox.id);
                 m_lootBoxesContentContainer.style.display = DisplayStyle.Flex;
                 m_lootBoxesContentContainer.transform.scale = new Vector3(0.1f, 0.1f, 0.1f);
                 m_lootBoxesContentContainer.experimental.animation.Scale(1f, 200);
             };
 
-            shopItem.OnPurchaseClicked = () =>
-            {
-                SetupAndShowOpenLootBoxContainer();
-            };
-
-            shopItem.RegisterButtonCallbacks();
             m_lootboxesContainer.Add(lootBoxUI);
+            shopItem.RegisterButtonCallbacks();
         }
     }
 
@@ -182,8 +194,10 @@ public class ShopView : UIView
         }
     }
 
-    private void SetupAndShowOpenLootBoxContainer()
+    private void SetupAndShowOpenLootBoxContainer(CatalogItem reward)
     {
+        m_currentLootBoxReward = reward;
+
         m_lootBoxOpenContainer.style.display = DisplayStyle.Flex;
         ShopEvents.LootBoxPurchased?.Invoke();
 
@@ -245,16 +259,19 @@ public class ShopView : UIView
         m_lootBox.AddToClassList("loot-box-opened");
         m_claimLootBoxRewardButton.style.display = DisplayStyle.Flex;
         m_lootBoxOpenPrompt.style.display = DisplayStyle.None;
-        ShowLootBoxReward();
+        ShowLootBoxReward(m_currentLootBoxReward);
     }
 
-    private void ShowLootBoxReward()
+    private void ShowLootBoxReward(CatalogItem reward)
     {
         m_lootBoxResultContainer.Clear();
 
         TemplateContainer weaponUI = m_weaponItemAsset.Instantiate();
         var weaponComponent = new WeaponItemComponent();
+
         weaponComponent.SetVisualElements(weaponUI, WeaponItemComponentDisplayContext.LootBoxDetails);
+
+        weaponComponent.SetGameData(new CatalogWeaponInstance(reward));
 
         m_lootBoxResultContainer.Add(weaponUI);
 
@@ -292,6 +309,7 @@ public class ShopView : UIView
         m_lootBoxResultContainer.Clear();
 
         m_lootBoxShakeCurrentState = "loot-box";
+        m_currentLootBoxReward = null;
     }
 
     private void CloseDetailsPanel(ClickEvent evt)

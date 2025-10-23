@@ -1,5 +1,8 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PlayFab;
 using PlayFab.CloudScriptModels;
+using PlayFab.EconomyModels;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -166,6 +169,51 @@ public class AzureService
             });
 
         await tcs.Task;
+    }
+
+    public async Task<CatalogItem> GrantLootBoxRewardAsync(LootBoxData lootBoxData)
+    {
+        var tcs = new TaskCompletionSource<CatalogItem>();
+
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "GrantLootBoxReward",
+            FunctionParameter = lootBoxData,
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            async result =>
+            {
+                try
+                {
+                    var jObj = JObject.Parse(result.FunctionResult.ToString());
+
+                    var selectedRewardId = jObj["rewardId"]?.ToString();
+                    if (string.IsNullOrEmpty(selectedRewardId))
+                    {
+                        tcs.TrySetException(new Exception("selectedRewardId missing from response."));
+                        return;
+                    }
+
+                    var getItemResult = PlayFabManager.Instance.EconomyService.GetWeaponCatalogItemByFriendlyId(selectedRewardId);
+
+                    await PlayFabManager.Instance.EconomyService.FetchAndCachePlayerInventoryAsync();
+                    PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
+
+                    tcs.TrySetResult(getItemResult);
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            },
+            error =>
+            {
+                tcs.TrySetException(new Exception(error.ErrorMessage));
+            });
+
+        return await tcs.Task;
     }
 
 }
