@@ -20,4 +20,5 @@
         </ui:VisualElement>
     </ui:Button>
     <ui:Label text="44 %" name="weapon-scroll-item-chance" class="weapon-scroll-text-lvl lable" style="align-self: center; position: relative; top: 18px; left: 12px; display: none;" />
+    <ui:Button name="ad-btn" class="rectangleButton" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/IconMisc/Icon_ImageIcon_Ad_00_l.png?fileID=21300000&amp;guid=d535ffb65bf754dda95c3181d7389600&amp;type=3#Icon_ImageIcon_Ad_00_l&quot;); -unity-background-scale-mode: scale-to-fit; width: 143px; height: 150px; display: none;" />
 </ui:UXML>

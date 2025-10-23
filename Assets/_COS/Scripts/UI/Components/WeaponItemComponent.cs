@@ -7,6 +7,7 @@ public class WeaponItemComponent
 {
     public  VisualElement Root { get; private set; }
     private VisualElement m_weaponItemButton;
+    private Button m_watchRewardedAdButton;
     private WeaponInstanceBase m_WeaponInstance;
     private VisualElement m_weaponImage;
     private Label m_Lvl;
@@ -46,6 +47,7 @@ public class WeaponItemComponent
     }
 
     public Action OnCustomClick { get; set; }
+    public Action OnAdsButtonClick { get; set; }
 
     public void SetVisualElements(TemplateContainer weaponItemUXMLTemplate , WeaponItemComponentDisplayContext context)
     {
@@ -61,7 +63,7 @@ public class WeaponItemComponent
         m_healthNumber = weaponItemUXMLTemplate.Q<Label>("health-number");
         m_damageNumber = weaponItemUXMLTemplate.Q<Label>("damage-number");
         m_chanceLabel = weaponItemUXMLTemplate.Q<Label>("weapon-scroll-item-chance");
-
+        m_watchRewardedAdButton = weaponItemUXMLTemplate.Q<Button>("ad-btn");
         m_cooldownTimer = weaponItemUXMLTemplate.Q<Label>("countdown-counter");
         m_cooldownOverlay = weaponItemUXMLTemplate.Q<VisualElement>("countdown-timer-container");
     }
@@ -97,11 +99,15 @@ public class WeaponItemComponent
         {
             if (playerweaponInstance.IsOnCooldown) 
             {
+                m_watchRewardedAdButton.style.display = DisplayStyle.Flex;
+                m_watchRewardedAdButton.RegisterCallback<ClickEvent>(OnAdsButtonClikced);
                 m_cooldownOverlay.style.display = DisplayStyle.Flex;
                 StartCooldownTimer(playerweaponInstance);
             }
             else
             {
+                m_watchRewardedAdButton.style.display = DisplayStyle.None;
+                m_watchRewardedAdButton.UnregisterCallback<ClickEvent>(OnAdsButtonClikced);
                 m_cooldownOverlay.style.display = DisplayStyle.None;
                 m_cooldownTimer.text = "";
             }
@@ -230,6 +236,11 @@ public class WeaponItemComponent
         ArsenalEvents.WeaponItemClicked?.Invoke(this);
     }
 
+    private void OnAdsButtonClikced(ClickEvent evt)
+    {
+        OnAdsButtonClick?.Invoke();
+    }
+
     private void OnCustomButtonClicked(ClickEvent evt)
     {
         OnCustomClick?.Invoke();
@@ -237,12 +248,12 @@ public class WeaponItemComponent
 
     public void DisableInteractions()
     {
-        Root.SetEnabled(false);
+        m_weaponItemButton.SetEnabled(false);
     }
 
     public void EnableInteractions()
     {
-        Root.SetEnabled(true);
+        m_weaponItemButton.SetEnabled(true);
     }
 
     public WeaponInstanceBase GetWeaponInstance() => m_WeaponInstance;

@@ -211,6 +211,7 @@ public class PreparingForBattleStageView : UIView
 
             if (weapon.IsOnCooldown)
             {
+                weaponItem.OnAdsButtonClick = ()=> PlayFabManager.Instance.ADService.ShowRewardedAd();
                 weaponItem.DisableInteractions();
             }
 
