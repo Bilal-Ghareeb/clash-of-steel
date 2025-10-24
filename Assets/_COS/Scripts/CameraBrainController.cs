@@ -21,8 +21,8 @@ public class CameraBrainController : MonoBehaviour
         MainTabBarEvents.PlayScreenShown += RotateCameraTowardsEntrance;
         MainTabBarEvents.ShopViewShown += RotateCameraTowardsShop;
 
-        InspectWeaponEvents.BackToArsenalButtonPressed += RotateCameraTowardsArsenal;
-        InspectWeaponEvents.InspectWeaponViewShown += RotateCameraTowardsInspectWeapon;
+        InspectWeaponEvents.BackButtonClicked += RotateCameraTowardsArsenal;
+        InspectWeaponEvents.ScreenEnabled += RotateCameraTowardsInspectWeapon;
     }
 
     private void OnDisable()
@@ -32,8 +32,8 @@ public class CameraBrainController : MonoBehaviour
         MainTabBarEvents.ShopViewShown -= RotateCameraTowardsShop;
 
 
-        InspectWeaponEvents.BackToArsenalButtonPressed -= RotateCameraTowardsArsenal;
-        InspectWeaponEvents.InspectWeaponViewShown -= RotateCameraTowardsInspectWeapon;
+        InspectWeaponEvents.BackButtonClicked -= RotateCameraTowardsArsenal;
+        InspectWeaponEvents.ScreenEnabled -= RotateCameraTowardsInspectWeapon;
     }
 
     private void RotateCameraTowardsArsenal()

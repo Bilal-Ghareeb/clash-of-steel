@@ -4,14 +4,23 @@ using UnityEngine.SceneManagement;
 
 public class PreparingForBattleStageController : MonoBehaviour
 {
+    [SerializeField] private SoundData m_preparingForBattleEntranceSound;
+
     private void OnEnable()
     {
+        PreparingForBattleStageEvents.ScreenEnabled += HandleScreenEnabled;
         PreparingForBattleStageEvents.RequestBeginBattle += HandleBeginBattle;
     }
 
     private void OnDisable()
     {
+        PreparingForBattleStageEvents.ScreenEnabled -= HandleScreenEnabled;
         PreparingForBattleStageEvents.RequestBeginBattle -= HandleBeginBattle;
+    }
+
+    private void HandleScreenEnabled()
+    {
+        AudioManager.Instance.PlaySFX(m_preparingForBattleEntranceSound);
     }
 
     private void HandleBeginBattle(List<WeaponInstance> playerTeam, List<StageEnemyData> enemies)

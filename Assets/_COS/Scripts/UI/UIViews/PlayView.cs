@@ -32,11 +32,11 @@ public class PlayView : UIView
 
     private void ClickPlayButton(ClickEvent evt)
     {
-        PlayScreenEvents.PlayBattleStageButtonPressed?.Invoke();
+        PlayerEvents.PlayBattleStageButtonPressed?.Invoke();
     }
 
     private void ShowSettingsPanel(ClickEvent evt)
     {
-        PlayScreenEvents.SettingsButtonPressed?.Invoke();
+        PlayerEvents.SettingsButtonPressed?.Invoke();
     }
 }

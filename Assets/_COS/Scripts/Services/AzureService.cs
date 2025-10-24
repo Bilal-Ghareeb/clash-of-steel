@@ -104,7 +104,7 @@ public class AzureService
     }
 
 
-    public async Task LevelWeaponAsync(string weaponInstanceId, string currencyFriendlyId, int cost)
+    public async Task LevelWeaponAsync(string weaponInstanceId, string currencyFriendlyId , int cost)
     {
         var tcs = new TaskCompletionSource<bool>();
 

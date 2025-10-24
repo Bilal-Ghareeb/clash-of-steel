@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ArsenalController : MonoBehaviour
 {
+    [SerializeField] private SoundData m_arsenalEntranceSound;
+
     private void OnEnable()
     {
         ArsenalEvents.ScreenEnabled += OnArsenalScreenEnabled;
@@ -22,6 +24,7 @@ public class ArsenalController : MonoBehaviour
 
     private void OnArsenalScreenEnabled()
     {
+        AudioManager.Instance.PlaySFX(m_arsenalEntranceSound);
         UpdateInventory(PlayFabManager.Instance.EconomyService.PlayerWeapons);
     }
 

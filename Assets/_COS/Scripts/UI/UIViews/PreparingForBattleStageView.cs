@@ -30,7 +30,7 @@ public class PreparingForBattleStageView : UIView
     public override void Show()
     {
         base.Show();
-        PreparingForBattleStageEvents.PreparingForBattleStageShown?.Invoke();
+        PreparingForBattleStageEvents.ScreenEnabled?.Invoke();
 
         SetVisualElements();
         RegisterButtonCallbacks();

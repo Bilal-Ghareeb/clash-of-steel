@@ -1,7 +1,6 @@
 using PlayFab.EconomyModels;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using UnityEngine.UIElements.Experimental;
 
@@ -55,6 +54,7 @@ public class ShopView : UIView
     public override void Show()
     {
         base.Show();
+        ShopEvents.ScreenEnabled?.Invoke();
         m_lootBoxesContentContainer.style.display = DisplayStyle.None;
         PopulateDiamondBundles();
         PopulateLootBoxes();

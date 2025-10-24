@@ -5,6 +5,10 @@ using UnityEngine.UIElements;
 [RequireComponent (typeof(UIDocument))]
 public class MainGameUIManager : MonoBehaviour
 {
+
+    [Header("UI Controllers")]
+    [SerializeField] private InspectController m_inspectorController;
+
     private UIDocument m_MainGameDocument;
 
     private UIView m_CurrentView;
@@ -14,7 +18,7 @@ public class MainGameUIManager : MonoBehaviour
     private UIView m_PlayView;
     private UIView m_SettingView;
     private UIView m_ArsenalView;
-    private UIView m_InspectView;
+    private InspectView m_InspectView;
     private UIView m_TabsView;
     private UIView m_CurrenciesView;
     private UIView m_PreparingForBattleStageView;
@@ -28,8 +32,6 @@ public class MainGameUIManager : MonoBehaviour
     const string k_CurrenciesViewName = "CurrenciesView";
     const string k_PreparingForBattleStageViewName = "PrepareForBattleStageView";
     const string k_ShopView = "ShopView";
-
-    [SerializeField] private WeaponInspectPresenter m_WeaponInspectPresenter;
 
     private void OnEnable()
     {
@@ -57,12 +59,12 @@ public class MainGameUIManager : MonoBehaviour
         MainTabBarEvents.PlayScreenShown += OnPlayViewShown;
         MainTabBarEvents.ShopViewShown += OnShopViewShown;
 
-        InspectWeaponEvents.BackToArsenalButtonPressed += OnArsenalViewShown;
+        InspectWeaponEvents.BackButtonClicked += OnArsenalViewShown;
 
         ArsenalEvents.WeaponItemClicked += OnInspectViewShown;
 
-        PlayScreenEvents.PlayBattleStageButtonPressed += OnPreparingForBattleStageShown;
-        PlayScreenEvents.SettingsButtonPressed += OnSettingsPanelShown;
+        PlayerEvents.PlayBattleStageButtonPressed += OnPreparingForBattleStageShown;
+        PlayerEvents.SettingsButtonPressed += OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle += OnPlayViewShown;
 
         ShopEvents.LootBoxPurchased += OnLootBoxPurchased;
@@ -77,12 +79,12 @@ public class MainGameUIManager : MonoBehaviour
         MainTabBarEvents.ShopViewShown += OnShopViewShown;
 
 
-        InspectWeaponEvents.BackToArsenalButtonPressed -= OnArsenalViewShown;
+        InspectWeaponEvents.BackButtonClicked -= OnArsenalViewShown;
 
         ArsenalEvents.WeaponItemClicked -= OnInspectViewShown;
 
-        PlayScreenEvents.PlayBattleStageButtonPressed -= OnPreparingForBattleStageShown;
-        PlayScreenEvents.SettingsButtonPressed -= OnSettingsPanelShown;
+        PlayerEvents.PlayBattleStageButtonPressed -= OnPreparingForBattleStageShown;
+        PlayerEvents.SettingsButtonPressed -= OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle -= OnPlayViewShown;
     }
 
@@ -93,7 +95,10 @@ public class MainGameUIManager : MonoBehaviour
         m_PlayView = new PlayView(root.Q<VisualElement>(k_PlayViewName));
         m_SettingView = new SettingsView(root.Q<VisualElement>(k_SettingView));
         m_ArsenalView = new ArsenalView(root.Q<VisualElement>(k_ArsenalViewName));
-        m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName) , m_WeaponInspectPresenter);
+
+        m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName));
+        m_inspectorController.Setup(m_InspectView);
+
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
         m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName) , false);
         m_PreparingForBattleStageView = new PreparingForBattleStageView(root.Q<VisualElement>(k_PreparingForBattleStageViewName));
