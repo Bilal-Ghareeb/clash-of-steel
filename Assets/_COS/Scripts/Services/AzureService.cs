@@ -104,7 +104,7 @@ public class AzureService
     }
 
 
-    public async Task LevelWeaponAsync(string weaponInstanceId, string currencyFriendlyId , int cost)
+    public async Task LevelWeaponAsync(string weaponInstanceId, string progressionFriendlyID , int levelups)
     {
         var tcs = new TaskCompletionSource<bool>();
 
@@ -114,8 +114,8 @@ public class AzureService
             FunctionParameter = new
             {
                 instanceId = weaponInstanceId,
-                currencyFriendlyId,
-                cost
+                progressionFriendlyID,
+                levelups
             },
             GeneratePlayStreamEvent = true
         };
@@ -124,6 +124,7 @@ public class AzureService
             async result =>
             {
                 await PlayFabManager.Instance.EconomyService.FetchAndCachePlayerInventoryAsync();
+                PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
                 tcs.SetResult(true);
             },
             error =>

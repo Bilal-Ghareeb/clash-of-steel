@@ -46,10 +46,10 @@ public class InspectView : UIView
         RefreshWeaponStats(weapon);
     }
 
-    public void RefreshWeaponStats(WeaponInstanceBase weapon)
+    public void RefreshWeaponStats(WeaponInstanceBase weapon, int? overrideLevel = null)
     {
         var progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[weapon.CatalogData.progressionId];
-        int level = (weapon is WeaponInstance instance) ? instance.InstanceData.level : 1;
+        int level = overrideLevel ?? (weapon is WeaponInstance instance ? instance.InstanceData.level : 1);
 
         m_level.text = level.ToString();
         m_health.text = WeaponProgressionCalculator.GetHealth(weapon.CatalogData.baseHealth, level, progression).ToString();
@@ -62,6 +62,7 @@ public class InspectView : UIView
         m_max.style.display = isMax ? DisplayStyle.Flex : DisplayStyle.None;
         m_cost.style.display = isMax ? DisplayStyle.None : DisplayStyle.Flex;
     }
+
 
     public void SetLevelUpInteractable(bool state)
     {

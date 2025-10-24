@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public static class WeaponProgressionCalculator
@@ -14,6 +15,8 @@ public static class WeaponProgressionCalculator
 
     public static int GetCostForLevelUp(int level, WeaponProgressionData prog)
     {
-        return Mathf.RoundToInt(prog.costBase * Mathf.Pow(prog.costMultiplier, level - 1));
+        double rawCost = prog.costBase * Math.Pow(prog.costMultiplier, level - 1);
+        return (int)Math.Round(rawCost, MidpointRounding.AwayFromZero);
     }
+
 }
