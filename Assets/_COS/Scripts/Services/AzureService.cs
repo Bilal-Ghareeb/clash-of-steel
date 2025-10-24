@@ -75,6 +75,34 @@ public class AzureService
         await tcs.Task;
     }
 
+    public async Task ClearWeaponCooldownAsync(string weaponInstanceId)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+
+        var request = new ExecuteFunctionRequest
+        {
+            FunctionName = "ClearWeaponCooldown",
+            FunctionParameter = new
+            {
+                instanceId = weaponInstanceId
+            },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabCloudScriptAPI.ExecuteFunction(request,
+            async result =>
+            {
+                await PlayFabManager.Instance.EconomyService.FetchAndCachePlayerInventoryAsync();
+                tcs.SetResult(true);
+            },
+            error =>
+            {
+                tcs.SetException(new Exception(error.ErrorMessage));
+            });
+
+        await tcs.Task;
+    }
+
 
     public async Task LevelWeaponAsync(string weaponInstanceId, string currencyFriendlyId, int cost)
     {

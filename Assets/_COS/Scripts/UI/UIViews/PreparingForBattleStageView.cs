@@ -211,7 +211,15 @@ public class PreparingForBattleStageView : UIView
 
             if (weapon.IsOnCooldown)
             {
-                weaponItem.OnAdsButtonClick = ()=> PlayFabManager.Instance.ADService.ShowRewardedAd();
+                weaponItem.OnAdsButtonClick = () =>
+                {
+                    PlayFabManager.Instance.ADService.ShowRewardedAd(async () =>
+                    {
+                        weapon.RemoveCooldownLocally();
+                        weaponItem.EnableInteractions();
+                        await PlayFabManager.Instance.AzureService.ClearWeaponCooldownAsync(weapon.Item.Id);
+                    });
+                };
                 weaponItem.DisableInteractions();
             }
 

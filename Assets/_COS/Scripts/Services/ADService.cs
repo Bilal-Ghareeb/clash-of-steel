@@ -1,10 +1,13 @@
 using UnityEngine;
 using Unity.Services.LevelPlay;
+using System;
 
 public class ADService 
 {
     private bool m_isAdsEnabled = false;
     private LevelPlayRewardedAd m_rewardedVideoAd;
+    private Action m_onAdFinished; 
+
 
     public void Init()
     {
@@ -18,7 +21,6 @@ public class ADService
 
     private void SdkInitializationCompletedEvent(LevelPlayConfiguration config)
     {
-        Debug.Log($"[LevelPlaySample] Received SdkInitializationCompletedEvent with Config: {config}");
         EnableReardedAds();
         m_isAdsEnabled = true;
     }
@@ -31,8 +33,7 @@ public class ADService
     private void EnableReardedAds()
     {
         m_rewardedVideoAd = new LevelPlayRewardedAd(AdConfig.RewardedVideoAdUnitId);
-        Debug.Log("[LevelPlaySample] LoadRewardedVideoButtonClicked");
-        m_rewardedVideoAd.LoadAd();
+
         m_rewardedVideoAd.OnAdLoaded += RewardedVideoOnLoadedEvent;
         m_rewardedVideoAd.OnAdLoadFailed += RewardedVideoOnAdLoadFailedEvent;
         m_rewardedVideoAd.OnAdDisplayed += RewardedVideoOnAdDisplayedEvent;
@@ -41,16 +42,18 @@ public class ADService
         m_rewardedVideoAd.OnAdClicked += RewardedVideoOnAdClickedEvent;
         m_rewardedVideoAd.OnAdClosed += RewardedVideoOnAdClosedEvent;
         m_rewardedVideoAd.OnAdInfoChanged += RewardedVideoOnAdInfoChangedEvent;
+
+        m_rewardedVideoAd.LoadAd();
+
     }
 
-    public void ShowRewardedAd()
+    public void ShowRewardedAd(Action onAdFinished = null)
     {
-        Debug.Log("[LevelPlaySample] ShowRewardedVideoButtonClicked");
+        m_rewardedVideoAd.LoadAd();
         if (m_isAdsEnabled && m_rewardedVideoAd.IsAdReady())
         {
-            Debug.Log("[LevelPlaySample] Showing Rewarded Video Ad");
+            m_onAdFinished = onAdFinished;
             m_rewardedVideoAd.ShowAd();
-            m_rewardedVideoAd.LoadAd();
         }
         else
         {
@@ -80,7 +83,9 @@ public class ADService
 
     private void RewardedVideoOnAdRewardedEvent(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
-        Debug.Log($"[LevelPlaySample] Received RewardedVideoOnAdRewardedEvent With AdInfo: {adInfo} and Reward: {reward}");
+        m_onAdFinished?.Invoke();
+        m_onAdFinished = null;
+        m_rewardedVideoAd.LoadAd();
     }
 
     private void RewardedVideoOnAdClickedEvent(LevelPlayAdInfo adInfo)
@@ -90,7 +95,15 @@ public class ADService
 
     private void RewardedVideoOnAdClosedEvent(LevelPlayAdInfo adInfo)
     {
-        Debug.Log($"[LevelPlaySample] Received RewardedVideoOnAdClosedEvent With AdInfo: {adInfo}");
+        Debug.Log("[ADService] Ad closed.");
+
+        if (m_onAdFinished != null)
+        {
+            Debug.Log("[ADService] Ad closed without reward.");
+            m_onAdFinished = null;
+        }
+
+        m_rewardedVideoAd.LoadAd();
     }
 
     private void RewardedVideoOnAdInfoChangedEvent(LevelPlayAdInfo adInfo)

@@ -29,4 +29,6 @@ public class WeaponInstanceData
     public float RemainingCooldownSeconds =>
         IsOnCooldown ? (float)(CooldownEndUtc.Value - PlayFabManager.Instance.TimeService.ServerUtcNow).TotalSeconds : 0f;
 
+    public void ClearCooldown() => cooldownEndTime = null;
+
 }

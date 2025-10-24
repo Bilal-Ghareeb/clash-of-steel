@@ -220,7 +220,7 @@ public class WeaponItemComponent
 
         m_cooldownOverlay.style.display = DisplayStyle.None;
         m_cooldownTimer.text = "";
-
+        m_watchRewardedAdButton.style.display = DisplayStyle.None;
         EnableInteractions();
     }
 

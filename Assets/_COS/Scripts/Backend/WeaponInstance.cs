@@ -29,6 +29,7 @@ public class WeaponInstance : WeaponInstanceBase
 
     public bool IsOnCooldown => InstanceData?.IsOnCooldown ?? false;
     public float RemainingCooldownSeconds => InstanceData?.RemainingCooldownSeconds ?? 0f;
+    public void RemoveCooldownLocally() => InstanceData.ClearCooldown();
 
     public async Task DownloadIconAsync()
     {

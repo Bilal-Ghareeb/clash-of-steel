@@ -40,7 +40,7 @@ public static class AdConfig
     static string GetRewardedVideoAdUnitId()
     {
         #if UNITY_ANDROID
-            return "76yy3nay3ceui2a3";
+            return "fthrzvak5bwcxx5r";
         #elif UNITY_IPHONE
             return "qwouvdrkuwivay5q";
         #else
