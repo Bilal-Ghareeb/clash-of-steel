@@ -120,7 +120,15 @@ public class ArsenalView : UIView
         WeaponItemComponent weaponItem = new();
 
         weaponItem.SetVisualElements(weaponUIElement , WeaponItemComponentDisplayContext.Arsenal);
-        weaponItem.SetGameData(weaponData);
+
+        var levelToDisplay = 0;
+
+        if (LocalWeaponProgressionCache.TryGetLocalLevel(weaponData.Item.Id, out int localLevel))
+            levelToDisplay = localLevel;
+        else
+            levelToDisplay = weaponData.InstanceData.level;
+
+        weaponItem.SetGameData(weaponData , levelToDisplay);
         weaponItem.RegisterButtonCallbacks();
 
         container.Add(weaponUIElement);

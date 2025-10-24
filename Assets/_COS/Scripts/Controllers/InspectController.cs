@@ -38,7 +38,15 @@ public class InspectController : MonoBehaviour
     private void HandleWeaponSelectedForInspect(WeaponInstanceBase weapon)
     {
         m_currentWeapon = weapon;
-        m_displayedLevel = weapon is WeaponInstance w ? w.InstanceData.level : 0;
+        int localLevel = 0;
+
+        if (weapon is WeaponInstance w)
+        {
+            if (LocalWeaponProgressionCache.TryGetLocalLevel(w.Item.Id, out localLevel))
+                m_displayedLevel = localLevel;
+            else
+                m_displayedLevel = w.InstanceData.level;
+        }
 
         m_inspectedWeaponModelPresenter.ShowWeapon(m_currentWeapon);
         m_view.RefreshWeaponStats(weapon, m_displayedLevel);
@@ -57,14 +65,17 @@ public class InspectController : MonoBehaviour
             return;
 
         PlayFabManager.Instance.EconomyService.PlayerCurrencies[progression.currencyId] -= cost;
+        PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
+
         m_displayedLevel++;
         m_levelUpQueue.Enqueue(cost);
+        LocalWeaponProgressionCache.SetLocalLevel(weapon.Item.Id, m_displayedLevel);
 
-        PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
         m_view.PlayLevelUpAnimation();
-        m_view.RefreshWeaponStats(weapon, m_displayedLevel);
         AudioManager.Instance.PlaySFX(m_levelUpSFX);
         m_statueEyeGlow.TriggerGlow();
+
+        m_view.RefreshWeaponStats(weapon, m_displayedLevel);
 
         UpdateLevelUpButtonState();
 
@@ -88,11 +99,13 @@ public class InspectController : MonoBehaviour
                     1
                 );
                 weapon.InstanceData.level++;
+                LocalWeaponProgressionCache.SetLocalLevel(weapon.Item.Id, weapon.InstanceData.level);
             }
             catch (Exception)
             {
                 PlayFabManager.Instance.EconomyService.PlayerCurrencies[progression.currencyId] += cost;
                 m_displayedLevel--;
+                LocalWeaponProgressionCache.SetLocalLevel(weapon.Item.Id, m_displayedLevel);
                 m_view.RefreshWeaponStats(weapon, m_displayedLevel);
             }
 

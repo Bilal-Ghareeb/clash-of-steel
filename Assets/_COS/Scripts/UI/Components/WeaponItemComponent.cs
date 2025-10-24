@@ -68,7 +68,7 @@ public class WeaponItemComponent
         m_cooldownOverlay = weaponItemUXMLTemplate.Q<VisualElement>("countdown-timer-container");
     }
 
-    public async void SetGameData(WeaponInstanceBase weaponInstance = null)
+    public async void SetGameData(WeaponInstanceBase weaponInstance = null, int? overrideLevel = null)
     {
         if (weaponInstance == null)
         {
@@ -84,7 +84,7 @@ public class WeaponItemComponent
 
         m_WeaponInstance = weaponInstance;
 
-        if (m_Lvl != null) m_Lvl.text = $"{weaponInstance.Level}";
+        if (m_Lvl != null) m_Lvl.text = $"{overrideLevel ?? weaponInstance.Level}";
         if (m_healthNumber != null) m_healthNumber.text = weaponInstance.GetHealth().ToString();
         if (m_damageNumber != null) m_damageNumber.text = weaponInstance.GetDamage().ToString();
 

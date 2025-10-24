@@ -39,11 +39,11 @@ public class InspectView : UIView
         m_levelUpButton.RegisterCallback<ClickEvent>(_ => InspectWeaponEvents.LevelUpWeaponClicked?.Invoke());
     }
 
-    public void SetWeaponData(WeaponInstanceBase weapon)
+    public void SetWeaponData(WeaponInstanceBase weapon , int? overrideLevel = null)
     {
         m_weaponName.text = weapon.CatalogData.name;
         m_weaponDescription.text = weapon.CatalogData.description;
-        RefreshWeaponStats(weapon);
+        RefreshWeaponStats(weapon, overrideLevel);
     }
 
     public void RefreshWeaponStats(WeaponInstanceBase weapon, int? overrideLevel = null)

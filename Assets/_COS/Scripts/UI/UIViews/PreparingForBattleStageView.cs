@@ -202,7 +202,15 @@ public class PreparingForBattleStageView : UIView
             WeaponItemComponent weaponItem = new WeaponItemComponent();
 
             weaponItem.SetVisualElements(weaponUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
-            weaponItem.SetGameData(weapon);
+
+            var levelToDisplay = 0;
+
+            if (LocalWeaponProgressionCache.TryGetLocalLevel(weapon.Item.Id, out int localLevel))
+                levelToDisplay = localLevel;
+            else
+                levelToDisplay = weapon.InstanceData.level;
+
+            weaponItem.SetGameData(weapon , levelToDisplay);
 
             m_arsenalWeaponComponents.Add(weaponItem);
 
