@@ -26,8 +26,6 @@ public class ShopView : UIView
     private Button m_closeDetailsPanelButton;
     private Button m_claimLootBoxRewardButton;
 
-    private CatalogItem m_currentLootBoxReward;
-
     public ShopView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
     {
         m_shopItemAsset = Resources.Load<VisualTreeAsset>("ShopItem");
@@ -48,7 +46,6 @@ public class ShopView : UIView
         m_lootBoxContentScrollView = m_TopElement.Q<ScrollView>("loot-box-content-scrollview");
         m_closeDetailsPanelButton = m_TopElement.Q<Button>("close-details-btn");
         m_claimLootBoxRewardButton = m_TopElement.Q<Button>("claim-reward-btn");
-        
     }
 
     public override void Show()
@@ -56,8 +53,6 @@ public class ShopView : UIView
         base.Show();
         ShopEvents.ScreenEnabled?.Invoke();
         m_lootBoxesContentContainer.style.display = DisplayStyle.None;
-        PopulateDiamondBundles();
-        PopulateLootBoxes();
     }
 
     public override void Hide()
@@ -83,55 +78,29 @@ public class ShopView : UIView
         m_claimLootBoxRewardButton.UnregisterCallback<ClickEvent>(HandleAfterClaimReward);
     }
 
-    private void PopulateDiamondBundles()
+    public void PopulateDiamondBundles(IReadOnlyList<DiamondBundleData> bundles)
     {
         m_diamondBundlesContainer.Clear();
-
-        var bundles = PlayFabManager.Instance.EconomyService.DiamondBundlesCatalog;
-
         foreach (var bundle in bundles)
         {
-
             TemplateContainer bundleUI = m_shopItemAsset.Instantiate();
             var shopItem = new ShopItemComponent();
             shopItem.SetVisualElements(bundleUI);
-
             shopItem.Configure(ShopItemType.DiamondBundle);
+            shopItem.SetAmount(bundle.Amount);
 
-            if (bundle.Amount > 0)
-            {
-                shopItem.SetAmount(bundle.Amount);
-            }
+            string price = PlayFabManager.Instance.IAPService?.GetProductPrice(bundle.MarketplaceId) ?? "";
+            shopItem.SetPrice(price);
 
-            if (PlayFabManager.Instance.IAPService != null)
-            {
-                string price = PlayFabManager.Instance.IAPService.GetProductPrice(bundle.MarketplaceId);
-                if (!string.IsNullOrEmpty(price))
-                {
-                    shopItem.SetPrice(price);
-                }
-                else
-                {
-                    shopItem.SetPrice("Price not available");
-                }
-            }
-
-            if (PlayFabManager.Instance.IAPService != null)
-            {
-                string marketplaceId = bundle.MarketplaceId;
-                shopItem.OnPurchaseClicked = () => PlayFabManager.Instance.IAPService.BuyProduct(marketplaceId);
-                shopItem.RegisterButtonCallbacks();
-            }
-
+            shopItem.OnPurchaseClicked = () => ShopEvents.DiamondPurchased?.Invoke(bundle.MarketplaceId);
+            shopItem.RegisterButtonCallbacks();
             m_diamondBundlesContainer.Add(bundleUI);
         }
     }
 
-    private void PopulateLootBoxes()
+    public void PopulateLootBoxes(IReadOnlyList<LootBoxData> lootBoxes)
     {
         m_lootboxesContainer.Clear();
-
-        var lootBoxes = PlayFabManager.Instance.EconomyService.LootBoxes;
 
         foreach (var lootBox in lootBoxes)
         {
@@ -142,37 +111,17 @@ public class ShopView : UIView
             shopItem.Configure(ShopItemType.LootBox);
             shopItem.SetPrice(lootBox.cost.ToString());
 
-            if(!PlayFabManager.Instance.EconomyService.PlayerCurrencies.TryGetValue("DM", out int playerCurrency) || playerCurrency < lootBox.cost)
-            {
-                shopItem.DisableButton();
-            }
-            else
-            {
-                shopItem.EnableButton();
-                shopItem.OnPurchaseClicked = async () =>
-                {
-
-                    CatalogItem rewardItem = await PlayFabManager.Instance.AzureService.GrantLootBoxRewardAsync(lootBox);
-                    SetupAndShowOpenLootBoxContainer(rewardItem);
-                };
-            }
-
-            shopItem.OnDetailsClicked = () =>
-            {
-                var weaponEntries = PlayFabManager.Instance.EconomyService.GetWeaponsCatalogItemsInLootBox(lootBox.id);
-                PopulateLootBoxDetailsPanel(weaponEntries, lootBox.id);
-                m_lootBoxesContentContainer.style.display = DisplayStyle.Flex;
-                m_lootBoxesContentContainer.transform.scale = new Vector3(0.1f, 0.1f, 0.1f);
-                m_lootBoxesContentContainer.experimental.animation.Scale(1f, 200);
-            };
+            shopItem.EnableButton();
+            shopItem.OnPurchaseClicked = () => ShopEvents.LootBoxPurchaseIntiated?.Invoke(lootBox);
+            
+            shopItem.OnDetailsClicked = () => ShopEvents.LootBoxDeatailsInspected?.Invoke(lootBox);
 
             m_lootboxesContainer.Add(lootBoxUI);
             shopItem.RegisterButtonCallbacks();
         }
     }
 
-
-    private void PopulateLootBoxDetailsPanel(List<LootBoxWeaponEntry> weaponEntries , string lootBoxName)
+    public void PopulateLootBoxDetailsPanel(List<LootBoxWeaponEntry> weaponEntries , string lootBoxName)
     {
         m_lootBoxName.text = lootBoxName;
         m_lootBoxContentScrollView.Clear();
@@ -194,15 +143,13 @@ public class ShopView : UIView
         }
     }
 
-    private void SetupAndShowOpenLootBoxContainer(CatalogItem reward)
+    public void SetupAndShowOpenLootBoxContainer()
     {
-        m_currentLootBoxReward = reward;
-
         m_lootBoxOpenContainer.style.display = DisplayStyle.Flex;
         ShopEvents.LootBoxPurchased?.Invoke();
 
         m_lootBox.RegisterCallback<TransitionEndEvent>(OnTransitionEnd);
-        m_lootBox.RegisterCallback<ClickEvent>(OnLootBoxClicked);
+        m_lootBox.RegisterCallback<ClickEvent>(evt => ShopEvents.LootBoxClicked?.Invoke());
 
         m_TopElement.schedule.Execute(() =>
         {
@@ -249,7 +196,7 @@ public class ShopView : UIView
         m_lootBox.AddToClassList("loot-box-middle");
     }
 
-    private void OnLootBoxClicked(ClickEvent evt)
+    public void OpenLootBox(CatalogItem reward)
     {
         StopShaking();
 
@@ -259,7 +206,8 @@ public class ShopView : UIView
         m_lootBox.AddToClassList("loot-box-opened");
         m_claimLootBoxRewardButton.style.display = DisplayStyle.Flex;
         m_lootBoxOpenPrompt.style.display = DisplayStyle.None;
-        ShowLootBoxReward(m_currentLootBoxReward);
+
+        ShowLootBoxReward(reward);
     }
 
     private void ShowLootBoxReward(CatalogItem reward)
@@ -289,11 +237,11 @@ public class ShopView : UIView
         }).StartingIn(100);
     }
 
-    private void ResetLootBoxOpenState()
+    public void ResetLootBoxOpenState()
     {
         m_isShaking = true;
         m_lootBox?.UnregisterCallback<TransitionEndEvent>(OnTransitionEnd);
-        m_lootBox?.UnregisterCallback<ClickEvent>(OnLootBoxClicked);
+        m_lootBox?.UnregisterCallback<ClickEvent>(evt => ShopEvents.LootBoxClicked?.Invoke());
 
         if (m_lootBox != null)
         {
@@ -309,7 +257,13 @@ public class ShopView : UIView
         m_lootBoxResultContainer.Clear();
 
         m_lootBoxShakeCurrentState = "loot-box";
-        m_currentLootBoxReward = null;
+    }
+
+    public void ShowLootBoxDetailsContainer()
+    {
+        m_lootBoxesContentContainer.style.display = DisplayStyle.Flex;
+        m_lootBoxesContentContainer.transform.scale = new Vector3(0.1f, 0.1f, 0.1f);
+        m_lootBoxesContentContainer.experimental.animation.Scale(1f, 200);
     }
 
     private void CloseDetailsPanel(ClickEvent evt)

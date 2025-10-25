@@ -8,6 +8,7 @@ public class MainGameUIManager : MonoBehaviour
 
     [Header("UI Controllers")]
     [SerializeField] private InspectController m_inspectorController;
+    [SerializeField] private ShopController m_shopController;
 
     private UIDocument m_MainGameDocument;
 
@@ -22,7 +23,7 @@ public class MainGameUIManager : MonoBehaviour
     private UIView m_TabsView;
     private UIView m_CurrenciesView;
     private UIView m_PreparingForBattleStageView;
-    private UIView m_ShopView;
+    private ShopView m_ShopView;
 
     const string k_PlayViewName = "PlayView";
     const string k_SettingView = "SettingsView";
@@ -69,7 +70,6 @@ public class MainGameUIManager : MonoBehaviour
 
         ShopEvents.LootBoxPurchased += OnLootBoxPurchased;
         ShopEvents.LootBoxRewardClaimed += OnLootBoxRewardClaimed;
-
     }
 
     private void UnSubscribeFromEvents()
@@ -102,7 +102,9 @@ public class MainGameUIManager : MonoBehaviour
         m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
         m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName) , false);
         m_PreparingForBattleStageView = new PreparingForBattleStageView(root.Q<VisualElement>(k_PreparingForBattleStageViewName));
+
         m_ShopView = new ShopView(root.Q<VisualElement>(k_ShopView));
+        m_shopController.Setup(m_ShopView);
 
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_SettingView);
