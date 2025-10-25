@@ -92,7 +92,7 @@ public class ShopView : UIView
             string price = PlayFabManager.Instance.IAPService?.GetProductPrice(bundle.MarketplaceId) ?? "";
             shopItem.SetPrice(price);
 
-            shopItem.OnPurchaseClicked = () => ShopEvents.DiamondPurchased?.Invoke(bundle.MarketplaceId);
+            shopItem.OnPurchaseClicked = () => ShopEvents.DiamondPurchaseIntiated?.Invoke(bundle.MarketplaceId);
             shopItem.RegisterButtonCallbacks();
             m_diamondBundlesContainer.Add(bundleUI);
         }

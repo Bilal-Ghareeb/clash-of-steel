@@ -190,6 +190,7 @@ public class AzureService
             {
                 await PlayFabManager.Instance.EconomyService.FetchAndCachePlayerInventoryAsync();
                 PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();
+                ShopEvents.DiamondPurchased?.Invoke();
                 tcs.TrySetResult(true);
             },
             error =>

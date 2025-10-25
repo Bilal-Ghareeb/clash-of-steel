@@ -19,7 +19,7 @@ public class ShopController : MonoBehaviour
     private void OnEnable()
     {
         ShopEvents.ScreenEnabled += HandleScreenEnabled;
-        ShopEvents.DiamondPurchased += HandleDiamondPurchased;
+        ShopEvents.DiamondPurchaseIntiated += HandleDiamondPurchased;
         ShopEvents.LootBoxPurchaseIntiated += HandlePurchaseLootBox;
         ShopEvents.LootBoxDeatailsInspected += HandleShowLootBoxDetails;
         ShopEvents.LootBoxClicked += HandleLootBoxClicked;
@@ -29,7 +29,7 @@ public class ShopController : MonoBehaviour
     private void OnDisable()
     {
         ShopEvents.ScreenEnabled -= HandleScreenEnabled;
-        ShopEvents.DiamondPurchased -= HandleDiamondPurchased;
+        ShopEvents.DiamondPurchaseIntiated -= HandleDiamondPurchased;
         ShopEvents.LootBoxPurchaseIntiated -= HandlePurchaseLootBox;
         ShopEvents.LootBoxDeatailsInspected -= HandleShowLootBoxDetails;
         ShopEvents.LootBoxClicked -= HandleLootBoxClicked;

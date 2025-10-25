@@ -21,4 +21,5 @@
     </ui:VisualElement>
     <ui:Instance template="SettingsView" name="SettingsView" style="width: 100%; height: 100%; display: none;" />
     <ui:Instance template="ProcessingView" name="ProcessingView" style="width: 100%; height: 100%;" />
+    <ui:VisualElement name="VFX" picking-mode="Ignore" style="width: 100%; height: 100%; position: absolute; background-image: url(&quot;project://database/Assets/_COS/Level/VFX.renderTexture?fileID=8400000&amp;guid=6a4438d600bd0ed4babde2909f737334&amp;type=2#VFX&quot;); -unity-background-scale-mode: scale-and-crop;" />
 </ui:UXML>
