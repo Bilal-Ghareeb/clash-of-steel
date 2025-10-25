@@ -17,6 +17,13 @@ public class SoundCategory
         ApplySettings(src);
     }
 
+    public void UnRegisterSource(AudioSource src)
+    {
+        if (m_sources.Contains(src))
+            m_sources.Remove(src);
+        ApplySettings(src);
+    }
+
     public void ApplySettings(AudioSource src)
     {
         src.mute = Muted;

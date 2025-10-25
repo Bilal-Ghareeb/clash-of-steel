@@ -7,6 +7,7 @@
     <ui:Template name="ShopView" src="project://database/Assets/_COS/UI/UXML/ShopView.uxml?fileID=9197481963319205126&amp;guid=86a6e48ae2faf054cb588cae5dcd7c18&amp;type=3#ShopView" />
     <ui:Template name="TabsView" src="project://database/Assets/_COS/UI/UXML/TabsView.uxml?fileID=9197481963319205126&amp;guid=4924dcf38d0e0ba4494179c17c0b18e2&amp;type=3#TabsView" />
     <ui:Template name="SettingsView" src="project://database/Assets/_COS/UI/UXML/SettingsView.uxml?fileID=9197481963319205126&amp;guid=bcaa375bc33c52449ba2e240b22d0090&amp;type=3#SettingsView" />
+    <ui:Template name="ProcessingView" src="project://database/Assets/_COS/UI/UXML/ProcessingView.uxml?fileID=9197481963319205126&amp;guid=f3699197a838862479bdd0fc9f20da21&amp;type=3#ProcessingView" />
     <Style src="project://database/Assets/_COS/UI/USS/Buttons.uss?fileID=7433441132597879392&amp;guid=9c9604bf076c00e4bb187469ac903dd9&amp;type=3#Buttons" />
     <Style src="project://database/Assets/_COS/UI/USS/Tabs.uss?fileID=7433441132597879392&amp;guid=7f5ae17052e34eb4db728cdec75f22f3&amp;type=3#Tabs" />
     <ui:VisualElement name="safe-area" style="width: 100%; height: 100%; position: absolute; justify-content: flex-end; align-items: center; align-content: center; align-self: center;">
@@ -19,4 +20,5 @@
         <ui:Instance template="TabsView" name="TabsView" enabled="true" style="width: 100%; height: 15%; translate: 0 0%; display: flex;" />
     </ui:VisualElement>
     <ui:Instance template="SettingsView" name="SettingsView" style="width: 100%; height: 100%; display: none;" />
+    <ui:Instance template="ProcessingView" name="ProcessingView" style="width: 100%; height: 100%;" />
 </ui:UXML>

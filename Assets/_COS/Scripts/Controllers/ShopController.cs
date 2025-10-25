@@ -58,6 +58,8 @@ public class ShopController : MonoBehaviour
     private async void HandlePurchaseLootBox(LootBoxData lootBox)
     {
         m_currentLootBoxReward = await PlayFabManager.Instance.AzureService.GrantLootBoxRewardAsync(lootBox);
+        AudioManager.Instance.PlaySFX(m_purchaseConfirmedSound);
+        AudioManager.Instance.PlayLoop(m_boxShakingSound , AudioManager.Instance.SFX);
         m_view.SetupAndShowOpenLootBoxContainer();
     }
 
@@ -70,6 +72,8 @@ public class ShopController : MonoBehaviour
 
     private void HandleLootBoxClicked()
     {
+        AudioManager.Instance.PlaySFX(m_openChestSound);
+        AudioManager.Instance.StopLoop(m_boxShakingSound.ID);
         m_view.OpenLootBox(m_currentLootBoxReward);
     }
 

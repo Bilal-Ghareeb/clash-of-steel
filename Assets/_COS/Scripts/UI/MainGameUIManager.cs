@@ -24,6 +24,7 @@ public class MainGameUIManager : MonoBehaviour
     private UIView m_CurrenciesView;
     private UIView m_PreparingForBattleStageView;
     private ShopView m_ShopView;
+    private ProcessingView m_processingView;
 
     const string k_PlayViewName = "PlayView";
     const string k_SettingView = "SettingsView";
@@ -33,6 +34,7 @@ public class MainGameUIManager : MonoBehaviour
     const string k_CurrenciesViewName = "CurrenciesView";
     const string k_PreparingForBattleStageViewName = "PrepareForBattleStageView";
     const string k_ShopView = "ShopView";
+    const string k_ProcessingView = "ProcessingView";
 
     private void OnEnable()
     {
@@ -70,6 +72,7 @@ public class MainGameUIManager : MonoBehaviour
 
         ShopEvents.LootBoxPurchased += OnLootBoxPurchased;
         ShopEvents.LootBoxRewardClaimed += OnLootBoxRewardClaimed;
+        ShopEvents.LootBoxPurchaseIntiated += OnLootBoxPurchaseIntiated;
     }
 
     private void UnSubscribeFromEvents()
@@ -86,6 +89,10 @@ public class MainGameUIManager : MonoBehaviour
         PlayerEvents.PlayBattleStageButtonPressed -= OnPreparingForBattleStageShown;
         PlayerEvents.SettingsButtonPressed -= OnSettingsPanelShown;
         PreparingForBattleStageEvents.LeavePreparingForBattle -= OnPlayViewShown;
+
+        ShopEvents.LootBoxPurchased -= OnLootBoxPurchased;
+        ShopEvents.LootBoxRewardClaimed -= OnLootBoxRewardClaimed;
+        ShopEvents.LootBoxPurchaseIntiated -= OnLootBoxPurchaseIntiated;
     }
 
     private void SetupViews()
@@ -106,6 +113,8 @@ public class MainGameUIManager : MonoBehaviour
         m_ShopView = new ShopView(root.Q<VisualElement>(k_ShopView));
         m_shopController.Setup(m_ShopView);
 
+        m_processingView = new ProcessingView(root.Q<VisualElement>(k_ProcessingView));
+
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_SettingView);
         m_AllViews.Add(m_TabsView);
@@ -114,6 +123,7 @@ public class MainGameUIManager : MonoBehaviour
         m_AllViews.Add(m_CurrenciesView);
         m_AllViews.Add(m_PreparingForBattleStageView);
         m_AllViews.Add(m_ShopView);
+        m_AllViews.Add(m_processingView);
     }
 
     private void OnArsenalViewShown()
@@ -146,9 +156,15 @@ public class MainGameUIManager : MonoBehaviour
         ShowModalView(m_PreparingForBattleStageView);
     }
 
+    private void OnLootBoxPurchaseIntiated(LootBoxData data)
+    {
+        m_processingView.Show();
+    }
+
     private void OnLootBoxPurchased()
     {
         m_TabsView.Hide();
+        m_processingView.Hide();
     }
 
     private void OnLootBoxRewardClaimed()
