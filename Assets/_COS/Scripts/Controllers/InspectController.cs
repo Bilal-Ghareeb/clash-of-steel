@@ -49,7 +49,7 @@ public class InspectController : MonoBehaviour
         }
 
         m_inspectedWeaponModelPresenter.ShowWeapon(m_currentWeapon);
-        m_view.RefreshWeaponStats(weapon, m_displayedLevel);
+        m_view.SetWeaponData(weapon , m_displayedLevel);
         UpdateLevelUpButtonState();
     }
 
@@ -75,7 +75,7 @@ public class InspectController : MonoBehaviour
         AudioManager.Instance.PlaySFX(m_levelUpSFX);
         m_statueEyeGlow.TriggerGlow();
 
-        m_view.RefreshWeaponStats(weapon, m_displayedLevel);
+        m_view.SetWeaponData(weapon, m_displayedLevel);
 
         UpdateLevelUpButtonState();
 
@@ -106,7 +106,7 @@ public class InspectController : MonoBehaviour
                 PlayFabManager.Instance.EconomyService.PlayerCurrencies[progression.currencyId] += cost;
                 m_displayedLevel--;
                 LocalWeaponProgressionCache.SetLocalLevel(weapon.Item.Id, m_displayedLevel);
-                m_view.RefreshWeaponStats(weapon, m_displayedLevel);
+                m_view.SetWeaponData(weapon, m_displayedLevel);
             }
 
             PlayFabManager.Instance.EconomyService.NotifyCurrenciesUpdated();

@@ -4,8 +4,13 @@ using UnityEngine.UIElements;
 
 public class MainBattleSceneUIManager : MonoBehaviour
 {
+    [Header("Core Battle Manager")]
+    [SerializeField] private BattleManager m_battle;
+
+    [Header("UI Controllers")]
+    [SerializeField] private WeaponsHUDController m_weaponsHUDController;
+
     private UIDocument m_BattleUIDocument;
-    private BattleManager m_battle;
 
     private List<UIView> m_AllViews = new List<UIView>();
 
@@ -20,9 +25,10 @@ public class MainBattleSceneUIManager : MonoBehaviour
     private void Awake()
     {
         m_BattleUIDocument = GetComponent<UIDocument>();
-        m_battle = FindAnyObjectByType<BattleManager>();
 
         SetupViews();
+
+        m_battle.Init(m_weaponsHUDController);
 
         ShowModalView(m_WeaponsHUDView);
         ShowModalView(m_BattleActionsView);
@@ -33,13 +39,12 @@ public class MainBattleSceneUIManager : MonoBehaviour
         VisualElement root = m_BattleUIDocument.rootVisualElement;
 
         m_WeaponsHUDView = new WeaponsHUDView(root.Q<VisualElement>(k_WeaponsHUDView), false);
-        m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
-        m_BattleResultView = new BattleResultView(root.Q<VisualElement>(k_BattleResultView));
+        m_weaponsHUDController.Setup(m_battle, m_WeaponsHUDView);
 
-        m_WeaponsHUDView.InitializeBattleManager(m_battle);
+        m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
         m_BattleActionsView.InitializeBattleManager(m_battle);
 
-        m_battle.Init(m_WeaponsHUDView);
+        m_BattleResultView = new BattleResultView(root.Q<VisualElement>(k_BattleResultView));
 
         m_AllViews.Add(m_WeaponsHUDView);
         m_AllViews.Add(m_BattleActionsView);

@@ -44,7 +44,7 @@ public class InspectView : UIView
         RefreshWeaponStats(weapon, overrideLevel);
     }
 
-    public void RefreshWeaponStats(WeaponInstanceBase weapon, int? overrideLevel = null)
+    private void RefreshWeaponStats(WeaponInstanceBase weapon, int? overrideLevel = null)
     {
         var progression = PlayFabManager.Instance.EconomyService.ProgressionFormulas[weapon.CatalogData.progressionId];
         int level = overrideLevel ?? (weapon is WeaponInstance instance ? instance.InstanceData.level : 1);

@@ -5,14 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// BattleManager (refactored)
-/// - Allocation phase (player & enemy choose attack/defend/reserve)
-/// - Reveal phase (public allocations shown: attack & defend only)
-/// - Execution phase (animations + damage resolution)
-/// This is designed for: 1 active player combatant per side, pooled points per turn,
-/// animations play once while damage counts multiple times.
-/// </summary>
+
 public class BattleManager : MonoBehaviour
 {
     [SerializeField] private int maxPointsPerTurn = 4;
@@ -45,7 +38,7 @@ public class BattleManager : MonoBehaviour
     public event Action OnEnemyFinishedAllocating;
 
 
-    public event Action<(int attack, int defend) /* playerPublic */, (int attack, int defend) /* enemyPublic */> OnAllocationsRevealed;
+    public event Action<(int attack, int defend), (int attack, int defend)> OnAllocationsRevealed;
 
     public event Action OnPlayerTurnStarted;
     public event Action OnEnemyTurnStarted;
@@ -64,7 +57,7 @@ public class BattleManager : MonoBehaviour
 
     private TaskCompletionSource<(int attack, int defend, int reserve)> _playerAllocationTcs;
 
-    private WeaponsHUDView m_weaponHUDView;
+    private WeaponsHUDController m_weaponHUDController;
 
     [Header("Timing Settings (ms)")]
     [SerializeField] private int turnStartDelayMs = 1000;
@@ -73,10 +66,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private int countdownDelayMs = 3500;
 
 
-    public void Init(WeaponsHUDView wHUd)
+    public void Init(WeaponsHUDController controller)
     {
-        m_weaponHUDView = wHUd;
-        m_weaponHUDView.OnRequestSwitch += SwitchActivePlayerWeapon;
+        m_weaponHUDController = controller;
+        m_weaponHUDController.OnRequestSwitch += SwitchActivePlayerWeapon;
     }
 
     private async void Start()

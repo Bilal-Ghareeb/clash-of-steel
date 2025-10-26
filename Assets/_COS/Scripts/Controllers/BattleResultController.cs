@@ -6,16 +6,7 @@ public class BattleResultController : MonoBehaviour
     [SerializeField] private MainBattleSceneUIManager uiManager;
     [SerializeField] private BattleManager battle;
 
-    private BattleResultView resultView;
-
-    private void Awake()
-    {
-        if (battle == null)
-            battle = FindAnyObjectByType<BattleManager>();
-
-        if (uiManager == null)
-            uiManager = FindAnyObjectByType<MainBattleSceneUIManager>();
-    }
+    private BattleResultView m_resultView;
 
     private void OnEnable()
     {
@@ -25,20 +16,20 @@ public class BattleResultController : MonoBehaviour
     private void OnDisable()
     {
         battle.OnBattleEnded -= OnBattleEnded;
-        if (resultView != null)
-            resultView.OnActionButtonClicked -= OnActionButtonClicked;
+        if (m_resultView != null)
+            m_resultView.OnActionButtonClicked -= OnActionButtonClicked;
     }
 
     private void OnBattleEnded()
     {
         AudioManager.Instance.StopAllAmbience();
 
-        resultView = uiManager.GetResultView();
-        resultView.Setup(battle.PlayerWon, GetStageRewards());
-        resultView.Show();
-        resultView.PlayShowAnimation();
+        m_resultView = uiManager.GetResultView();
+        m_resultView.Setup(battle.PlayerWon, GetStageRewards());
+        m_resultView.Show();
+        m_resultView.PlayShowAnimation();
 
-        resultView.OnActionButtonClicked += OnActionButtonClicked;
+        m_resultView.OnActionButtonClicked += OnActionButtonClicked;
     }
 
     private StageRewardData GetStageRewards()
