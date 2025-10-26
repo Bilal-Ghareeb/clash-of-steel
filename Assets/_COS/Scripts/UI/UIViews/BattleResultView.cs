@@ -40,11 +40,11 @@ public class BattleResultView : UIView
         m_actionButton.clicked -= () => OnActionButtonClicked?.Invoke();
     }
 
-    public void Setup(bool playerWon, StageRewardData rewards)
+    public async void Setup(bool playerWon, StageRewardData rewards)
     {
-        m_resultScreenTitle.text = playerWon ? "STAGE CLEARED!" : "STAGE LOST!";
+        m_resultScreenTitle.text = playerWon ? await LocalizationManager.GetLocalizedLabel("ID_StageClear" , "COS_Strings") : await LocalizationManager.GetLocalizedLabel("ID_StageLost", "COS_Strings");
         m_rewardsContainer.style.display = playerWon ? DisplayStyle.Flex : DisplayStyle.None;
-        m_actionButton.text = playerWon ? "CLAIM & LEAVE" : "LEAVE";
+        m_actionButton.text = playerWon ? await LocalizationManager.GetLocalizedLabel("ID_ClaimAndLeave", "COS_Strings") : await LocalizationManager.GetLocalizedLabel("ID_Leave", "COS_Strings");
 
         m_actionButton.RemoveFromClassList("lose-style");
         m_actionButton.RemoveFromClassList("win-style");

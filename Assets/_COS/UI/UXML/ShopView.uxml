@@ -3,11 +3,21 @@
     <Style src="project://database/Assets/_COS/UI/USS/Shop.uss?fileID=7433441132597879392&amp;guid=2f3874590f8c4794c92371142da97273&amp;type=3#Shop" />
     <ui:VisualElement name="ShopView" style="width: 100%; height: 100%;">
         <ui:VisualElement name="diamond_title_container" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Green.png?fileID=21300000&amp;guid=4f004328d7c9547edae34787869f3e8a&amp;type=3#Title_Ribbon_Bg_Green&quot;); -unity-background-scale-mode: scale-and-crop; width: 100%; height: 10%; top: 15%;">
-            <ui:Label text="DIAMOND" name="diamonds-label" class="lable" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; font-size: 178px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 11%;" />
+            <ui:Label text="DIAMOND" name="diamonds-label" class="lable" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; font-size: 178px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 11%; -unity-text-generator: advanced;">
+                <Bindings>
+                    <UnityEngine.Localization.LocalizedString property="text" table="GUID:9d54b1f05550329419c7c4665483e6d5" entry="Id(311549976576)" />
+                    <UnityEngine.Localization.LocalizedFont property="style.unityFontDefinition" table="GUID:89767a4e5fab9d247987086e4fda05b9" entry="Id(4547895296)" />
+                </Bindings>
+            </ui:Label>
         </ui:VisualElement>
         <ui:VisualElement name="diamond-bundles-container" style="height: 26%; width: 100%; top: 15%; flex-direction: row; align-self: center; justify-content: space-around; align-items: center;" />
         <ui:VisualElement name="boxes_title_container" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Orange.png?fileID=21300000&amp;guid=2323358c16953446e9b2cb27fde07104&amp;type=3#Title_Ribbon_Bg_Orange&quot;); -unity-background-scale-mode: scale-and-crop; width: 100%; height: 10%; margin-top: 24px; top: 14%;">
-            <ui:Label text="BOXES" name="diamonds-label" class="lable" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; font-size: 178px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 11%;" />
+            <ui:Label text="BOXES" name="diamonds-label" class="lable" style="color: rgb(255, 255, 255); -unity-text-align: middle-center; font-size: 178px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 11%; -unity-text-generator: advanced;">
+                <Bindings>
+                    <UnityEngine.Localization.LocalizedString property="text" table="GUID:9d54b1f05550329419c7c4665483e6d5" entry="Id(385160011776)" />
+                    <UnityEngine.Localization.LocalizedFont property="style.unityFontDefinition" table="GUID:89767a4e5fab9d247987086e4fda05b9" entry="Id(4547895296)" />
+                </Bindings>
+            </ui:Label>
         </ui:VisualElement>
         <ui:VisualElement name="lootboxes-bundles-container" style="height: 20%; width: 100%; top: 15%;" />
         <ui:VisualElement name="loot-box-content-container" style="width: 100%; height: 100%; position: absolute; top: 0%; background-image: none; -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgba(0, 0, 0, 0); justify-content: center; padding-top: 50px; padding-right: 50px; padding-bottom: 50px; padding-left: 50px; display: none; background-color: rgba(0, 0, 0, 0);">
@@ -15,7 +25,12 @@
                 <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" name="loot-box-content-scrollview" style="width: 100%; height: 75%; flex-direction: row; align-items: center; justify-content: space-around;" />
             </ui:VisualElement>
             <ui:VisualElement name="loot-box-panel-title-container" style="position: absolute; width: 85%; height: 9%; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Label/Title_Ribbon_Bg_Yellow.png?fileID=21300000&amp;guid=03a52e934f88f4a699b498a51573c186&amp;type=3#Title_Ribbon_Bg_Yellow&quot;); -unity-background-scale-mode: scale-and-crop; top: 27%; left: 8%;">
-                <ui:Label text="LEGENDARY BOX" name="loot-box-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); position: absolute; top: 13%; left: 10%;" />
+                <ui:Label text="LEGENDARY BOX" name="loot-box-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); position: absolute; top: 13%; left: 10%; -unity-text-generator: advanced;">
+                    <Bindings>
+                        <UnityEngine.Localization.LocalizedString property="text" table="GUID:9d54b1f05550329419c7c4665483e6d5" entry="Id(35133035077632)" />
+                        <UnityEngine.Localization.LocalizedFont property="style.unityFontDefinition" table="GUID:89767a4e5fab9d247987086e4fda05b9" entry="Id(4547895296)" />
+                    </Bindings>
+                </ui:Label>
             </ui:VisualElement>
             <ui:Button name="close-details-btn" class="rectangleButton" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button01_145_Red.Png?fileID=21300000&amp;guid=681db73f19fb24efe843aad713eccb43&amp;type=3#Button01_145_Red&quot;); width: 10%; top: -3%; height: 5%; flex-shrink: 0; flex-grow: 0;">
                 <ui:VisualElement name="icon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Icon_PictoIcons/128/PictoIcon_Close.Png?fileID=21300000&amp;guid=0dc6643ddb3934127b12402c7fd7bcf1&amp;type=3#PictoIcon_Close&quot;);" />
@@ -25,8 +40,18 @@
             <ui:VisualElement name="loot-box" class="loot-box">
                 <ui:VisualElement name="loot-box-result-container" style="width: 43%; height: 100%;" />
             </ui:VisualElement>
-            <ui:Label text="OPEN BOX" name="loot-box-open-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 7%; display: flex;" />
-            <ui:Button text="CLAIM" name="claim-reward-btn" class="rectangleButton lable" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button01_145_Green.Png?fileID=21300000&amp;guid=cb37917483ee24fea8fab306393441e5&amp;type=3#Button01_145_Green&quot;); display: none; top: 7%;" />
+            <ui:Label text="OPEN BOX" name="loot-box-open-title" class="lable" style="-unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 161px; -unity-font-definition: url(&quot;project://database/Assets/_COS/Fonts/LilitaOne-Regular.ttf?fileID=12800000&amp;guid=67875264478804542a3bc72a6b9a4785&amp;type=3#LilitaOne-Regular&quot;); top: 7%; display: flex; -unity-text-generator: advanced;">
+                <Bindings>
+                    <UnityEngine.Localization.LocalizedFont property="style.unityFontDefinition" table="GUID:89767a4e5fab9d247987086e4fda05b9" entry="Id(4547895296)" />
+                    <UnityEngine.Localization.LocalizedString property="text" table="GUID:9d54b1f05550329419c7c4665483e6d5" entry="Id(35429211660288)" />
+                </Bindings>
+            </ui:Label>
+            <ui:Button text="CLAIM" name="claim-reward-btn" class="rectangleButton lable" style="background-image: url(&quot;project://database/Assets/_COS/ThirdParty/Layer%20Lab/GUI%20Pro-CasualGame/ResourcesData/Sprites/Components/Button/Button01_145_Green.Png?fileID=21300000&amp;guid=cb37917483ee24fea8fab306393441e5&amp;type=3#Button01_145_Green&quot;); display: none; top: 7%; -unity-text-generator: advanced;">
+                <Bindings>
+                    <UnityEngine.Localization.LocalizedString property="text" table="GUID:9d54b1f05550329419c7c4665483e6d5" entry="Id(35493711667200)" />
+                    <UnityEngine.Localization.LocalizedFont property="style.unityFontDefinition" table="GUID:89767a4e5fab9d247987086e4fda05b9" entry="Id(4547895296)" />
+                </Bindings>
+            </ui:Button>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

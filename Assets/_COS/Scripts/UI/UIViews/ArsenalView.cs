@@ -17,19 +17,30 @@ public class ArsenalView : UIView
     public ArsenalView(VisualElement topElement) : base(topElement)
     {
         ArsenalEvents.WeaponItemClicked += OnWeaponItemClicked;
-        ArsenalEvents.ArsenalSetup += OnArsenalSetup;
         ArsenalEvents.ArsenalUpdated += OnArsenalUpdated;
 
         m_WeaponItemAsset = Resources.Load("WeaponItem") as VisualTreeAsset;
+    }
+
+    public override void Show()
+    {
+        base.Show();
+        ArsenalEvents.ScreenEnabled?.Invoke();
+        LocalizeDropdowns();
+        UpdateFilters(null);
+    }
+
+
+    public override void Hide()
+    {
+        base.Hide();
     }
 
     public override void Dispose()
     {
         base.Dispose();
         ArsenalEvents.WeaponItemClicked -= OnWeaponItemClicked;
-        ArsenalEvents.ArsenalSetup -= OnArsenalSetup;
         ArsenalEvents.ArsenalUpdated -= OnArsenalUpdated;
-
         UnregisterButtonCallbacks();
     }
 
@@ -134,27 +145,24 @@ public class ArsenalView : UIView
         container.Add(weaponUIElement);
     }
 
-    public override void Show()
+    private async void LocalizeDropdowns()
     {
-        base.Show();
+        m_InventoryClassTypeDropdown.choices = await LocalizationManager.GetLocalizedArsenalDropDownOptions(
+            new[] { "ID_ALL", "ID_SWORDS", "ID_SHIELDS", "ID_HAMMERS" },
+            "COS_Strings"
+        );
 
-        ArsenalEvents.ScreenEnabled?.Invoke();
-        UpdateFilters(null);
+        m_InventoryRarityDropdown.choices = await LocalizationManager.GetLocalizedArsenalDropDownOptions(
+            new[] { "ID_ALL", "ID_COMMON", "ID_RARE", "ID_LEGENDARY" },
+            "COS_Strings"
+        );
+
+        m_InventoryClassTypeDropdown.index = 0;
+        m_InventoryRarityDropdown.index = 0;
     }
 
 
-    public override void Hide()
-    {
-        base.Hide();
-    }
-
-    private void OnArsenalSetup()
-    {
-        SetVisualElements();
-        RegisterButtonCallbacks();
-    }
-
-   private void OnArsenalUpdated(IReadOnlyList<WeaponInstance> weaponsToLoad)
+    private void OnArsenalUpdated(IReadOnlyList<WeaponInstance> weaponsToLoad)
     {
         ShowWeaponItems(weaponsToLoad);
     }

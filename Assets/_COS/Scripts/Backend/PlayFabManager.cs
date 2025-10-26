@@ -41,28 +41,28 @@ public class PlayFabManager : MonoBehaviour
 
     private async void Start()
     {
+        await LocalizationManager.InitializeLocaleFromPrefsOrDefault();
+
         OnLoginAndDataReady += HandleLoginAndDataReady;
         AzureService.OnBattleStageRewardsClaimed += HandleBattleStageClaimed;
         NetworkService.OnDisconnected += HandleDisconnected;
 
-        try
+        NetworkService.StartMonitoring(this, async isOnline =>
         {
-            await IAPService.InintIAP();
-            AuthService.Login();
-            ADService.Init();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to initialize IAP or login: {ex.Message}");
-        }
-
-        //NetworkService.StartMonitoring(this, async isOnline =>
-        //{
-        //    if (isOnline)
-        //    {
-
-        //    }
-        //});
+            if (isOnline)
+            {
+                try
+                {
+                    await IAPService.InintIAP();
+                    AuthService.Login();
+                    ADService.Init();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to initialize IAP or login: {ex.Message}");
+                }
+            }
+        });
     }
 
 

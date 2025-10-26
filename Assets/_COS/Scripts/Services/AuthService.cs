@@ -27,10 +27,10 @@ public class AuthService
     public void Login()
     {
 #if UNITY_ANDROID
-        ReportProgress("Attempting Google sign-in...");
+        ReportProgress("ID_ATTEMPTGOOGLESIGNIN");
         TryGoogleLogin();
 #else
-        ReportProgress("Logging in with Custom ID...");
+        ReportProgress("ID_ATTEMPTWITHCUSTOMID");
         LoginWithCustomID();
 #endif
     }
@@ -86,24 +86,24 @@ public class AuthService
         {
             if (success == SignInStatus.Success)
             {
-                ReportProgress("Google sign-in succeeded — requesting auth code...");
+                ReportProgress("ID_GOOGLESUCCESS");
                 PlayGamesPlatform.Instance.RequestServerSideAccess(false, serverAuthCode =>
                 {
                     if (!string.IsNullOrEmpty(serverAuthCode))
                     {
-                        ReportProgress("Logging in to PlayFab with Google...");
+                        ReportProgress("ID_LOGINWITHGOOGLETOPLAYFAB");
                         TryPlayFabLoginWithGoogle(serverAuthCode);
                     }
                     else
                     {
-                        ReportProgress("No auth code found — using device ID login...");
+                        ReportProgress("ID_NOAUTHCODE");
                         LoginWithCustomID();
                     }
                 });
             }
             else
             {
-                ReportProgress("Google sign-in failed — using device ID login...");
+                ReportProgress("ID_GOOGLESINGINFAILED");
                 LoginWithCustomID();
             }
         });
@@ -121,7 +121,7 @@ public class AuthService
             OnAnyLoginSuccess,
             error =>
             {
-                ReportProgress("Google account not linked — logging in with Custom ID...");
+                ReportProgress("ID_GOOGLNOTLINKED");
                 LoginWithCustomID();
             });
     }
@@ -149,7 +149,7 @@ public class AuthService
 
     private void OnAnyLoginSuccess(LoginResult result)
     {
-        ReportProgress("Login successful — getting entity token...");
+        ReportProgress("ID_LOGINSUCCESSFULL");
 
         PlayFabAuthenticationAPI.GetEntityToken(new GetEntityTokenRequest(),
             async resp =>
@@ -160,19 +160,19 @@ public class AuthService
                     Type = resp.Entity.Type
                 };
 
-                ReportProgress("Setting up PlayFab context...");
+                ReportProgress("ID_PFCONTEXT");
                 PlayFabManager.Instance.PlayFabContext.SetEntityData(result.PlayFabId, entityKey);
 
-                ReportProgress("Syncing server time...");
+                ReportProgress("ID_SYNTIME");
                 await PlayFabManager.Instance.TimeService.SyncServerTimeAsync();
 
-                ReportProgress("Checking display name...");
+                ReportProgress("ID_DNAME");
                 await PlayFabManager.Instance.PlayerService.CheckOrAssignDisplayNameAsync(result.PlayFabId);
 
-                ReportProgress("Fetching catalog and inventory...");
+                ReportProgress("ID_CATALOGINVENTORY");
                 await PlayFabManager.Instance.EconomyService.FetchAllCatalogsAndInventoryAsync();
 
-                ReportProgress("Setting current stage...");
+                ReportProgress("ID_CURRENTSTAGE");
                 await PlayFabManager.Instance.PlayerService.SetCurrentStage();
 
                 ReportProgress("WELCOME!!");

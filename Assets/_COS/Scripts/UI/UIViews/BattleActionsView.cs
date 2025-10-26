@@ -102,30 +102,35 @@ public class BattleActionsView : UIView
     public async void StartCountdown()
     {
         HideAllUI();
-        string[] seq = { "3", "2", "1", "FIGHT!" };
+        var fight = await LocalizationManager.GetLocalizedLabel("ID_FIGHT", "COS_Strings");
+        string[] seq = { "3", "2", "1", fight };
         m_CountdownLabel.style.display = DisplayStyle.Flex;
 
-        foreach (string s in seq)
+        for (int i = 0; i < seq.Length; i++)
         {
+            string s = seq[i];
             m_CountdownLabel.text = s;
             OnCountdownNumberChanged?.Invoke(s);
-            if (s == "FIGHT!")
+            if (i == seq.Length - 1)
             {
                 m_CountdownLabel.experimental.animation.Scale(7f, 5).OnCompleted(() =>
                 {
                     m_CountdownLabel.experimental.animation.Scale(1f, 5);
                 });
             }
+
             await Task.Delay(800);
         }
+
         m_CountdownLabel.style.display = DisplayStyle.None;
     }
+
 
     public async void ShowPlayerTurn()
     {
         HideAllUI();
         m_CountdownLabel.style.display = DisplayStyle.Flex;
-        m_CountdownLabel.text = "YOUR TURN";
+        m_CountdownLabel.text = await LocalizationManager.GetLocalizedLabel("ID_YOURTURN" , "COS_Strings");
         await Task.Delay(1200);
         m_CountdownLabel.style.display = DisplayStyle.None;
     }
@@ -134,7 +139,7 @@ public class BattleActionsView : UIView
     {
         HideAllUI();
         m_CountdownLabel.style.display = DisplayStyle.Flex;
-        m_CountdownLabel.text = "ENEMY TURN";
+        m_CountdownLabel.text = await LocalizationManager.GetLocalizedLabel("ID_ENEMYTURN", "COS_Strings");
         await Task.Delay(1200);
         ShowEnemyPointsHolder();
         m_CountdownLabel.style.display = DisplayStyle.None;

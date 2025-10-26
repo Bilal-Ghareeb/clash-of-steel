@@ -10,6 +10,7 @@ public class MainGameUIManager : MonoBehaviour
     [SerializeField] private InspectController m_inspectorController;
     [SerializeField] private ShopController m_shopController;
     [SerializeField] private PreparingForBattleStageController m_preparingForBattleStageController;
+    [SerializeField] private SettingsController m_settingsController;
 
     private UIDocument m_MainGameDocument;
 
@@ -18,7 +19,7 @@ public class MainGameUIManager : MonoBehaviour
     private List<UIView> m_AllViews = new List<UIView>();
 
     private UIView m_PlayView;
-    private UIView m_SettingView;
+    private SettingsView m_SettingView;
     private UIView m_ArsenalView;
     private InspectView m_InspectView;
     private UIView m_TabsView;
@@ -101,12 +102,10 @@ public class MainGameUIManager : MonoBehaviour
         VisualElement root = m_MainGameDocument.rootVisualElement;
 
         m_PlayView = new PlayView(root.Q<VisualElement>(k_PlayViewName));
-        m_SettingView = new SettingsView(root.Q<VisualElement>(k_SettingView));
         m_ArsenalView = new ArsenalView(root.Q<VisualElement>(k_ArsenalViewName));
-        m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
-        m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName), false);
-        m_processingView = new ProcessingView(root.Q<VisualElement>(k_ProcessingView));
 
+        m_SettingView = new SettingsView(root.Q<VisualElement>(k_SettingView));
+        m_settingsController.Setup(m_SettingView);
 
         m_InspectView = new InspectView(root.Q<VisualElement>(k_InspectViewName));
         m_inspectorController.Setup(m_InspectView);
@@ -117,6 +116,9 @@ public class MainGameUIManager : MonoBehaviour
         m_ShopView = new ShopView(root.Q<VisualElement>(k_ShopView));
         m_shopController.Setup(m_ShopView);
 
+        m_TabsView = new TabsView(root.Q<VisualElement>(k_TabsViewName));
+        m_CurrenciesView = new CurrenciesView(root.Q<VisualElement>(k_CurrenciesViewName), false);
+        m_processingView = new ProcessingView(root.Q<VisualElement>(k_ProcessingView));
 
         m_AllViews.Add(m_PlayView);
         m_AllViews.Add(m_SettingView);

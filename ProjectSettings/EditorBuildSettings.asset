@@ -18,5 +18,7 @@ EditorBuildSettings:
     path: Assets/Samples/Ads Mediation/9.0.1/Unity LevelPlay Sample/Scenes/LevelPlaySample.unity
     guid: bd1eb3e1953724de08fadd7cbbc6d358
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 80e125795246cf64a861089fe1f6173e, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.localization.settings: {fileID: 11400000, guid: c4884518281cc334395335f100c99a56, type: 2}
   m_UseUCBPForAssetBundles: 0

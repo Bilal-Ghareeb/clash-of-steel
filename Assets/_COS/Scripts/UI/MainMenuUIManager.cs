@@ -17,7 +17,7 @@ public class MainMenuUIManager : MonoBehaviour
     private void OnEnable()
     {
         m_loadingState = m_MainMenuDocument.rootVisualElement.Q<Label>("loading-state");
-        UpdateLoadingLabel("Connecting...");
+        UpdateLoadingLabel("ID_CONECTING");
 
         m_disconnectedPanel = m_MainMenuDocument.rootVisualElement.Q<VisualElement>("disconnected_panel");
         m_disconnectedPanel.style.display = DisplayStyle.None;
@@ -64,16 +64,16 @@ public class MainMenuUIManager : MonoBehaviour
     private void RetryConnection(ClickEvent evt)
     {
         HideDisconnectedPanel();
-        UpdateLoadingLabel("Reconnecting...");
+        UpdateLoadingLabel("ID_RECONNECTING");
 
         PlayFabManager.Instance.RetryConnection();
     }
 
 
-    private void UpdateLoadingLabel(string message)
+    private async void UpdateLoadingLabel(string message)
     {
         if (m_loadingState != null)
-            m_loadingState.text = message;
+            m_loadingState.text = await LocalizationManager.GetLocalizedLabel(message , "COS_Strings");
     }
 
     private void ShowDisconnectedPanel()

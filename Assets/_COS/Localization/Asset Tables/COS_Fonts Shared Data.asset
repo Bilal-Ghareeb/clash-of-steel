@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: COS_Fonts Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: COS_Fonts
+  m_TableCollectionNameGuidString: 89767a4e5fab9d247987086e4fda05b9
+  m_Entries:
+  - m_Id: 4547895296
+    m_Key: ID_Font
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25557774589952
+    m_Key: ID_LangFlag
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items:
+    - rid: 5161932812060197207
+    - rid: 5161932812729451003
+  m_KeyGenerator:
+    rid: 5161932812060197206
+  references:
+    version: 2
+    RefIds:
+    - rid: 5161932812060197206
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1761470881471
+    - rid: 5161932812060197207
+      type: {class: AssetTypeMetadata, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries:
+        - m_KeyId: 4547895296
+          m_TableCodes:
+          - en
+          - ar
+        m_TypeString: UnityEngine.Font, UnityEngine.TextRenderingModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+    - rid: 5161932812729451003
+      type: {class: AssetTypeMetadata, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries:
+        - m_KeyId: 25557774589952
+          m_TableCodes:
+          - ar
+          - en
+        m_TypeString: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null

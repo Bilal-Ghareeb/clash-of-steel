@@ -1,0 +1,207 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: COS_Strings_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 9d54b1f05550329419c7c4665483e6d5, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 8595398656
+    m_Localized: SETTINGS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 174832443392
+    m_Localized: LINK WITH GOOGLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311549976576
+    m_Localized: DIAMONDS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 385160011776
+    m_Localized: BOXES
+    m_Metadata:
+      m_Items: []
+  - m_Id: 496707526656
+    m_Localized: LINKED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6146460180480
+    m_Localized: NO INTERNET CONNECTION
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6468410761216
+    m_Localized: TRY RECONNECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7032938913792
+    m_Localized: STAGE CLEAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7348426072064
+    m_Localized: CLAIM & LEAVE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7919325372416
+    m_Localized: ALL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7968625221632
+    m_Localized: SWORDS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8030889664512
+    m_Localized: HAMMERS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8075496087552
+    m_Localized: SHIELDS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18987527397376
+    m_Localized: COMMON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19050496483328
+    m_Localized: RARE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19157925191680
+    m_Localized: LEGENDARY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24536696446976
+    m_Localized: LINKING.....
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32861077069824
+    m_Localized: BATTLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33234378514432
+    m_Localized: SELECT YOUR TEAM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33343753379840
+    m_Localized: OPP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33389194469376
+    m_Localized: TEAM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 33428218273792
+    m_Localized: YOUR ARSENAL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34442950434816
+    m_Localized: STAGE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35133035077632
+    m_Localized: BOX DETAILS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35429211660288
+    m_Localized: OPEN BOX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35493711667200
+    m_Localized: CLAIM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36469390663680
+    m_Localized: Connecting...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36657035436032
+    m_Localized: Reconnecting...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36898698649600
+    m_Localized: Attempting Google sign-in...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37031020552192
+    m_Localized: Logging in with Custom ID...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37278580957184
+    m_Localized: "Google sign-in succeeded \u2014 requesting auth code..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37498706419712
+    m_Localized: Logging in to PlayFab with Google...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37657033007104
+    m_Localized: "No auth code found \u2014 using device ID login..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37801900072960
+    m_Localized: "Google sign-in failed \u2014 using device ID login..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 37991633608704
+    m_Localized: "Google account not linked \u2014 logging in with Custom ID..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38167106510848
+    m_Localized: "Login successful \u2014 getting entity token..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38291194994688
+    m_Localized: Setting up PlayFab context...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38465422188544
+    m_Localized: Syncing server time...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38550633668608
+    m_Localized: Checking display name...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38622935080960
+    m_Localized: Fetching catalog and inventory...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 38674982199296
+    m_Localized: Setting current stage...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40404306321408
+    m_Localized: YOUR TURN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40464519749632
+    m_Localized: ENEMY TURN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41056755474432
+    m_Localized: FIGHT!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44098838028288
+    m_Localized: STAGE LOST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44312260993024
+    m_Localized: LEAVE
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
