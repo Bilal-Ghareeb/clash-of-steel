@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,19 +7,14 @@ public class PreparingForBattleStageView : UIView
     private VisualTreeAsset m_WeaponItemAsset;
 
     private Label m_stageNumber;
-
     private Button m_leavePreparingForBattleButton;
     private Button m_beginBattleStageButton;
-
     private VisualElement m_opponentTeamContainer;
     private VisualElement m_playerTeamContainer;
-
     private ScrollView m_ScrollViewParent;
 
-    private WeaponInstance[] m_playerSelectedWeapons = new WeaponInstance[2];
     private WeaponItemComponent[] m_playerTeamSlotComponents = new WeaponItemComponent[2];
     private List<WeaponItemComponent> m_arsenalWeaponComponents = new List<WeaponItemComponent>();
-
 
     public PreparingForBattleStageView(VisualElement topElement, bool hideOnAwake = true) : base(topElement, hideOnAwake)
     {
@@ -30,23 +24,17 @@ public class PreparingForBattleStageView : UIView
     public override void Show()
     {
         base.Show();
+
         PreparingForBattleStageEvents.ScreenEnabled?.Invoke();
-
-        SetVisualElements();
-        RegisterButtonCallbacks();
-
+        PreparingForBattleStageEvents.RequestFetchPlayerArsenal?.Invoke();
+        PreparingForBattleStageEvents.RequestStageInfo?.Invoke();
         SpawnPlayerTeamHolders();
-        SpawnEnemyTeamHolders();
-
-        FetchPlayerArsenal();
-
-        UpdateStageInfo();
     }
 
     public override void Hide()
     {
         base.Hide();
-        ClearContainers();
+        PreparingForBattleStageEvents.ClearContainers?.Invoke();
     }
 
     public override void Dispose()
@@ -60,52 +48,23 @@ public class PreparingForBattleStageView : UIView
         base.SetVisualElements();
 
         m_stageNumber = m_TopElement.Q<Label>("stage-number");
-
         m_leavePreparingForBattleButton = m_TopElement.Q<Button>("Back-btn");
         m_beginBattleStageButton = m_TopElement.Q<Button>("Battle-btn");
-
         m_opponentTeamContainer = m_TopElement.Q<VisualElement>("OponentTeamContainer");
         m_playerTeamContainer = m_TopElement.Q<VisualElement>("PlayerTeamContainer");
-
         m_ScrollViewParent = m_TopElement.Q<ScrollView>("ScrollView");
     }
 
     protected override void RegisterButtonCallbacks()
     {
-        m_leavePreparingForBattleButton.RegisterCallback<ClickEvent>(LeavePreparingForBattle);
-        m_beginBattleStageButton.RegisterCallback<ClickEvent>(BeginBattle);
+        m_leavePreparingForBattleButton.RegisterCallback<ClickEvent>(evt => PreparingForBattleStageEvents.LeavePreparingForBattle?.Invoke());
+        m_beginBattleStageButton.RegisterCallback<ClickEvent>(evt => PreparingForBattleStageEvents.RequestBeginBattle?.Invoke());
     }
 
     protected void UnregisterButtonCallbacks()
     {
-        m_leavePreparingForBattleButton.UnregisterCallback<ClickEvent>(LeavePreparingForBattle);
-        m_beginBattleStageButton.UnregisterCallback<ClickEvent>(BeginBattle);
-    }
-
-    private void LeavePreparingForBattle(ClickEvent evt)
-    {
-        PreparingForBattleStageEvents.LeavePreparingForBattle?.Invoke();
-    }
-
-    private async void BeginBattle(ClickEvent evt)
-    {
-        var playerTeam = m_playerSelectedWeapons.Where(w => w != null).ToList();
-        if (playerTeam.Count == 0) return;
-
-        var enemies = PlayFabManager.Instance.PlayerService?.CurrentStage.enemies;
-        if (enemies == null) return;
-
-        foreach (var weapon in playerTeam)
-        {
-            await PlayFabManager.Instance.AzureService.StartWeaponCooldownAsync(
-                weapon.Item.Id,
-                weapon.Level,
-                weapon.CatalogData.rarity,
-                weapon.CatalogData.progressionId
-            );
-        }
-
-        PreparingForBattleStageEvents.RequestBeginBattle?.Invoke(playerTeam, enemies);
+        m_leavePreparingForBattleButton.UnregisterCallback<ClickEvent>(evt => PreparingForBattleStageEvents.LeavePreparingForBattle?.Invoke());
+        m_beginBattleStageButton.UnregisterCallback<ClickEvent>(evt => PreparingForBattleStageEvents.RequestBeginBattle?.Invoke());
     }
 
     private void SpawnPlayerTeamHolders()
@@ -117,7 +76,7 @@ public class PreparingForBattleStageView : UIView
         }
         m_playerTeamContainer.Clear();
 
-        for (int i = 0; i < m_playerSelectedWeapons.Length; i++)
+        for (int i = 0; i < m_playerTeamSlotComponents.Length; i++)
         {
             TemplateContainer weaponUIElement = m_WeaponItemAsset.Instantiate();
             m_playerTeamSlotComponents[i] = new WeaponItemComponent();
@@ -125,56 +84,24 @@ public class PreparingForBattleStageView : UIView
             m_playerTeamSlotComponents[i].SetGameData();
 
             int slotIndex = i;
-            m_playerTeamSlotComponents[i].OnCustomClick = () => OnTeamSlotClicked(slotIndex);
+            m_playerTeamSlotComponents[i].OnCustomClick = () => PreparingForBattleStageEvents.TeamSlotClicked?.Invoke(slotIndex);
             m_playerTeamSlotComponents[i].RegisterButtonCallbacks(useCustomClick: true);
 
             m_playerTeamContainer.Add(weaponUIElement);
         }
     }
 
-    private void SpawnEnemyTeamHolders()
+    public void UpdateTeamSlot(int slotIndex, WeaponInstance weapon)
     {
-        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
-        if (currentStage == null)
-        {
-            Debug.LogError("Cannot spawn enemies: current stage not found.");
-            return;
-        }
-
-        if (m_opponentTeamContainer == null)
-        {
-            Debug.LogError("Opponent team container is null.");
-            return;
-        }
-
-        m_opponentTeamContainer.Clear();
-
-        foreach (var enemy in currentStage.enemies)
-        {
-            var weaponData = PlayFabManager.Instance.EconomyService.GetWeaponDataByFriendlyId(enemy.weaponId);
-            if (weaponData == null)
-            {
-                Debug.LogWarning($"No WeaponData found for friendly ID: {enemy.weaponId}");
-                continue;
-            }
-
-            var enemyInstance = new EnemyWeaponInstance(enemy.weaponId, weaponData, enemy.level);
-
-            TemplateContainer enemyUIElement = m_WeaponItemAsset.Instantiate();
-            var enemyItemComponent = new WeaponItemComponent();
-            enemyItemComponent.SetVisualElements(enemyUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
-            enemyItemComponent.SetGameData(enemyInstance);
-
-            m_opponentTeamContainer.Add(enemyUIElement);
-        }
+        if (slotIndex < 0 || slotIndex >= m_playerTeamSlotComponents.Length) return;
+        m_playerTeamSlotComponents[slotIndex].SetGameData(weapon);
     }
 
-
-    private void FetchPlayerArsenal()
+    public void UpdatePlayerArsenal(IReadOnlyList<WeaponInstance> weapons)
     {
         if (m_ScrollViewParent == null)
         {
-            Debug.LogError("ScrollView parent is null in PreparingForBattleStageView.");
+            Debug.LogError("ScrollView parent is null.");
             return;
         }
 
@@ -188,33 +115,20 @@ public class PreparingForBattleStageView : UIView
         contentContainer.Clear();
         m_arsenalWeaponComponents.Clear();
 
-        var playerWeapons = PlayFabManager.Instance.EconomyService.PlayerWeapons;
-
-        if (playerWeapons == null || playerWeapons.Count == 0)
-        {
-            Debug.Log("Player has no weapons in arsenal.");
-            return;
-        }
-
-        foreach (var weapon in playerWeapons)
+        foreach (var weapon in weapons)
         {
             TemplateContainer weaponUIElement = m_WeaponItemAsset.Instantiate();
             WeaponItemComponent weaponItem = new WeaponItemComponent();
-
             weaponItem.SetVisualElements(weaponUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
 
-            var levelToDisplay = 0;
+            int levelToDisplay = LocalWeaponProgressionCache.TryGetLocalLevel(weapon.Item.Id, out int localLevel)
+                ? localLevel
+                : weapon.InstanceData.level;
 
-            if (LocalWeaponProgressionCache.TryGetLocalLevel(weapon.Item.Id, out int localLevel))
-                levelToDisplay = localLevel;
-            else
-                levelToDisplay = weapon.InstanceData.level;
-
-            weaponItem.SetGameData(weapon , levelToDisplay);
-
+            weaponItem.SetGameData(weapon, levelToDisplay);
             m_arsenalWeaponComponents.Add(weaponItem);
 
-            weaponItem.OnCustomClick = () => OnArsenalWeaponClicked(weaponItem,weapon);
+            weaponItem.OnCustomClick = () => PreparingForBattleStageEvents.ArsenalWeaponClicked?.Invoke(weapon);
             weaponItem.RegisterButtonCallbacks(useCustomClick: true);
 
             if (weapon.IsOnCooldown)
@@ -235,67 +149,45 @@ public class PreparingForBattleStageView : UIView
         }
     }
 
-    private void OnArsenalWeaponClicked(WeaponItemComponent weaponItem, WeaponInstance weapon)
+    public void UpdateEnemyTeam(List<EnemyWeaponInstance> enemies)
     {
-        for (int i = 0; i < m_playerSelectedWeapons.Length; i++)
+        if (m_opponentTeamContainer == null)
         {
-            if (m_playerSelectedWeapons[i] == null)
-            {
-                weaponItem.IsSelected = true;
-                m_playerSelectedWeapons[i] = weapon;
-                UpdateTeamSlot(i, weapon);
-                break;
-            }
-        }
-    }
-
-
-    private void OnTeamSlotClicked(int slotIndex)
-    {
-        if (m_playerSelectedWeapons[slotIndex] != null)
-        {
-            WeaponItemComponent selectedWeaponComponent = m_arsenalWeaponComponents.Find(
-                component => component.GetWeaponInstance() == m_playerSelectedWeapons[slotIndex]
-            );
-
-            if (selectedWeaponComponent != null)
-            {
-                selectedWeaponComponent.IsSelected = false;
-            }
-
-            m_playerSelectedWeapons[slotIndex] = null;
-            UpdateTeamSlot(slotIndex, null);
-        }
-    }
-
-    private void UpdateTeamSlot(int slotIndex, WeaponInstance weapon)
-    {
-        if (weapon != null)
-        {
-            m_playerTeamSlotComponents[slotIndex].SetGameData(weapon);
-        }
-        else
-        {
-            m_playerTeamSlotComponents[slotIndex].SetGameData(null);
-        }
-    }
-
-    private void UpdateStageInfo()
-    {
-        var currentStage = PlayFabManager.Instance.PlayerService?.CurrentStage;
-        if (currentStage == null)
-        {
-            m_stageNumber.text = "?";
+            Debug.LogError("Opponent team container is null.");
             return;
         }
 
-        m_stageNumber.text = $"{currentStage.id}";
+        m_opponentTeamContainer.Clear();
+
+        foreach (var enemy in enemies)
+        {
+            TemplateContainer enemyUIElement = m_WeaponItemAsset.Instantiate();
+            var enemyItemComponent = new WeaponItemComponent();
+            enemyItemComponent.SetVisualElements(enemyUIElement, WeaponItemComponentDisplayContext.PrepareForBattle);
+            enemyItemComponent.SetGameData(enemy);
+            m_opponentTeamContainer.Add(enemyUIElement);
+        }
     }
 
+    public void UpdateStageInfo(int stageId)
+    {
+        m_stageNumber.text = stageId.ToString() ?? "?";
+    }
 
-    private void ClearContainers()
+    public void ClearContainers()
     {
         m_playerTeamContainer?.Clear();
         m_opponentTeamContainer?.Clear();
+        m_ScrollViewParent?.Q<VisualElement>("unity-content-container")?.Clear();
+        m_arsenalWeaponComponents.Clear();
+    }
+
+    public void UpdateWeaponSelection(WeaponInstance weapon, bool isSelected)
+    {
+        var weaponItem = m_arsenalWeaponComponents.Find(component => component.GetWeaponInstance() == weapon);
+        if (weaponItem != null)
+        {
+            weaponItem.IsSelected = isSelected;
+        }
     }
 }

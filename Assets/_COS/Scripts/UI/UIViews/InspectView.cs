@@ -10,8 +10,6 @@ public class InspectView : UIView
 
     public InspectView(VisualElement root) : base(root)
     {
-        SetVisualElements();
-        RegisterButtonCallbacks();
     }
 
     public override void Show()
