@@ -194,6 +194,8 @@ public class WeaponsHUDController : MonoBehaviour
             return;
         }
 
+        m_View.AnimateAttackerCardDashAndDefenderCardReaction(attackerUI, defenderUI , isPlayerAttacker);
+
         if (defenderNewHealth <= 0)
         {
             m_View.ApplyDeadCardStyle(defenderUI);

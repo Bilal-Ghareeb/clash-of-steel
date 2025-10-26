@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.UIElements.Experimental;
+using static LTGUI;
 
 public class WeaponsHUDView : UIView
 {
@@ -44,6 +46,20 @@ public class WeaponsHUDView : UIView
         var weaponItem = new WeaponItemComponent();
         weaponItem.SetVisualElements(itemTemplate, context);
         weaponItem.SetGameData(combatant.InstanceData);
+
+        var rootElement = weaponItem.Root;
+        if (rootElement != null)
+        {
+            List<TimeValue> durations = new List<TimeValue>();
+            durations.Add(new TimeValue(0.1f, TimeUnit.Second));
+
+            List<EasingFunction> easing = new List<EasingFunction>();
+            easing.Add(new EasingFunction(EasingMode.EaseOutCubic));
+
+            rootElement.style.transitionDuration = new StyleList<TimeValue>(durations);
+            rootElement.style.transitionTimingFunction = new StyleList<EasingFunction>(easing);
+        }
+
         return weaponItem;
     }
 
@@ -60,6 +76,34 @@ public class WeaponsHUDView : UIView
         weaponItem.UnRegisterButtonCallbacks();
         weaponItem.OnCustomClick = null;
     }
+
+    public void AnimateAttackerCardDashAndDefenderCardReaction(WeaponItemComponent attacker, WeaponItemComponent defender, bool isPlayer)
+    {
+        var attackerRoot = attacker.Root;
+        var defenderRoot = defender.Root;
+
+        var attackerAnimationClass = isPlayer ? "dash-to-enemy-card" : "dash-to-player-card";
+        var defenderAnimationClass = "react-to-attack";
+
+        void OnDefenderTransitionEnd(TransitionEndEvent evt)
+        {
+            defenderRoot.RemoveFromClassList(defenderAnimationClass);
+            defenderRoot.UnregisterCallback<TransitionEndEvent>(OnDefenderTransitionEnd);
+        }
+
+        void OnAttackerTransitionEnd(TransitionEndEvent evt)
+        {
+            defenderRoot.AddToClassList(defenderAnimationClass);
+            defenderRoot.RegisterCallback<TransitionEndEvent>(OnDefenderTransitionEnd);
+
+            attackerRoot.RemoveFromClassList(attackerAnimationClass);
+            attackerRoot.UnregisterCallback<TransitionEndEvent>(OnAttackerTransitionEnd);
+        }
+
+        attackerRoot.AddToClassList(attackerAnimationClass);
+        attackerRoot.RegisterCallback<TransitionEndEvent>(OnAttackerTransitionEnd);
+    }
+
 
     public void UpdateAttackPreview(WeaponItemComponent weaponItem, float newAttackValue, bool hasAdvantage, bool hasDisadvantage)
     {

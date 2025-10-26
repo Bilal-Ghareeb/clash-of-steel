@@ -1,0 +1,15 @@
+:root {
+}
+
+.dash-to-enemy-card {
+    translate: 598px 0;
+}
+
+.dash-to-player-card {
+    translate: -584px 0;
+}
+
+.react-to-attack {
+    scale: 0.8 0.8 0.8;
+    rotate: 9deg;
+}

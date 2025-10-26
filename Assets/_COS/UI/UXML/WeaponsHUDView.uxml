@@ -1,4 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/_COS/UI/USS/WeaponsHud.uss?fileID=7433441132597879392&amp;guid=86b8eb41f4484c04095acd8a698f9805&amp;type=3#WeaponsHud" />
     <ui:VisualElement name="WeaponsHudView" style="width: 100%; height: 100%; flex-direction: row;">
         <ui:VisualElement name="PlayerWeaponsContainer" style="height: 100%; width: 100%; align-items: flex-start;" />
         <ui:VisualElement name="EnemyWeaponsContainer" style="height: 100%; width: 100%; align-items: flex-end;" />
