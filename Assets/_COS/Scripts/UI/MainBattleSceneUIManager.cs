@@ -9,6 +9,7 @@ public class MainBattleSceneUIManager : MonoBehaviour
 
     [Header("UI Controllers")]
     [SerializeField] private WeaponsHUDController m_weaponsHUDController;
+    [SerializeField] private BattleActionsController m_battleActionsController;
 
     private UIDocument m_BattleUIDocument;
 
@@ -42,7 +43,7 @@ public class MainBattleSceneUIManager : MonoBehaviour
         m_weaponsHUDController.Setup(m_battle, m_WeaponsHUDView);
 
         m_BattleActionsView = new BattleActionsView(root.Q(k_BattleActionsView), false);
-        m_BattleActionsView.InitializeBattleManager(m_battle);
+        m_battleActionsController.Setup(m_battle, m_BattleActionsView);
 
         m_BattleResultView = new BattleResultView(root.Q<VisualElement>(k_BattleResultView));
 
