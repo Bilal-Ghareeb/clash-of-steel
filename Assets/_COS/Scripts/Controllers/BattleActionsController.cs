@@ -170,7 +170,7 @@ public class BattleActionsController : MonoBehaviour
         if (actor == null || m_Battle == null) return;
 
         int totalAvailable = m_Battle.GetCurrentPlayerAvailablePoints();
-        int basePts = m_Battle.GetCurrentPlayerBasePoints();
+        int basePts = m_Battle.GetPlayerCurrentBasePoints();
         int spent = m_AttackPoints + m_DefendPoints + m_ReservePoints + m_SwitchPoint;
         int remaining = Mathf.Max(0, totalAvailable - spent);
 
@@ -182,7 +182,7 @@ public class BattleActionsController : MonoBehaviour
         if (m_Battle == null) return;
 
         int totalAvailable = m_Battle.GetCurrentEnemyAvailablePoints();
-        int basePts = m_Battle.GetCurrentEnemyBasePoints();
+        int basePts = m_Battle.GetEnemyCurrentBasePoints();
         m_View.UpdateEnemyPointsUI(totalAvailable, basePts, totalAvailable > basePts);
     }
 
