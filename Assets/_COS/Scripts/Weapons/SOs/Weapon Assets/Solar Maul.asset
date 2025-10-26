@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Solar Maul
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAsset
   weaponId: Solar Maul
-  WeaponPrefab: {fileID: 5882740418562934682, guid: dea89ad487fba0d43998917fd5f30879, type: 3}
+  WeaponPrefab: {fileID: 51888925711307708, guid: dea89ad487fba0d43998917fd5f30879, type: 3}
   Timelines:
-    entranceTimeline: {fileID: 0}
-    attackTimeline: {fileID: 0}
-    deathTimeline: {fileID: 0}
+    entranceTimeline: {fileID: 11400000, guid: 63902f10a8b12594abf4b9e2652f5737, type: 2}
+    attackTimeline: {fileID: 11400000, guid: 777ef9079281f754bbeb0deb85f9d2f4, type: 2}
+    deathTimeline: {fileID: 11400000, guid: 68d7b69d02314194f96d510c1f42d7d2, type: 2}

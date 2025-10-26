@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Venomspire
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAsset
   weaponId: Venomspire
-  WeaponPrefab: {fileID: 2839524829476184550, guid: b31cf3d5ac315214a950e823cb9e2b9f, type: 3}
+  WeaponPrefab: {fileID: 5604073375247852250, guid: b31cf3d5ac315214a950e823cb9e2b9f, type: 3}
   Timelines:
-    entranceTimeline: {fileID: 0}
-    attackTimeline: {fileID: 0}
-    deathTimeline: {fileID: 0}
+    entranceTimeline: {fileID: 11400000, guid: 2f0c1816b6fcb3742b5e11d5bfe24da6, type: 2}
+    attackTimeline: {fileID: 11400000, guid: 5c9543e4208faff46ad0153db52b9802, type: 2}
+    deathTimeline: {fileID: 11400000, guid: 92dd47b41445dae4e8398179db15b7a9, type: 2}
