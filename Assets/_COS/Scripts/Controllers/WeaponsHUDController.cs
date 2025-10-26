@@ -14,6 +14,10 @@ public class WeaponsHUDController : MonoBehaviour
 
     private bool m_IsPlayerAllocationPhase = false;
 
+    [Header("Sounds")]
+    [SerializeField] private SoundData m_cardAttackPiercedSound;
+    [SerializeField] private SoundData m_cardAttackBlockedSound;
+
     public void Setup(BattleManager battle , WeaponsHUDView view)
     {
         m_View = view;
@@ -194,7 +198,7 @@ public class WeaponsHUDController : MonoBehaviour
             return;
         }
 
-        m_View.AnimateAttackerCardDashAndDefenderCardReaction(attackerUI, defenderUI , isPlayerAttacker);
+        m_View.AnimateAttackerCardDashAndDefenderCardReaction(attackerUI, defenderUI , attackerDamage, isPlayerAttacker);
 
         if (defenderNewHealth <= 0)
         {
@@ -202,6 +206,15 @@ public class WeaponsHUDController : MonoBehaviour
         }
 
         m_View.UpdateHealth(defenderUI, defenderNewHealth);
+
+        if (attackerDamage > 0)
+        {
+            AudioManager.Instance.PlaySFX(m_cardAttackPiercedSound);
+        }
+        else
+        {
+            AudioManager.Instance.PlaySFX(m_cardAttackBlockedSound);
+        }
     }
 
     private WeaponItemComponent GetCombatantUI(Combatant combatant, bool isPlayer)

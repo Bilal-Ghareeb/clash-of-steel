@@ -11,6 +11,13 @@ public class BattleActionsController : MonoBehaviour
     private int m_ReservePoints;
     private int m_SwitchPoint;
 
+    [Header("Sounds")]
+    [SerializeField] private SoundData m_buttonClickSound;
+    [SerializeField] private SoundData m_tickSound;
+    [SerializeField] private SoundData m_fightTickSound;
+    [SerializeField] private SoundData m_turnChangeAlertSound;
+    [SerializeField] private SoundData m_revealPointsSound;
+
     public void Setup(BattleManager battle , BattleActionsView view)
     {
         m_Battle = battle;
@@ -45,11 +52,13 @@ public class BattleActionsController : MonoBehaviour
             m_Battle.OnPlayerWeaponEntranceCompleted -= HandlePlayerWeaponEntranceCompleted;
             m_Battle.OnBattleEnded -= HandleBattleEnded;
             BattleActionsEvents.SpendPointRequested -= HandleSpendPointRequested;
+            m_View.OnCountdownNumberChanged -= HandleCountdownNumberChanged;
         }
     }
 
     private void HandleBattleCountdownStarted()
     {
+        m_View.OnCountdownNumberChanged += HandleCountdownNumberChanged;
         m_View.StartCountdown();
     }
 
@@ -67,18 +76,34 @@ public class BattleActionsController : MonoBehaviour
 
     private void HandleEnemyTurnStarted()
     {
-        UpdateEnemyPointsUI();
+        AudioManager.Instance.PlaySFX(m_turnChangeAlertSound);
+        UpdateEnemyPoints();
         m_View.ShowEnemyTurn();
     }
 
     private void HandleAllocationsRevealed((int attack, int defend) playerPublic, (int attack, int defend) enemyPublic)
     {
         m_View.ShowAllocations(playerPublic, enemyPublic);
+        AudioManager.Instance.PlaySFX(m_revealPointsSound);
     }
 
     private void HandlePlayerTurnStarted()
     {
+        AudioManager.Instance.PlaySFX(m_turnChangeAlertSound);
         m_View.ShowPlayerTurn();
+    }
+
+    private void HandleCountdownNumberChanged(string number)
+    {
+        switch (number)
+        {
+            case "FIGHT!":
+                AudioManager.Instance.PlaySFX(m_fightTickSound);
+                break;
+            default:
+                AudioManager.Instance.PlaySFX(m_tickSound);
+                break;
+        }
     }
 
     private void HandleWeaponSwitched(Combatant incomingCombatant, Combatant outgoingCombatant, bool deductCost, bool isPlayer)
@@ -116,6 +141,7 @@ public class BattleActionsController : MonoBehaviour
 
     private async void HandleSpendPointRequested(string actionName)
     {
+        AudioManager.Instance.PlaySFX(m_buttonClickSound);
         var actor = m_Battle?.GetActivePlayerCombatant();
         if (actor == null) return;
 
@@ -177,7 +203,7 @@ public class BattleActionsController : MonoBehaviour
         m_View.UpdatePointsUI(remaining, basePts, m_AttackPoints, m_DefendPoints, m_ReservePoints, totalAvailable > basePts);
     }
 
-    private void UpdateEnemyPointsUI()
+    private void UpdateEnemyPoints()
     {
         if (m_Battle == null) return;
 

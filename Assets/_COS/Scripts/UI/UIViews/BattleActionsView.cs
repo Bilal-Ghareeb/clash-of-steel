@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,6 +31,7 @@ public class BattleActionsView : UIView
 
     private Label m_CountdownLabel;
 
+    public event Action<string> OnCountdownNumberChanged;
 
     public BattleActionsView(VisualElement topElement, bool hideOnAwake = true)
         : base(topElement, hideOnAwake)
@@ -106,6 +108,14 @@ public class BattleActionsView : UIView
         foreach (string s in seq)
         {
             m_CountdownLabel.text = s;
+            OnCountdownNumberChanged?.Invoke(s);
+            if (s == "FIGHT!")
+            {
+                m_CountdownLabel.experimental.animation.Scale(7f, 5).OnCompleted(() =>
+                {
+                    m_CountdownLabel.experimental.animation.Scale(1f, 5);
+                });
+            }
             await Task.Delay(800);
         }
         m_CountdownLabel.style.display = DisplayStyle.None;

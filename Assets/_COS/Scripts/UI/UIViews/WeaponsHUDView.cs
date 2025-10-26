@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.UIElements.Experimental;
-using static LTGUI;
 
 public class WeaponsHUDView : UIView
 {
@@ -77,7 +76,7 @@ public class WeaponsHUDView : UIView
         weaponItem.OnCustomClick = null;
     }
 
-    public void AnimateAttackerCardDashAndDefenderCardReaction(WeaponItemComponent attacker, WeaponItemComponent defender, bool isPlayer)
+    public void AnimateAttackerCardDashAndDefenderCardReaction(WeaponItemComponent attacker, WeaponItemComponent defender, int attackerDamage , bool isPlayer)
     {
         var attackerRoot = attacker.Root;
         var defenderRoot = defender.Root;
@@ -93,8 +92,12 @@ public class WeaponsHUDView : UIView
 
         void OnAttackerTransitionEnd(TransitionEndEvent evt)
         {
-            defenderRoot.AddToClassList(defenderAnimationClass);
-            defenderRoot.RegisterCallback<TransitionEndEvent>(OnDefenderTransitionEnd);
+            if(attackerDamage > 0)
+            {
+                defenderRoot.AddToClassList(defenderAnimationClass);
+                ShowDamagePopup(defenderRoot, attackerDamage);
+                defenderRoot.RegisterCallback<TransitionEndEvent>(OnDefenderTransitionEnd);
+            }
 
             attackerRoot.RemoveFromClassList(attackerAnimationClass);
             attackerRoot.UnregisterCallback<TransitionEndEvent>(OnAttackerTransitionEnd);
@@ -103,6 +106,33 @@ public class WeaponsHUDView : UIView
         attackerRoot.AddToClassList(attackerAnimationClass);
         attackerRoot.RegisterCallback<TransitionEndEvent>(OnAttackerTransitionEnd);
     }
+
+    public void ShowDamagePopup(VisualElement parent, int damage)
+    {
+        var popup = new VisualElement();
+        popup.AddToClassList("damage-popup");
+
+        var label = new Label(damage.ToString());
+        label.AddToClassList("damage-popup-label");
+        popup.Add(label);
+
+        parent.Add(popup);
+
+        var randomOffset = UnityEngine.Random.Range(-10f, 10f);
+        popup.style.left = new Length(randomOffset, LengthUnit.Pixel);
+        popup.style.top = new Length(500f, LengthUnit.Pixel);
+
+        popup.schedule.Execute(() =>
+        {
+            popup.AddToClassList("float");
+        }).StartingIn(50);
+
+        popup.schedule.Execute(() =>
+        {
+            parent.Remove(popup);
+        }).StartingIn(900);
+    }
+
 
 
     public void UpdateAttackPreview(WeaponItemComponent weaponItem, float newAttackValue, bool hasAdvantage, bool hasDisadvantage)
