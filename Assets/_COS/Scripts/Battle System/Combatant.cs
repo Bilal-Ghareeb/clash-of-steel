@@ -33,7 +33,7 @@ public class Combatant
     {
         InstanceData = instance;
         Id = id;
-        DisplayName = string.IsNullOrEmpty(displayName) ? instance.CatalogData.name : displayName;
+        DisplayName = string.IsNullOrEmpty(displayName) ? instance.CatalogData.GetLocalizedName() : displayName;
         CurrentHP = MaxHP;
     }
 

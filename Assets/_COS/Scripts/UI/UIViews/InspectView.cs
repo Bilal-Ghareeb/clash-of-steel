@@ -39,8 +39,8 @@ public class InspectView : UIView
 
     public void SetWeaponData(WeaponInstanceBase weapon , int? overrideLevel = null)
     {
-        m_weaponName.text = weapon.CatalogData.name;
-        m_weaponDescription.text = weapon.CatalogData.description;
+        m_weaponName.text = weapon.CatalogData.GetLocalizedName(LocalizationManager.GetCurrentLocaleCode());
+        m_weaponDescription.text = weapon.CatalogData.GetLocalizedDescription(LocalizationManager.GetCurrentLocaleCode());
         RefreshWeaponStats(weapon, overrideLevel);
     }
 

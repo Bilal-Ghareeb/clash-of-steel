@@ -24,7 +24,7 @@ public class WeaponInstance : WeaponInstanceBase
         InstanceData = JsonConvert.DeserializeObject<WeaponInstanceData>(instanceJson);
 
         Level = InstanceData.level;
-        Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.name);
+        Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.GetLocalizedName());
     }
 
     public bool IsOnCooldown => InstanceData?.IsOnCooldown ?? false;

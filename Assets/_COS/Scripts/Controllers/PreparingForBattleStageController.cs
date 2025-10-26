@@ -80,7 +80,7 @@ public class PreparingForBattleStageController : MonoBehaviour
             if (weapon == null) continue;
             sessionData.playerTeam.Add(new BattleSession.CombatantDTO
             {
-                friendlyId = weapon.CatalogData.name,
+                friendlyId = weapon.CatalogData.GetLocalizedName(),
                 instanceId = weapon.Item.Id,
                 level = weapon.InstanceData.level,
                 isPlayerOwned = true

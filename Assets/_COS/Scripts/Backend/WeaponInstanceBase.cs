@@ -18,7 +18,7 @@ public abstract class WeaponInstanceBase
     {
         CatalogData = catalogData;
         Level = level;
-        Asset = WeaponAssetProvider.Database.GetAssetFor(catalogData.name);
+        Asset = WeaponAssetProvider.Database.GetAssetFor(catalogData.GetLocalizedName());
     }
 
     public virtual int GetDamage()

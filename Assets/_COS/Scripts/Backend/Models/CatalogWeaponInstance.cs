@@ -19,6 +19,6 @@ public class CatalogWeaponInstance : WeaponInstanceBase
 
         Level = 1;
 
-        Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.name);
+        Asset = WeaponAssetProvider.Database.GetAssetFor(CatalogData.GetLocalizedName());
     }
 }

@@ -119,7 +119,7 @@ public class BattleManager : MonoBehaviour
         var instance = TryGetPlayerWeaponInstance(dto, isPlayer);
 
         if (instance != null)
-            return new Combatant(instance, dto.instanceId, instance.CatalogData.name);
+            return new Combatant(instance, dto.instanceId, instance.CatalogData.GetLocalizedName());
 
         return CreateFallbackCombatant(dto);
     }
@@ -140,7 +140,6 @@ public class BattleManager : MonoBehaviour
             Debug.LogError($"No WeaponData for friendly id {dto.friendlyId}. Creating placeholder.");
             weaponData = new WeaponData
             {
-                name = dto.friendlyId ?? "Unknown",
                 baseDamage = 10,
                 baseHealth = 100,
                 rarity = "Common",
@@ -150,7 +149,7 @@ public class BattleManager : MonoBehaviour
         }
 
         var enemyInstance = new EnemyWeaponInstance(dto.friendlyId ?? dto.instanceId ?? dto.friendlyId, weaponData, dto.level);
-        return new Combatant(enemyInstance, dto.friendlyId, weaponData.name);
+        return new Combatant(enemyInstance, dto.friendlyId, weaponData.GetLocalizedName());
     }
 
 

@@ -85,11 +85,14 @@ public class PlayFabManager : MonoBehaviour
 
     public void RetryConnection()
     {
-        NetworkService.StartMonitoring(this,isOnline =>
+        NetworkService.StartMonitoring(this,async isOnline =>
         {
             if (isOnline)
             {
+                await IAPService.InintIAP();
                 AuthService.Login();
+                AuthService.Login();
+                ADService.Init();
             }
         });
     }
