@@ -16,6 +16,7 @@ public class PlayFabManager : MonoBehaviour
     public NetworkService NetworkService => ServiceLocator.Get<NetworkService>();
     public IAPService IAPService => ServiceLocator.Get<IAPService>();
     public ADService ADService => ServiceLocator.Get<ADService>();
+    public AddressablesService AddressablesService => ServiceLocator.Get<AddressablesService>();
     #endregion
 
     #region Events
@@ -37,6 +38,7 @@ public class PlayFabManager : MonoBehaviour
         ServiceLocator.Register(new NetworkService());
         ServiceLocator.Register(new IAPService());
         ServiceLocator.Register(new ADService());
+        ServiceLocator.Register(new AddressablesService());
     }
 
     private async void Start()
@@ -53,6 +55,7 @@ public class PlayFabManager : MonoBehaviour
             {
                 try
                 {
+                    await AddressablesService.Init();
                     await IAPService.InintIAP();
                     AuthService.Login();
                     ADService.Init();

@@ -58,5 +58,5 @@ MonoBehaviour:
     Muted: 0
   Ambience:
     Name: Ambience
-    Volume: 0.5
+    Volume: 1
     Muted: 0

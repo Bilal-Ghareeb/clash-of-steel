@@ -6,7 +6,7 @@ public class SceneAmbienceController : MonoBehaviour
     [SerializeField] private SoundData[] ambienceTracks;
     [SerializeField] private bool stopPreviousAmbience = true;
 
-    private void OnEnable()
+    private void Start()
     {
         foreach (var track in ambienceTracks)
         {
