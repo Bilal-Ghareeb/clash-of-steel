@@ -1,5 +1,0 @@
-clash of steel GCloud Client ID Android : 24914410207-b2ughia8a5s4p0tl5sb63lio8oft9qnj.apps.googleusercontent.com
-clash of steel GCloud Client ID Web: 24914410207-3f5r05bi9t5ri4v516it3etl7iep5fts.apps.googleusercontent.com
-clash of steel GCloud Client Secret : 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
-
-keystore SHA1 : 2B:84:A1:A5:8B:02:FE:81:90:60:D2:EF:0A:43:F1:7A:06:E7:7B:D3
