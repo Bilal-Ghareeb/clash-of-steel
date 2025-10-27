@@ -48,15 +48,16 @@ public class NetworkService
 
     private IEnumerator CheckInternetConnection(Action<bool> callback)
     {
-        UnityWebRequest request = new UnityWebRequest("https://google.com");
-        request.timeout = 3;
-        yield return request.SendWebRequest();
+        using (UnityWebRequest request = UnityWebRequest.Head("https://clients3.google.com/generate_204"))
+        {
+            request.timeout = 5;
+            yield return request.SendWebRequest();
 
-        bool connected = !(request.result == UnityWebRequest.Result.ConnectionError ||
-                           request.result == UnityWebRequest.Result.ProtocolError);
-
-        callback?.Invoke(connected);
+            bool connected = request.result == UnityWebRequest.Result.Success;
+            callback?.Invoke(connected);
+        }
     }
+
 
     public void StopMonitoring(MonoBehaviour host)
     {

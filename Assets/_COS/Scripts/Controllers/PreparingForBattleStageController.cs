@@ -99,7 +99,13 @@ public class PreparingForBattleStageController : MonoBehaviour
         }
 
         BattleSessionHolder.CurrentSession = sessionData;
-        SceneManager.LoadScene("BattleScene");
+
+        if (SceneManager.GetActiveScene().name == "GameScene" &&
+            PlayFabManager.Instance.NetworkService.IsConnected)
+        {
+            BattleSessionHolder.CurrentSession = sessionData;
+            SceneManager.LoadScene("BattleScene");
+        }
     }
 
     private void HandleTeamSlotClicked(int slotIndex)
