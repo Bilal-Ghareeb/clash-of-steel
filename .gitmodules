@@ -1,0 +1,3 @@
+[submodule "Backend/clashofsteel-azure"]
+	path = Backend/clashofsteel-azure
+	url = https://github.com/Bilal-Ghareeb/clashofsteel-azure.git
