@@ -19,10 +19,10 @@ dependencyResolutionManagement {
 // Android Resolver Repos Start
         def unityProjectPath = $/file:///**DIR_UNITYPROJECT**/$.replace("\\", "/")
         maven {
-            url (unityProjectPath + "/Assets/GeneratedLocalRepo/GooglePlayGames/com.google.play.games/Editor/m2repository") // Assets/GooglePlayGames/com.google.play.games/Editor/GooglePlayGamesPluginDependencies.xml:11
+            url (unityProjectPath + "/Assets/GooglePlayGames/com.google.play.games/Editor/m2repository") // Assets/_COS/ThirdParty/GooglePlayGames/com.google.play.games/Editor/GooglePlayGamesPluginDependencies.xml:11
         }
         maven {
-            url "https://maven.google.com/" // Assets/LevelPlay/Editor/IronSourceSDKDependencies.xml:12, Assets/LevelPlay/Editor/ISAdMobAdapterDependencies.xml:8, Packages/com.unity.ads/Editor/Source/Dependencies.xml:7
+            url "https://maven.google.com/" // Assets/_COS/ThirdParty/LevelPlay/Editor/IronSourceSDKDependencies.xml:12, Assets/_COS/ThirdParty/LevelPlay/Editor/ISAdMobAdapterDependencies.xml:8, Packages/com.unity.ads/Editor/Source/Dependencies.xml:7
         }
         mavenLocal()
 // Android Resolver Repos End
