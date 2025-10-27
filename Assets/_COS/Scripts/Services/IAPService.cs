@@ -110,6 +110,7 @@ public class IAPService
                 var gpJsonDict = (Dictionary<string, object>)MiniJson.JsonDecode(gpJson);
                 var productId = (string)gpJsonDict["productId"];
 
+                ShopEvents.WaitForDiamondBundleProcessing?.Invoke();
                 await PlayFabManager.Instance.AzureService.ValidateAndGrantPurchaseAsync(productId, gpJson, gpSig);
             }
 

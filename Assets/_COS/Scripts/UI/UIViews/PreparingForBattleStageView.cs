@@ -29,6 +29,7 @@ public class PreparingForBattleStageView : UIView
         PreparingForBattleStageEvents.RequestFetchPlayerArsenal?.Invoke();
         PreparingForBattleStageEvents.RequestStageInfo?.Invoke();
         SpawnPlayerTeamHolders();
+        EnableButtons();
     }
 
     public override void Hide()
@@ -189,5 +190,17 @@ public class PreparingForBattleStageView : UIView
         {
             weaponItem.IsSelected = isSelected;
         }
+    }
+
+    public void CloseButtonsWhileLoadingBattle()
+    {
+        m_beginBattleStageButton.SetEnabled(false);
+        m_leavePreparingForBattleButton.SetEnabled(false);
+    }
+
+    public void EnableButtons()
+    {
+        m_beginBattleStageButton.SetEnabled(true);
+        m_leavePreparingForBattleButton.SetEnabled(true);
     }
 }

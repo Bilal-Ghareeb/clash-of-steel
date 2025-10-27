@@ -45,10 +45,13 @@ public class PreparingForBattleStageController : MonoBehaviour
 
     private async void HandleBeginBattle()
     {
+        m_view.CloseButtonsWhileLoadingBattle();
+
         var playerTeam = m_playerSelectedWeapons.Where(w => w != null).ToList();
         if (playerTeam.Count == 0)
         {
             Debug.LogWarning("No weapons selected for battle.");
+            m_view.EnableButtons();
             return;
         }
 

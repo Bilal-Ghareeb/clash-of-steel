@@ -74,7 +74,9 @@ public class MainGameUIManager : MonoBehaviour
 
         ShopEvents.LootBoxPurchased += OnLootBoxPurchased;
         ShopEvents.LootBoxRewardClaimed += OnLootBoxRewardClaimed;
-        ShopEvents.LootBoxPurchaseIntiated += OnLootBoxPurchaseIntiated;
+        ShopEvents.LootBoxPurchaseIntiated += OnWaitingForLootBoxPurchaseIntiated;
+        ShopEvents.WaitForDiamondBundleProcessing += OnWaitingForDiamondPurchaseIntiated;
+        ShopEvents.DiamondPurchased += OnDiamondBundlePurchased;
     }
 
     private void UnSubscribeFromEvents()
@@ -94,7 +96,9 @@ public class MainGameUIManager : MonoBehaviour
 
         ShopEvents.LootBoxPurchased -= OnLootBoxPurchased;
         ShopEvents.LootBoxRewardClaimed -= OnLootBoxRewardClaimed;
-        ShopEvents.LootBoxPurchaseIntiated -= OnLootBoxPurchaseIntiated;
+        ShopEvents.LootBoxPurchaseIntiated -= OnWaitingForLootBoxPurchaseIntiated;
+        ShopEvents.WaitForDiamondBundleProcessing -= OnWaitingForDiamondPurchaseIntiated;
+        ShopEvents.DiamondPurchased -= OnDiamondBundlePurchased;
     }
 
     private void SetupViews()
@@ -161,7 +165,12 @@ public class MainGameUIManager : MonoBehaviour
         ShowModalView(m_PreparingForBattleStageView);
     }
 
-    private void OnLootBoxPurchaseIntiated(LootBoxData data)
+    private void OnWaitingForLootBoxPurchaseIntiated(LootBoxData data)
+    {
+        m_processingView.Show();
+    }
+
+    private void OnWaitingForDiamondPurchaseIntiated()
     {
         m_processingView.Show();
     }
@@ -169,6 +178,11 @@ public class MainGameUIManager : MonoBehaviour
     private void OnLootBoxPurchased()
     {
         m_TabsView.Hide();
+        m_processingView.Hide();
+    }
+
+    private void OnDiamondBundlePurchased()
+    {
         m_processingView.Hide();
     }
 
