@@ -123,7 +123,6 @@ public class ShopView : UIView
 
     public void PopulateLootBoxDetailsPanel(List<LootBoxWeaponEntry> weaponEntries , string lootBoxName)
     {
-        m_lootBoxName.text = lootBoxName;
         m_lootBoxContentScrollView.Clear();
 
         foreach (var entry in weaponEntries)
