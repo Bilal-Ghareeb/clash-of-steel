@@ -117,12 +117,6 @@ Each screen inherits from a base **`UIView`** class, with logic handled by dedic
 
 ---
 
-## 📸 Gallery
-
-*(All screenshots hosted on itch.io — high-res architecture and UI diagrams included above.)*
-
----
-
 ## 📄 License
 
 This prototype is for **educational and portfolio purposes**.  
