@@ -57,7 +57,7 @@ The entire Azure Functions project is maintained as a **Git submodule** within t
 
 - Implemented **in-app purchases** with **Unity IAP**; receipts are securely validated via **Azure Functions** and confirmed through **PlayFab Economy V2**, granting bundles directly to the player’s inventory.
 
-![IAP Flow](https://img.itch.zone/aW1nLzIzODQwNjIxLnBuZw==/original/3fx9CV.png)
+![IAP Flow](https://img.itch.zone/aW1nLzIzODUzMzk2LmpwZw==/original/sa0dVU.jpg)
 
 - Integrated **rewarded ads** using **Unity Mediation (LevelPlay)** — combining **Unity Ads**, **ironSource**, and **AdMob** for optimal fill rates.
 
