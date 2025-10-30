@@ -1,4 +1,4 @@
-## 🎯 Development Goals
+# 🎯 Development Goals
 
 When developing **Clash of Steel**, I focused on exploring key aspects of **mobile backend integration**, **UI Toolkit**, and **live-service systems**.
 
